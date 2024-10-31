@@ -1,0 +1,36 @@
+# ?? ?? ??
+server:
+  port: 8080
+
+# mybatis, jpa
+spring:
+  application:
+    name: shallwecode
+  config:
+    import: optional:file:.env[.properties]
+  datasource:
+    url: jdbc:mariadb://${MARIADB_HOST}:${MARIADB_PORT}/${MARIADB_DATABASE}
+    username: ${MARIADB_USER}
+    password: ${MARIADB_PASSWORD}
+    driver-class-name: ${DRIVER_CLASS_NAME}
+
+  jpa:
+    hibernate:
+      ddl-auto: none
+    show-sql: true
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.MariaDBDialect
+        format_sql: true
+
+springdoc:
+  api-docs:
+    path: /v3/api-docs
+  swagger-ui:
+    path: /
+    operations-sorter: method
+    doc-expansion: none
+
+token:
+  expiration_time: 7200000
+  secret: ${SECRET_KEY}
