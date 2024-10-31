@@ -5,7 +5,7 @@ server:
 # mybatis, jpa
 spring:
   application:
-    name: matzipuser
+    name: shallwecode
   config:
     import: optional:file:.env[.properties]
   datasource:
