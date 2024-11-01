@@ -11,7 +11,6 @@ import java.util.Date;
 @Getter
 @ToString
 public class User {
-
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long userId;
@@ -21,4 +20,11 @@ public class User {
     private String nickname;
     private String auth;
     private Date createdAt;
+
+    public User()
+    {}
+
+    public void UpdateUser(String nickname){
+        this.nickname = nickname;
+    }
 }
