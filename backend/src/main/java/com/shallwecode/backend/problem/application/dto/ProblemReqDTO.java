@@ -8,7 +8,7 @@ import lombok.Setter;
 @Setter
 @RequiredArgsConstructor
 public class ProblemReqDTO {
-    private Long problemId;
+
     private String title;
     private String content;
     private int problemLevel;

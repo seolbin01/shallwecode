@@ -12,7 +12,7 @@ public class Problem {
     private Long problemId;
     private String title;
     private String content;
-    private Integer problemLevel;
+    private int problemLevel;
 
     public void updateProblemTitle(String title) {
         this.title = title;
