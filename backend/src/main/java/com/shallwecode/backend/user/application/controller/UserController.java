@@ -3,6 +3,7 @@ package com.shallwecode.backend.user.application.controller;
 import com.shallwecode.backend.user.application.dto.UserUpdateDTO;
 import com.shallwecode.backend.user.application.service.UserService;
 import com.shallwecode.backend.user.domain.aggregate.UserInfo;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
@@ -18,8 +19,7 @@ public class UserController {
 
     //회원 닉네임 수정
     @PutMapping("/nickName")
-    public ResponseEntity<UserInfo> updateUser(@RequestBody UserUpdateDTO userUpdateDTO) {
-        userUpdateDTO.setNickName(userUpdateDTO.getNickName());
+    public ResponseEntity<UserInfo> updateUser(@Valid @RequestBody UserUpdateDTO userUpdateDTO) {
         userService.updateUser(userUpdateDTO);
         return ResponseEntity.ok().build();
     }
