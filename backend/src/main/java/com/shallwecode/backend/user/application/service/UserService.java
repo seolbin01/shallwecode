@@ -1,7 +1,7 @@
 package com.shallwecode.backend.user.application.service;
 
 import com.shallwecode.backend.user.application.dto.UserUpdateDTO;
-import com.shallwecode.backend.user.domain.aggregate.User;
+import com.shallwecode.backend.user.domain.aggregate.UserInfo;
 import com.shallwecode.backend.user.domain.repository.UserRepository;
 import com.shallwecode.backend.user.domain.service.UserDomainService;
 import lombok.RequiredArgsConstructor;
@@ -27,16 +27,16 @@ public class UserService implements UserDetailsService {
 
     // 회원 닉네임 수정
     @Transactional
-    public void UpdateUser(UserUpdateDTO userUpdateDTO) {
-        User user = userRepository.findById(userUpdateDTO.getUserId()).orElseThrow(()->new IllegalArgumentException("조회된 회원이 없습니다."));
-        userDomainService.updateUserDetails(user, userUpdateDTO);
-        userRepository.save(user);
+    public void updateUser(UserUpdateDTO userUpdateDTO) {
+        UserInfo userInfo = userRepository.findById(userUpdateDTO.getUserId()).orElseThrow(()->new IllegalArgumentException("조회된 회원이 없습니다."));
+        userDomainService.updateUserDetails(userInfo, userUpdateDTO);
+        userRepository.save(userInfo);
     }
 
     // 회원 삭제
     @Transactional
-    public void DeleteUser(Long userId) {
-        userDomainService.DeleteUser(userId);
+    public void deleteUser(Long userId) {
+        userDomainService.deleteUser(userId);
     }
 
 
