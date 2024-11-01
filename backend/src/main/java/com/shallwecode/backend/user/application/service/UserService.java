@@ -1,30 +1,35 @@
 package com.shallwecode.backend.user.application.service;
 
-import com.nimbusds.openid.connect.sdk.UserInfoResponse;
+import com.shallwecode.backend.user.domain.repository.UserRepository;
+import com.shallwecode.backend.user.domain.service.UserDomainService;
 import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
-import org.springframework.security.core.GrantedAuthority;
-import org.springframework.security.core.authority.SimpleGrantedAuthority;
-import org.springframework.security.core.userdetails.User;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
-import java.util.ArrayList;
-import java.util.List;
 
 @Service
 @RequiredArgsConstructor
 public class UserService implements UserDetailsService {
     private final ModelMapper modelMapper;
+    private final UserDomainService userDomainService;
+
 
     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
         return null;
     }
+
+
+    // 회원 삭제
+    @Transactional
+    public void DeleteUser(Long userId) {
+        userDomainService.DeleteUser(userId);
+    }
+
+
 //    private final BCryptPasswordEncoder passwordEncoder;
 //    private final UserRepository userRepository;
 //
