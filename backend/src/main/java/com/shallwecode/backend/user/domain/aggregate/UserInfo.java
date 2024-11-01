@@ -10,8 +10,7 @@ import java.util.Date;
 @Table(name="user_info")
 @Getter
 @ToString
-public class User {
-
+public class UserInfo {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long userId;
@@ -21,4 +20,11 @@ public class User {
     private String nickname;
     private String auth;
     private Date createdAt;
+
+    public UserInfo()
+    {}
+
+    public void updateUser(String nickname){
+        this.nickname = nickname;
+    }
 }
