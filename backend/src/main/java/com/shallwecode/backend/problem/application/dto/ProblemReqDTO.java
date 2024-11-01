@@ -7,11 +7,10 @@ import lombok.Setter;
 @Getter
 @Setter
 @RequiredArgsConstructor
-public class ProblemResDTO {
+public class ProblemReqDTO {
     private Long problemId;
     private String title;
     private String content;
     private int problemLevel;
-    private String input;
-    private String output;
+
 }
