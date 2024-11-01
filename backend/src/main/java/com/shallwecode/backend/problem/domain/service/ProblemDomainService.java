@@ -22,14 +22,10 @@ public class ProblemDomainService {
     }
 
     @Transactional
-    public void updateProblem(ProblemReqDTO updateProblem) {
+    public void updateProblem(Long id, ProblemReqDTO updateProblem) {
 
-        Problem foundProblem = repository.findById(updateProblem.getProblemId()).orElse(null);
-
-        if(foundProblem != null) {
-            System.out.println("수정하려고 하는 문제가 존재하지 않습니다.");
-        }
-
+        Problem foundProblem = repository.findById(id)
+                .orElseThrow(() -> new RuntimeException("해당 id에 맞는 문제가 존재하지 않습니다."));
         foundProblem.updateProblemTitle(updateProblem.getTitle());
         foundProblem.updateProblemContent(updateProblem.getContent());
         foundProblem.updateProblemProblemLevel(updateProblem.getProblemLevel());

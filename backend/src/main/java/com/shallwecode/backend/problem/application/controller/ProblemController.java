@@ -38,9 +38,7 @@ public class ProblemController {
     @PutMapping("/{problemId}")
     public ResponseEntity<String> updateProblem(@PathVariable Long problemId, @RequestBody ProblemReqDTO newProblemInfo) {
 
-        // 해당 문제 번호가 존재하는지 여부 확인이 필요함
-
-        // 해당 id의 객체를 조회해야 함
+        problemDomainService.updateProblem(problemId, newProblemInfo);
 
         return ResponseEntity.ok().build();
 
