@@ -6,6 +6,11 @@ Author: Youni
 
 :root {
     --background-color : #EFEBEB;
+    --white : #FFFFFF;
+    --black : #121212;
+    --gray-line : #DADADA;
+    --hover : #f5f5f5;
+    --active : #eeeeee;
 }
 
 *{
