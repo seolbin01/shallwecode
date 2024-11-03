@@ -4,6 +4,10 @@ Updated: 2021-08-25
 Author: Youni
 */
 
+:root {
+    --background-color : #EFEBEB;
+}
+
 *{
     margin: 0 auto;
 }

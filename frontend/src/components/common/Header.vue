@@ -64,7 +64,7 @@ onUnmounted(() => {
   <header class="header">
     <router-link to="/" class="logo">ShallWeCode</router-link>
     <div class="menu">
-      <router-link to="/members" class="menu-item">회원 목록</router-link>
+      <router-link to="/user-list" class="menu-item">회원 목록</router-link>
       <router-link to="/logout" class="menu-item">로그아웃</router-link>
       <div class="notification-container">
         <button @click="toggleNotifications" class="menu-item notification-btn">
