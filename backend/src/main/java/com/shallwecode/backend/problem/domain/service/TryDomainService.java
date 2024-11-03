@@ -14,12 +14,23 @@ public class TryDomainService {
     private final ModelMapper modelMapper;
     private final TryRepository tryRepository;
 
-    public void save(Long problemId, Long userId, SaveTryReqDTO saveTryReqDTO) {
+    public void save(Long userId, Long problemId, SaveTryReqDTO saveTryReqDTO) {
 
         Try newTry = modelMapper.map(saveTryReqDTO, Try.class);
         newTry.updateUser(userId);
         newTry.updateProblem(problemId);
 
         tryRepository.save(newTry);
+    }
+
+    public Try findById(Long tryId) {
+
+        return tryRepository.findById(tryId)
+                .orElse(null);
+    }
+
+    public void delete(Long tryId) {
+
+        tryRepository.deleteById(tryId);
     }
 }

@@ -23,8 +23,19 @@ public class TryController {
                                         @RequestBody SaveTryReqDTO saveTryReqDTO) {
 
         Long userId = 1L;   // 추후 로그인된 회원의 userId를 가져오도록 수정
-        tryService.saveTry(problemId, userId, saveTryReqDTO);
+        tryService.saveTry(userId, problemId, saveTryReqDTO);
 
         return ResponseEntity.status(HttpStatus.CREATED).build();
+    }
+
+    @DeleteMapping("/{problemId}/{tryId}")
+    @Operation(summary = "풀이 시도 삭제", description = "풀이 시도를 삭제한다.")
+    public ResponseEntity<String> deleteTry(@PathVariable Long problemId,
+                                            @PathVariable Long tryId) {
+
+        Long userId = 1L;   // 추후 로그인된 회원의 userId를 가져오도록 수정
+        tryService.deleteTry(userId, problemId, tryId);
+
+        return ResponseEntity.ok().body("풀이 시도 삭제 완료");
     }
 }
