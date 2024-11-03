@@ -1,4 +1,4 @@
-package com.shallwecode.backend.friend.application.common.exception;
+package com.shallwecode.backend.common.exception;
 
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
