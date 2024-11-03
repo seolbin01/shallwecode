@@ -22,5 +22,14 @@ public class Try {
     private boolean isSolved;
     @Enumerated(EnumType.STRING)
     private TryLanguage tryLanguage;
-    private LocalDateTime createdAt;
+    private String codeContent;
+    private LocalDateTime createdAt = LocalDateTime.now();
+
+    public void updateUser(Long userId) {
+        this.userId = userId;
+    }
+
+    public void updateProblem(Long problemId) {
+        this.problemId = problemId;
+    }
 }
