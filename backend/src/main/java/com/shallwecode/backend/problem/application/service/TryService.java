@@ -1,11 +1,13 @@
 package com.shallwecode.backend.problem.application.service;
 
+import com.shallwecode.backend.problem.application.dto.FindMyTryResDTO;
 import com.shallwecode.backend.problem.application.dto.SaveTryReqDTO;
 import com.shallwecode.backend.problem.domain.aggregate.Try;
 import com.shallwecode.backend.problem.domain.service.TryDomainService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
 import java.util.Objects;
 
 @Service
@@ -32,5 +34,10 @@ public class TryService {
         }
 
         tryDomainService.delete(tryId);
+    }
+
+    public List<FindMyTryResDTO> findAllMyTry(Long userId) {
+
+        return tryDomainService.findAllMyTry(userId);
     }
 }
