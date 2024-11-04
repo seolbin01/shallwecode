@@ -14,7 +14,7 @@ const searchQuery = ref('');
 
 const fetchMyProblemList = async () => {
   try {
-    const response = await axios.get('http://localhost:8080/problem/list');
+    const response = await axios.get('http://localhost:8080/api/v1/problem/mylist');
     problems.value = response.data;
   } catch (error) {
     console.error('내 풀이 문제 목록을 불러오는 중 에러가 발생했습니다.', error.response ? error.response.data : error.message);
