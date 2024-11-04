@@ -3,6 +3,7 @@ package com.shallwecode.backend.problem.domain.service;
 import com.querydsl.core.types.Projections;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import com.shallwecode.backend.problem.application.dto.FindMyTryResDTO;
+import com.shallwecode.backend.problem.application.dto.FindTryResDTO;
 import com.shallwecode.backend.problem.application.dto.SaveTryReqDTO;
 import com.shallwecode.backend.problem.domain.aggregate.QTry;
 import com.shallwecode.backend.problem.domain.aggregate.Try;
@@ -30,10 +31,9 @@ public class TryDomainService {
         tryRepository.save(newTry);
     }
 
-    public Try findById(Long tryId) {
+    public FindTryResDTO findById(Long tryId) {
 
-        return tryRepository.findById(tryId)
-                .orElse(null);
+        return modelMapper.map(tryRepository.findById(tryId), FindTryResDTO.class);
     }
 
     public void delete(Long tryId) {

@@ -1,6 +1,7 @@
 package com.shallwecode.backend.problem.application.service;
 
 import com.shallwecode.backend.problem.application.dto.FindMyTryResDTO;
+import com.shallwecode.backend.problem.application.dto.FindTryResDTO;
 import com.shallwecode.backend.problem.application.dto.SaveTryReqDTO;
 import com.shallwecode.backend.problem.domain.aggregate.Try;
 import com.shallwecode.backend.problem.domain.service.TryDomainService;
@@ -23,13 +24,13 @@ public class TryService {
 
     public void deleteTry(Long userId, Long problemId, Long tryId) {
 
-        Try curTry = tryDomainService.findById(tryId);
+        FindTryResDTO findTry = tryDomainService.findById(tryId);
 
-        if(!Objects.equals(curTry.getUserId(), userId)) {
+        if(!Objects.equals(findTry.getUserId(), userId)) {
             throw new IllegalArgumentException();
         }
 
-        if(!Objects.equals(curTry.getProblemId(), problemId)) {
+        if(!Objects.equals(findTry.getProblemId(), problemId)) {
             throw new IllegalArgumentException();
         }
 
