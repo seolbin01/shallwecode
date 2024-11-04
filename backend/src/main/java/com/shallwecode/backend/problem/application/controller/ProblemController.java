@@ -78,7 +78,7 @@ public class ProblemController {
         return ResponseEntity.ok().body(oneProblem);
     }
 
-    @GetMapping("/list")
+    @GetMapping("/mylist")
     @Operation(summary = "내 문제 목록 전체 조회", description = "내 문제 목록을 전체 조회 한다.")
     public ResponseEntity<List<FindMyProblemResDTO>> findAllMyProblem() {
 
