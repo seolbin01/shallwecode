@@ -12,7 +12,7 @@ import lombok.Setter;
 @AllArgsConstructor
 public class SaveFriendDTO {
     private Long friendId;
-    private FoundUserDTO fromUser;
-    private FoundUserDTO toUser;
+    private FindUserDTO fromUser;
+    private FindUserDTO toUser;
     private FriendStatus friendStatus;
 }
