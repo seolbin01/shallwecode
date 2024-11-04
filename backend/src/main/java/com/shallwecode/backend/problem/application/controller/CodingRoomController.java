@@ -11,7 +11,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
-@RequestMapping("/codingroom")
+@RequestMapping("/api/v1/codingroom")
 @Slf4j
 @Tag(name = "CodingRoom", description = "코딩방 관련 API")
 @RequiredArgsConstructor
@@ -31,9 +31,6 @@ public class CodingRoomController {
         return new ResponseEntity<>("코딩방 생성 완료", HttpStatus.CREATED);
     }
 
-
-
-
     /* 코딩방 삭제 */
     @Operation(
             summary = "코딩방 삭제",
@@ -48,7 +45,5 @@ public class CodingRoomController {
         return ResponseEntity.noContent().build();
 
     }
-
-
 
 }

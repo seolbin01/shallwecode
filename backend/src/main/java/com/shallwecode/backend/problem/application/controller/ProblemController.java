@@ -11,7 +11,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
-@RequestMapping("/problem")
+@RequestMapping("/api/v1/problem")
 @Slf4j
 @Tag(name = "Problem", description = "문제 관련 API")
 @RequiredArgsConstructor
@@ -58,8 +58,5 @@ public class ProblemController {
 
         return ResponseEntity.noContent().build();
     }
-
-
-
 
 }
