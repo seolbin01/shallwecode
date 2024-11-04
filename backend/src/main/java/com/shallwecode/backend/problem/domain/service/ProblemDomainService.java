@@ -88,7 +88,16 @@ public class ProblemDomainService {
                 .fetch();
     }
 
+    /* 문제 목록 조회 기능 */
     public List<ProblemResListDTO> selectProblemList() {
+        QProblem qProblem = QProblem.problem;
 
+        return queryFactory.select(Projections.constructor(ProblemResListDTO.class,
+                qProblem.problemId,
+                qProblem.title,
+                qProblem.content,
+                qProblem.problemLevel))
+                .from(qProblem)
+                .fetch();
     }
 }
