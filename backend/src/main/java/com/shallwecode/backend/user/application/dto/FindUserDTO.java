@@ -9,7 +9,7 @@ import lombok.Setter;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-public class FoundUserDTO {
+public class FindUserDTO {
 
     private Long userId;
     private String email;
