@@ -24,13 +24,7 @@ public class FriendController {
     @Operation(summary = "친구 신청", description = "친구를 신청한다")
     @PostMapping("/request")
     public ResponseEntity<Void> saveFriend(@RequestBody SaveFriendReqDTO saveFriendReqDTO) {
-
-        try {
-            friendService.saveFriend(saveFriendReqDTO);
-        } catch (Exception e) {
-            throw new CustomException(ErrorCode.NOT_SAVED_FRIEND);
-        }
-
+        friendService.saveFriend(saveFriendReqDTO);
         return ResponseEntity.ok().build();
     }
 
