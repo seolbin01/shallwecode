@@ -2,19 +2,16 @@ package com.shallwecode.backend.problem.application.controller;
 
 import com.shallwecode.backend.problem.application.dto.ProblemReqDTO;
 import com.shallwecode.backend.problem.application.dto.ProblemResDTO;
+import com.shallwecode.backend.problem.application.dto.ProblemResListDTO;
 import com.shallwecode.backend.problem.application.service.ProblemService;
-import com.shallwecode.backend.problem.domain.service.ProblemDomainService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.nio.charset.StandardCharsets;
 import java.util.List;
 
 @RestController
@@ -25,7 +22,6 @@ import java.util.List;
 public class ProblemController {
 
     private final ProblemService problemService;
-    private final ProblemDomainService problemDomainService;
 
     /* 문제 등록 */
     @Operation(
@@ -70,7 +66,7 @@ public class ProblemController {
     /* 문제 단일 조회 - 문제 하나당 테스트 케이스가 여러 개 */
     @Operation(
             summary = "문제 단일 조회 기능",
-            description = "관리자가 문제를 상제 조회하는 기능입니다."
+            description = "관리자가 문제를 상세 조회하는 기능입니다."
     )
     @GetMapping("/{problemId}")
     public ResponseEntity<List<ProblemResDTO>> selectProblem(@PathVariable Long problemId) {
@@ -79,5 +75,19 @@ public class ProblemController {
         List<ProblemResDTO> oneProblem = problemService.selectOneProblem(problemId);
 
         return ResponseEntity.ok().body(oneProblem);
+    }
+
+    /* 문제 목록 조회 - 관리자가 문제 관리 클릭시 문제 목록 조회 */
+    @Operation(
+            summary = "문제 목록 조회 기능",
+            description = "문제 목록을 조회하는 기능입니다."
+    )
+    @GetMapping("/list")
+    public ResponseEntity<List<ProblemResListDTO>> selectProblemList() {
+
+        /* 데이터 조회 */
+        List<ProblemResListDTO> problemList = problemService.selectProblemList();
+
+        return ResponseEntity.ok().body(problemList);
     }
 }
