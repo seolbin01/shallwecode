@@ -1,7 +1,7 @@
 package com.shallwecode.backend.user.domain.service;
 
 import com.querydsl.jpa.impl.JPAQueryFactory;
-import com.shallwecode.backend.user.application.dto.FoundUserDTO;
+import com.shallwecode.backend.user.application.dto.FindUserDTO;
 import com.shallwecode.backend.user.application.dto.SaveFriendDTO;
 import com.shallwecode.backend.user.application.dto.SaveFriendReqDTO;
 import com.shallwecode.backend.user.domain.aggregate.Friend;
@@ -24,9 +24,9 @@ public class FriendDomainService {
     public SaveFriendDTO save(SaveFriendReqDTO saveFriendReqDTO) {
 
         Long loginUserId = 3L;
-        FoundUserDTO fromUserDTO = userDomainService.findById(loginUserId);
+        FindUserDTO fromUserDTO = userDomainService.findById(loginUserId);
 
-        FoundUserDTO toUserDTO = userDomainService.findById(saveFriendReqDTO.getToUserId());
+        FindUserDTO toUserDTO = userDomainService.findById(saveFriendReqDTO.getToUserId());
 
         SaveFriendDTO newFriendDTO = new SaveFriendDTO();
         newFriendDTO.setToUser(toUserDTO);
@@ -43,12 +43,13 @@ public class FriendDomainService {
 
         QFriend friend = QFriend.friend;
 
-        long count = queryFactory.selectFrom(friend)
+        Long count = queryFactory.select(friend.count())
+                .from(friend)
                 .where((friend.fromUser.userId.eq(loginUserId).and(friend.toUser.userId.eq(toUserId)))
                         .or(friend.fromUser.userId.eq(toUserId).and(friend.toUser.userId.eq(loginUserId))))
                 .where(friend.friendStatus.eq(FriendStatus.PENDING))
-                .fetchCount();
+                .fetchOne();
 
-        return count > 0;
+        return count != null || count > 0;
     }
 }
