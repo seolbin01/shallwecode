@@ -11,6 +11,7 @@ const selectedProblem = ref(null);
 const currentPage = ref(1);
 const tryCurrentPage = ref(1);
 const searchQuery = ref('');
+const curTry = ref('');
 
 const fetchMyProblemList = async () => {
   try {
@@ -27,6 +28,20 @@ const fetchTryList = async (problemId) => {
     trys.value = response.data;
   } catch (error) {
     console.error('풀이 시도 목록을 불러오는 중 에러가 발생했습니다.', error.response ? error.response.data : error.message);
+  }
+};
+
+const handleTryClick = async (tryId) => {
+  try {
+    const response = await axios.get(
+        `http://localhost:8080/api/v1/problem/${tryId}`
+    );
+
+    curTry.value = response.data;
+    console.log(curTry)
+
+  } catch (error) {
+    console.error('풀이 시도 상세 조회 실패', error);
   }
 };
 
@@ -196,7 +211,10 @@ onMounted(() => {
         </tr>
         </thead>
         <tbody>
-        <tr v-for="(try$, index) in displayedTrys" :key="try$.id">
+        <tr v-for="(try$, index) in displayedTrys"
+            :key="try$.id"
+            @click="handleTryClick(try$.tryId)"
+        >
           <td>{{ (tryCurrentPage - 1) * itemsPerPage + index + 1 }}</td>
           <td>{{ try$.tryLanguage }}</td>
           <td>
