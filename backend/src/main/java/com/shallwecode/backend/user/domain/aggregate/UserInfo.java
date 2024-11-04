@@ -5,6 +5,7 @@ import lombok.Getter;
 import lombok.ToString;
 
 import java.util.Date;
+import java.util.List;
 
 @Entity
 @Table(name="user_info")
@@ -20,6 +21,15 @@ public class UserInfo {
     private String nickname;
     private String auth;
     private Date createdAt;
+
+    @OneToMany(mappedBy = "fromUser", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    private List<Friend> friendsFrom;
+
+    @OneToMany(mappedBy = "toUser", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    private List<Friend> friendsTo;
+
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    private List<Noti> notiList;
 
     public UserInfo()
     {}
