@@ -8,7 +8,8 @@ import org.springframework.http.HttpStatus;
 @RequiredArgsConstructor
 public enum ErrorCode {
 
-    NOT_SAVED_FRIEND(HttpStatus.CONFLICT, "친구 신청 실패");
+    NOT_SAVED_FRIEND(HttpStatus.CONFLICT, "친구 신청 실패"),
+    NOT_FOUND_USER(HttpStatus.NOT_FOUND, "회원 조회 실패");
 
     private final HttpStatus httpStatus;
     private final String message;
