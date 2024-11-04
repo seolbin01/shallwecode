@@ -1,6 +1,8 @@
 package com.shallwecode.backend.problem.application.controller;
 
+import com.shallwecode.backend.problem.application.dto.FindMyProblemResDTO;
 import com.shallwecode.backend.problem.application.dto.ProblemReqDTO;
+import com.shallwecode.backend.problem.application.service.ProblemService;
 import com.shallwecode.backend.problem.domain.service.ProblemDomainService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -11,6 +13,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+
 @RestController
 @RequestMapping("/problem")
 @Slf4j
@@ -18,6 +22,7 @@ import org.springframework.web.bind.annotation.*;
 @RequiredArgsConstructor
 public class ProblemController {
 
+    private final ProblemService problemService;
     private final ProblemDomainService problemDomainService;
     private final ModelMapper modelMapper;
 
@@ -61,7 +66,13 @@ public class ProblemController {
         return ResponseEntity.ok().build();
     }
 
+    @GetMapping("/list")
+    @Operation(summary = "내 문제 목록 전체 조회", description = "내 문제 목록을 전체 조회 한다.")
+    public ResponseEntity<List<FindMyProblemResDTO>> findAllMyProblem() {
 
+        Long userId = 1L;   // 추후 로그인된 회원의 userId를 가져오도록 수정
+        List<FindMyProblemResDTO> myProblemList = problemService.findAllMyProblem(userId);
 
-
+        return new ResponseEntity<>(myProblemList, HttpStatus.OK);
+    }
 }

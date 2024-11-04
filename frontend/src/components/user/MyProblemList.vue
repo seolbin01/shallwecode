@@ -159,7 +159,7 @@ watch(searchQuery, () => {
           <th>번호</th>
           <th>언어</th>
           <th>상태</th>
-          <th>생성 일자</th>
+          <th>제출 일자</th>
         </tr>
         </thead>
         <tbody>
@@ -292,7 +292,6 @@ watch(searchQuery, () => {
 }
 
 .status {
-  padding: 4px 12px;
   border-radius: 4px;
   font-size: 12px;
 }

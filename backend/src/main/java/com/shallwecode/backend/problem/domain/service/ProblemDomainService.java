@@ -1,8 +1,12 @@
 package com.shallwecode.backend.problem.domain.service;
 
+import com.querydsl.core.types.Projections;
+import com.querydsl.jpa.impl.JPAQueryFactory;
+import com.shallwecode.backend.problem.application.dto.FindMyProblemResDTO;
 import com.shallwecode.backend.problem.application.dto.ProblemReqDTO;
-import com.shallwecode.backend.problem.application.dto.ProblemResDTO;
 import com.shallwecode.backend.problem.domain.aggregate.Problem;
+import com.shallwecode.backend.problem.domain.aggregate.QProblem;
+import com.shallwecode.backend.problem.domain.aggregate.QTry;
 import com.shallwecode.backend.problem.domain.aggregate.Testcase;
 import com.shallwecode.backend.problem.domain.repository.ProblemRepository;
 import com.shallwecode.backend.problem.domain.repository.TestcaseRepository;
@@ -11,6 +15,8 @@ import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
+
 @Service
 @RequiredArgsConstructor
 public class ProblemDomainService {
@@ -18,6 +24,7 @@ public class ProblemDomainService {
     private final ProblemRepository repository;
     private final TestcaseRepository testCaseRepository;
     private final ModelMapper modelMapper;
+    private final JPAQueryFactory queryFactory;
 
     @Transactional
     public void saveProblem(ProblemReqDTO newProblem) {
@@ -63,7 +70,25 @@ public class ProblemDomainService {
         repository.deleteById(problemId);
     }
 
+    public List<FindMyProblemResDTO> findAllMyProblem(Long userId) {
 
+        QProblem qProblem = QProblem.problem;
+        QTry qTry = QTry.try$;
 
-
+        return queryFactory
+                .select(Projections.constructor(FindMyProblemResDTO.class,
+                        qProblem.problemId,
+                        qProblem.title,
+                        qProblem.problemLevel,
+                        QTry.try$.isSolved
+                                .when(true).then(1)
+                                .otherwise(0)
+                                .max()))
+                .from(qTry)
+                .join(qProblem).on(qTry.problemId.eq(qProblem.problemId))
+                .where(qTry.userId.eq(userId))
+                .groupBy(qProblem.problemId)
+                .orderBy(qTry.createdAt.asc())
+                .fetch();
+    }
 }
