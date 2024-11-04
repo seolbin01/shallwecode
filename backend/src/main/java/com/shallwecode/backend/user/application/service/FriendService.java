@@ -2,10 +2,10 @@ package com.shallwecode.backend.user.application.service;
 
 import com.shallwecode.backend.common.exception.CustomException;
 import com.shallwecode.backend.common.exception.ErrorCode;
-import com.shallwecode.backend.user.application.dto.SaveFriendDTO;
-import com.shallwecode.backend.user.application.dto.SaveFriendReqDTO;
-import com.shallwecode.backend.user.application.dto.SaveNotiDTO;
+import com.shallwecode.backend.user.application.dto.*;
+import com.shallwecode.backend.user.domain.aggregate.FriendStatus;
 import com.shallwecode.backend.user.domain.aggregate.NotiType;
+import com.shallwecode.backend.user.domain.repository.FriendRepository;
 import com.shallwecode.backend.user.domain.service.FriendDomainService;
 import com.shallwecode.backend.user.domain.service.NotiDomainService;
 import lombok.RequiredArgsConstructor;
@@ -48,6 +48,33 @@ public class FriendService {
             notiDomainService.save(saveNotiDTO);
         } catch (Exception e) {
             throw new CustomException(ErrorCode.NOT_SAVED_FRIEND);
+        }
+    }
+
+    @Transactional
+    public void updateFriend(UpdateFriendReqDTO updateFriendReqDTO, boolean result) {
+
+        FindFriendDTO findFriendDTO = friendDomainService.findMyFriend(updateFriendReqDTO);
+
+        try {
+            String notiContent = "";
+            String toUserNickname = findFriendDTO.getToUser().getNickname();
+            if (result) {
+                notiContent += toUserNickname + "님이 친구 요청을 수락하셨습니다.";
+                findFriendDTO.setFriendStatus(FriendStatus.ACCEPTED);
+                friendDomainService.updateFriendStatus(findFriendDTO);
+            } else {
+                notiContent += toUserNickname + "님이 친구 요청을 거절하셨습니다.";
+                friendDomainService.deleteFriend(findFriendDTO);
+            }
+
+            notiDomainService.save(new SaveNotiDTO(
+                    findFriendDTO.getFromUser(),
+                    NotiType.FRIEND,
+                    notiContent
+            ));
+        } catch (Exception e) {
+            throw new CustomException(ErrorCode.NOT_CHANGED_FRIEND);
         }
     }
 }
