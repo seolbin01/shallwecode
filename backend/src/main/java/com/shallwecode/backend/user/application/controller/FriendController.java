@@ -27,7 +27,4 @@ public class FriendController {
         friendService.saveFriend(saveFriendReqDTO);
         return ResponseEntity.ok().build();
     }
-
-
-
 }
