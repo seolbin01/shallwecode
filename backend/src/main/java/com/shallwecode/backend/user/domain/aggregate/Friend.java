@@ -1,9 +1,7 @@
 package com.shallwecode.backend.user.domain.aggregate;
 
-import com.shallwecode.backend.user.application.dto.FriendStatus;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
-import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
@@ -31,11 +29,6 @@ public class Friend {
     @PrePersist
     public void prePersist() {
         friendStatus = FriendStatus.PENDING;
-    }
-
-    public void updateUserInfo(UserInfo fromUser, UserInfo toUser) {
-        this.fromUser = fromUser;
-        this.toUser = toUser;
     }
 }
 
