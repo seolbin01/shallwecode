@@ -14,15 +14,10 @@ public class Testcase {
     private String input;
     private String output;
 
-    @ManyToOne
-    @JoinColumn(name = "problem_id", nullable = false)
-    private Problem problem;
+    private Long problemId;
 
-    // 양방향 관계에서 Problem 엔티티와 연결을 설정하는 메서드
-    public void setProblem(Problem problem) {
-        this.problem = problem;
+    public void updateProblemId(Long problemId) {
+        this.problemId = problemId;
     }
-
-
 
 }
