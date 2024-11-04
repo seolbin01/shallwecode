@@ -12,7 +12,7 @@ import lombok.Setter;
 @AllArgsConstructor
 public class SaveNotiDTO {
 
-    private FoundUserDTO user;
+    private FindUserDTO user;
     private NotiType notiType;
     private String content;
 }
