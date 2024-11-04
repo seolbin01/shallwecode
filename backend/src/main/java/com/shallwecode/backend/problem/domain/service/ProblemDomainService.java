@@ -4,6 +4,7 @@ import com.querydsl.core.types.Projections;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import com.shallwecode.backend.problem.application.dto.ProblemReqDTO;
 import com.shallwecode.backend.problem.application.dto.ProblemResDTO;
+import com.shallwecode.backend.problem.application.dto.ProblemResListDTO;
 import com.shallwecode.backend.problem.domain.aggregate.Problem;
 import com.shallwecode.backend.problem.domain.aggregate.QProblem;
 import com.shallwecode.backend.problem.domain.aggregate.QTestcase;
@@ -85,5 +86,9 @@ public class ProblemDomainService {
                 .leftJoin(qTestcase).on(qTestcase.problemId.eq(qProblem.problemId))
                 .where(qProblem.problemId.eq(problemId))
                 .fetch();
+    }
+
+    public List<ProblemResListDTO> selectProblemList() {
+
     }
 }
