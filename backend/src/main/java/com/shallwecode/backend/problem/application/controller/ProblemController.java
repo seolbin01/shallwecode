@@ -4,18 +4,14 @@ import com.shallwecode.backend.problem.application.dto.ProblemReqDTO;
 import com.shallwecode.backend.problem.application.dto.ProblemResDTO;
 import com.shallwecode.backend.problem.application.dto.ProblemResListDTO;
 import com.shallwecode.backend.problem.application.service.ProblemService;
-import com.shallwecode.backend.problem.domain.service.ProblemDomainService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.nio.charset.StandardCharsets;
 import java.util.List;
 
 @RestController
@@ -26,7 +22,6 @@ import java.util.List;
 public class ProblemController {
 
     private final ProblemService problemService;
-    private final ProblemDomainService problemDomainService;
 
     /* 문제 등록 */
     @Operation(
