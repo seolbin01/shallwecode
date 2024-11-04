@@ -5,6 +5,7 @@ import com.querydsl.jpa.impl.JPAQueryFactory;
 import com.shallwecode.backend.problem.application.dto.FindMyProblemResDTO;
 import com.shallwecode.backend.problem.application.dto.ProblemReqDTO;
 import com.shallwecode.backend.problem.application.dto.ProblemResDTO;
+import com.shallwecode.backend.problem.application.dto.ProblemResListDTO;
 import com.shallwecode.backend.problem.domain.aggregate.Problem;
 import com.shallwecode.backend.problem.domain.aggregate.QProblem;
 import com.shallwecode.backend.problem.domain.aggregate.QTry;
@@ -70,8 +71,10 @@ public class ProblemDomainService {
     }
 
     public List<ProblemResDTO> selectOneProblem(Long problemId) {
+
         QProblem qProblem = QProblem.problem;
         QTestcase qTestcase = QTestcase.testcase;
+
         return queryFactory.select(Projections.constructor(ProblemResDTO.class,
                 qProblem.problemId,
                 qProblem.title,
@@ -105,6 +108,20 @@ public class ProblemDomainService {
                 .where(qTry.userId.eq(userId))
                 .groupBy(qProblem.problemId)
                 .orderBy(qTry.createdAt.asc())
+                .fetch();
+    }
+
+    /* 문제 목록 조회 기능 */
+    public List<ProblemResListDTO> selectProblemList() {
+
+        QProblem qProblem = QProblem.problem;
+
+        return queryFactory.select(Projections.constructor(ProblemResListDTO.class,
+                qProblem.problemId,
+                qProblem.title,
+                qProblem.content,
+                qProblem.problemLevel))
+                .from(qProblem)
                 .fetch();
     }
 }

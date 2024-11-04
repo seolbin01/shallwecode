@@ -4,6 +4,7 @@ import com.shallwecode.backend.problem.application.dto.FindMyProblemResDTO;
 import com.shallwecode.backend.problem.domain.service.ProblemDomainService;
 import com.shallwecode.backend.problem.application.dto.ProblemReqDTO;
 import com.shallwecode.backend.problem.application.dto.ProblemResDTO;
+import com.shallwecode.backend.problem.application.dto.ProblemResListDTO;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -34,5 +35,9 @@ public class ProblemService {
 
     public void saveProblem(ProblemReqDTO newProblemInfo) {
         problemDomainService.saveProblem(newProblemInfo);
+    }
+
+    public List<ProblemResListDTO> selectProblemList() {
+        return problemDomainService.selectProblemList();
     }
 }
