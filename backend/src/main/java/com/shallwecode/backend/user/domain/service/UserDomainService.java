@@ -2,7 +2,7 @@ package com.shallwecode.backend.user.domain.service;
 
 import com.shallwecode.backend.common.exception.CustomException;
 import com.shallwecode.backend.common.exception.ErrorCode;
-import com.shallwecode.backend.user.application.dto.FoundUserDTO;
+import com.shallwecode.backend.user.application.dto.FindUserDTO;
 import com.shallwecode.backend.user.application.dto.UserUpdateDTO;
 import com.shallwecode.backend.user.domain.aggregate.UserInfo;
 import com.shallwecode.backend.user.domain.repository.UserRepository;
@@ -27,11 +27,9 @@ public class UserDomainService {
         userRepository.delete(userInfo);
     }
 
-    public FoundUserDTO findById(Long userId) {
+    public FindUserDTO findById(Long userId) {
         UserInfo foundUser = userRepository.findById(userId)
                 .orElseThrow(() -> new CustomException(ErrorCode.NOT_FOUND_USER));
-        return modelMapper.map(foundUser, FoundUserDTO.class);
+        return modelMapper.map(foundUser, FindUserDTO.class);
     }
-
-
 }
