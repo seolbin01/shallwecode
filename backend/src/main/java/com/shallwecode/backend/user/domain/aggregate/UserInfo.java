@@ -16,6 +16,7 @@ public class UserInfo {
     private Long userId;
     private String provider;
     private String providerId;
+    @Column(unique = true, nullable = false)
     private String email;
     private String nickname;
     private String auth;
