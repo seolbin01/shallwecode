@@ -1,5 +1,6 @@
 package com.shallwecode.backend.user.application.service;
 
+import com.shallwecode.backend.user.application.dto.UserSaveDTO;
 import com.shallwecode.backend.user.application.dto.UserUpdateDTO;
 import com.shallwecode.backend.user.domain.aggregate.UserInfo;
 import com.shallwecode.backend.user.domain.repository.UserRepository;
@@ -15,9 +16,9 @@ import org.springframework.transaction.annotation.Transactional;
 @Service
 @RequiredArgsConstructor
 public class UserService implements UserDetailsService {
-    private final ModelMapper modelMapper;
     private final UserDomainService userDomainService;
     private final UserRepository userRepository;
+    private final ModelMapper modelMapper;
 
 
     @Override
@@ -25,11 +26,20 @@ public class UserService implements UserDetailsService {
         return null;
     }
 
+    // 회원 가입
+    @Transactional
+    public void saveUser(UserSaveDTO userSaveDTO) {
+        UserInfo userInfo = modelMapper.map(userSaveDTO, UserInfo.class);
+        userDomainService.validateNewUser(userInfo); // 회원 유효성 검사
+        userRepository.save(userInfo);
+
+    }
+
     // 회원 닉네임 수정
     @Transactional
     public void updateUser(UserUpdateDTO userUpdateDTO) {
-        UserInfo userInfo = userRepository.findById(userUpdateDTO.getUserId()).orElseThrow(()->new IllegalArgumentException("조회된 회원이 없습니다."));
-        userDomainService.updateUserDetails(userInfo, userUpdateDTO);
+        UserInfo userInfo = userRepository.findById(userUpdateDTO.getUserId()).orElseThrow(() -> new IllegalArgumentException("조회된 회원이 없습니다."));
+        userDomainService.updateUser(userInfo, userUpdateDTO);
         userRepository.save(userInfo);
     }
 
@@ -38,8 +48,6 @@ public class UserService implements UserDetailsService {
     public void deleteUser(Long userId) {
         userDomainService.deleteUser(userId);
     }
-
-
 
 
 //    private final BCryptPasswordEncoder passwordEncoder;
