@@ -2,8 +2,8 @@ package com.shallwecode.backend.user.application.service;
 
 import com.shallwecode.backend.common.exception.CustomException;
 import com.shallwecode.backend.common.exception.ErrorCode;
+import com.shallwecode.backend.user.application.dto.SaveFriendDTO;
 import com.shallwecode.backend.user.application.dto.SaveFriendReqDTO;
-import com.shallwecode.backend.user.application.dto.SaveFriendResDTO;
 import com.shallwecode.backend.user.application.dto.SaveNotiDTO;
 import com.shallwecode.backend.user.domain.aggregate.NotiType;
 import com.shallwecode.backend.user.domain.service.FriendDomainService;
@@ -35,12 +35,12 @@ public class FriendService {
         }
 
         try {
-            SaveFriendResDTO saveFriendResDTO = friendDomainService.save(saveFriendReqDTO);
+            SaveFriendDTO SaveFriendDTO = friendDomainService.save(saveFriendReqDTO);
 
-            String notiContent = saveFriendResDTO.getFromUser().getNickname()
+            String notiContent = SaveFriendDTO.getFromUser().getNickname()
                     + "님이 친구 신청하였습니다.";
             SaveNotiDTO saveNotiDTO = new SaveNotiDTO(
-                    saveFriendResDTO.getToUser(),
+                    SaveFriendDTO.getToUser(),
                     NotiType.FRIEND,
                     notiContent
             );
