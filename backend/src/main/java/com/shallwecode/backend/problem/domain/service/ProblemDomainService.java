@@ -1,7 +1,12 @@
 package com.shallwecode.backend.problem.domain.service;
 
+import com.querydsl.core.types.Projections;
+import com.querydsl.jpa.impl.JPAQueryFactory;
 import com.shallwecode.backend.problem.application.dto.ProblemReqDTO;
+import com.shallwecode.backend.problem.application.dto.ProblemResDTO;
 import com.shallwecode.backend.problem.domain.aggregate.Problem;
+import com.shallwecode.backend.problem.domain.aggregate.QProblem;
+import com.shallwecode.backend.problem.domain.aggregate.QTestcase;
 import com.shallwecode.backend.problem.domain.aggregate.Testcase;
 import com.shallwecode.backend.problem.domain.repository.ProblemRepository;
 import com.shallwecode.backend.problem.domain.repository.TestcaseRepository;
@@ -10,12 +15,15 @@ import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
+
 @Service
 @RequiredArgsConstructor
 public class ProblemDomainService {
 
     private final ProblemRepository repository;
     private final TestcaseRepository testCaseRepository;
+    private final JPAQueryFactory queryFactory;
     private final ModelMapper modelMapper;
 
     @Transactional
@@ -61,4 +69,21 @@ public class ProblemDomainService {
         repository.deleteById(problemId);
     }
 
+    public List<ProblemResDTO> selectOneProblem(Long problemId) {
+        QProblem qProblem = QProblem.problem;
+        QTestcase qTestcase = QTestcase.testcase;
+
+        return queryFactory.select(Projections.constructor(ProblemResDTO.class,
+                qProblem.problemId,
+                qProblem.title,
+                qProblem.content,
+                qProblem.problemLevel,
+                qTestcase.testcaseId,
+                qTestcase.input,
+                qTestcase.output))
+                .from(qProblem)
+                .leftJoin(qTestcase).on(qTestcase.problemId.eq(qProblem.problemId))
+                .where(qProblem.problemId.eq(problemId))
+                .fetch();
+    }
 }
