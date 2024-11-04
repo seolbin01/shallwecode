@@ -6,20 +6,18 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.modelmapper.ModelMapper;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
-@RequestMapping("/problem")
+@RequestMapping("/api/v1/problem")
 @Slf4j
 @Tag(name = "Problem", description = "문제 관련 API")
 @RequiredArgsConstructor
 public class ProblemController {
 
     private final ProblemDomainService problemDomainService;
-    private final ModelMapper modelMapper;
 
     /* 문제 등록 */
     @Operation(
@@ -58,10 +56,7 @@ public class ProblemController {
 
         problemDomainService.deleteProblem(problemId);
 
-        return ResponseEntity.ok().build();
+        return ResponseEntity.noContent().build();
     }
-
-
-
 
 }
