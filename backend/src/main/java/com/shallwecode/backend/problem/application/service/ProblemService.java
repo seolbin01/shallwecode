@@ -2,6 +2,7 @@ package com.shallwecode.backend.problem.application.service;
 
 import com.shallwecode.backend.problem.application.dto.ProblemReqDTO;
 import com.shallwecode.backend.problem.application.dto.ProblemResDTO;
+import com.shallwecode.backend.problem.application.dto.ProblemResListDTO;
 import com.shallwecode.backend.problem.domain.service.ProblemDomainService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -28,5 +29,9 @@ public class ProblemService {
 
     public void saveProblem(ProblemReqDTO newProblemInfo) {
         problemDomainService.saveProblem(newProblemInfo);
+    }
+
+    public List<ProblemResListDTO> selectProblemList() {
+        return problemDomainService.selectProblemList();
     }
 }
