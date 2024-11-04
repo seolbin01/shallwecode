@@ -4,7 +4,6 @@ import com.querydsl.jpa.impl.JPAQueryFactory;
 import com.shallwecode.backend.user.application.dto.FoundUserDTO;
 import com.shallwecode.backend.user.application.dto.SaveFriendDTO;
 import com.shallwecode.backend.user.application.dto.SaveFriendReqDTO;
-import com.shallwecode.backend.user.application.dto.SaveFriendResDTO;
 import com.shallwecode.backend.user.domain.aggregate.Friend;
 import com.shallwecode.backend.user.domain.aggregate.FriendStatus;
 import com.shallwecode.backend.user.domain.aggregate.QFriend;
@@ -22,7 +21,7 @@ public class FriendDomainService {
     private final ModelMapper modelMapper;
     private final JPAQueryFactory queryFactory;
 
-    public SaveFriendResDTO save(SaveFriendReqDTO saveFriendReqDTO) {
+    public SaveFriendDTO save(SaveFriendReqDTO saveFriendReqDTO) {
 
         Long loginUserId = 3L;
         FoundUserDTO fromUserDTO = userDomainService.findById(loginUserId);
@@ -35,11 +34,9 @@ public class FriendDomainService {
 
         Friend savedFriend = friendRepository.save(modelMapper.map(newFriendDTO, Friend.class));
 
-        return new SaveFriendResDTO(
-                modelMapper.map(fromUserDTO, FoundUserDTO.class),
-                modelMapper.map(toUserDTO, FoundUserDTO.class),
-                savedFriend.getFriendStatus()
-        );
+        newFriendDTO.setFriendStatus(savedFriend.getFriendStatus());
+
+        return newFriendDTO;
     }
 
     public boolean isExistFriend(Long loginUserId, Long toUserId) {
