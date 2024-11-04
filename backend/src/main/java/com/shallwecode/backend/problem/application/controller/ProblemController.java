@@ -68,6 +68,10 @@ public class ProblemController {
     }
 
     /* 문제 단일 조회 - 문제 하나당 테스트 케이스가 여러 개 */
+    @Operation(
+            summary = "문제 단일 조회 기능",
+            description = "관리자가 문제를 상제 조회하는 기능입니다."
+    )
     @GetMapping("/{problemId}")
     public ResponseEntity<List<ProblemResDTO>> selectProblem(@PathVariable Long problemId) {
 
