@@ -17,7 +17,7 @@ public class FriendDomainService {
     private final FriendRepository friendRepository;
     private final UserDomainService userDomainService;
     private final ModelMapper modelMapper;
-    
+
     public SaveFriendResDTO save(SaveFriendReqDTO saveFriendReqDTO) {
 
         Long loginUserId = 1L;
