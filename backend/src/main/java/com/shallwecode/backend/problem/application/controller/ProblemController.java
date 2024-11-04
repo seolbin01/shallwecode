@@ -71,7 +71,7 @@ public class ProblemController {
     /* 문제 단일 조회 - 문제 하나당 테스트 케이스가 여러 개 */
     @Operation(
             summary = "문제 단일 조회 기능",
-            description = "관리자가 문제를 상제 조회하는 기능입니다."
+            description = "관리자가 문제를 상세 조회하는 기능입니다."
     )
     @GetMapping("/{problemId}")
     public ResponseEntity<List<ProblemResDTO>> selectProblem(@PathVariable Long problemId) {
@@ -83,8 +83,13 @@ public class ProblemController {
     }
 
     /* 문제 목록 조회 - 관리자가 문제 관리 클릭시 문제 목록 조회 */
+    @Operation(
+            summary = "문제 목록 조회 기능",
+            description = "문제 목록을 조회하는 기능입니다."
+    )
     @GetMapping("/list")
     public ResponseEntity<List<ProblemResListDTO>> selectProblemList() {
+
         /* 데이터 조회 */
         List<ProblemResListDTO> problemList = problemService.selectProblemList();
 
