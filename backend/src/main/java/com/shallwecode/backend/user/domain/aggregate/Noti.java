@@ -8,7 +8,7 @@ import org.springframework.data.annotation.CreatedDate;
 
 import java.time.LocalDateTime;
 
-@Entity(name = "Noti")
+@Entity
 @Table(name = "noti")
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
@@ -26,9 +26,7 @@ public class Noti {
     private NotiType notiType;
     private Long codingRoomId;
     private String content;
-    private Integer IsRead;
-
-    @CreatedDate
+    private Integer IsRead = 0;
     private LocalDateTime createdAt;
 
     @PrePersist
