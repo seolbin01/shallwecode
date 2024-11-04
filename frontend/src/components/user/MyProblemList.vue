@@ -1,17 +1,22 @@
 <script setup>
-import {ref, computed, watch} from 'vue'
+import {ref, computed, watch, onMounted} from 'vue'
+import axios from 'axios';
 
-const ROWS_PER_PAGE = 7
+const ROWS_PER_PAGE = 7;
 
-const problems = ref([
-  {id: 1, title: '어려운 문제', level: 1, status: '해결'},
-  {id: 2, title: '진짜 어려운 문제', level: 2, status: '해결'},
-  {id: 3, title: '매우 어려운 문제', level: 3, status: '해결'},
-  {id: 4, title: '너무 어려운 문제', level: 3, status: '미해결'},
-  {id: 5, title: '어렵지만 어려운 문제', level: 3, status: '미해결'},
-  {id: 6, title: '어렵고 어려운 문제', level: 3, status: '해결'},
-  {id: 7, title: '복잡한예제', level: 3, status: '해결'}
-])
+const itemsPerPage = 7;
+
+const problems = ref([]);
+
+const fetchMyProblemList = async () => {
+  try {
+    const response = await axios.get('http://localhost:8080/problem/list');
+
+    problems.value = response.data;
+  } catch (error) {
+    console.error('내 풀이 문제 목록을 불러오는 중 에러가 발생했습니다.', error.response ? error.response.data : error.message);
+  }
+};
 
 const trys = ref([
   {id: 1, language: 'JAVA', status: '해결', createdAt: '2024-10-30\n' + '16:09:20'},
@@ -79,6 +84,10 @@ const changePage = (page) => {
 watch(searchQuery, () => {
   currentPage.value = 1
 })
+
+onMounted(() => {
+  fetchMyProblemList();
+})
 </script>
 <template>
   <div class="container">
@@ -105,14 +114,14 @@ watch(searchQuery, () => {
         </tr>
         </thead>
         <tbody>
-        <tr v-for="problem in displayedProblems" :key="problem.id">
-          <td>{{ problem.id }}</td>
+        <tr v-for="(problem, index) in displayedProblems" :key="problem.id">
+          <td>{{ (currentPage - 1) * itemsPerPage + index + 1 }}</td>
           <td>{{ problem.title }}</td>
-          <td><span class="level-badge">Lv. {{ problem.level }}</span></td>
+          <td><span class="level-badge">Lv. {{ problem.problemLevel }}</span></td>
           <td>
-            <span :class="['status', problem.status === '해결' ? 'status-solved' : 'status-unsolved']">
-              {{ problem.status }}
-            </span>
+            <span :class="['status', problem.solved ? 'status-solved' : 'status-unsolved']">
+            {{ problem.solved ? '해결' : '미해결' }}
+          </span>
           </td>
         </tr>
         <tr v-for="i in emptyRowsProblemCount" :key="`empty-${i}`" class="empty-row">
