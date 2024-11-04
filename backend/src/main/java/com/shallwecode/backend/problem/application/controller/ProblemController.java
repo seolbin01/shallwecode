@@ -78,10 +78,6 @@ public class ProblemController {
         /* 데이터 조회 */
         List<ProblemResDTO> oneProblem = problemService.selectOneProblem(problemId);
 
-        /* 응답 헤더 생성 */
-        HttpHeaders headers = new HttpHeaders();
-        headers.setContentType(new MediaType("application", "json", StandardCharsets.UTF_8));
-
-        return ResponseEntity.ok().headers(headers).body(oneProblem);
+        return ResponseEntity.ok().body(oneProblem);
     }
 }
