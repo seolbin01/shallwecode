@@ -42,12 +42,12 @@ public class TryController {
         return ResponseEntity.ok().body("풀이 시도 삭제 완료");
     }
 
-    @GetMapping("/try")
-    @Operation(summary = "내 문제 풀이 시도 전체 조회", description = "내 문제 풀이 시도를 전체 조회 한다.")
-    public ResponseEntity<List<FindMyTryResDTO>> findAllMyTry() {
+    @GetMapping("/{problemId}/try")
+    @Operation(summary = "내 문제 풀이 시도 조회", description = "내 문제 풀이 시도를 조회 한다.")
+    public ResponseEntity<List<FindMyTryResDTO>> findAllMyTry(@PathVariable Long problemId) {
 
         Long userId = 1L;   // 추후 로그인된 회원의 userId를 가져오도록 수정
-        List<FindMyTryResDTO> myTryList = tryService.findAllMyTry(userId);
+        List<FindMyTryResDTO> myTryList = tryService.findAllMyTry(userId, problemId);
 
         return new ResponseEntity<>(myTryList, HttpStatus.OK);
     }
