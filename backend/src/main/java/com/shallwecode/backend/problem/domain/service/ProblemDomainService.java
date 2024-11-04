@@ -4,9 +4,11 @@ import com.querydsl.core.types.Projections;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import com.shallwecode.backend.problem.application.dto.FindMyProblemResDTO;
 import com.shallwecode.backend.problem.application.dto.ProblemReqDTO;
+import com.shallwecode.backend.problem.application.dto.ProblemResDTO;
 import com.shallwecode.backend.problem.domain.aggregate.Problem;
 import com.shallwecode.backend.problem.domain.aggregate.QProblem;
 import com.shallwecode.backend.problem.domain.aggregate.QTry;
+import com.shallwecode.backend.problem.domain.aggregate.QTestcase;
 import com.shallwecode.backend.problem.domain.aggregate.Testcase;
 import com.shallwecode.backend.problem.domain.repository.ProblemRepository;
 import com.shallwecode.backend.problem.domain.repository.TestcaseRepository;
@@ -35,10 +37,9 @@ public class ProblemDomainService {
         // 연관된 테스트 케이스 저장
         newProblem.getTestcases().forEach(testcaseReqDTO -> {
             Testcase testcase = modelMapper.map(testcaseReqDTO, Testcase.class);
-            testcase.setProblem(problem); // 문제와 테스트 케이스 연결
+            testcase.updateProblemId(problem.getProblemId()); // 문제 ID 설정
             testCaseRepository.save(testcase);
         });
-
     }
 
     @Transactional
@@ -52,14 +53,12 @@ public class ProblemDomainService {
         foundProblem.updateProblemProblemLevel(updateProblem.getProblemLevel());
 
         // 기존 테스트 케이스 삭제 후 새로운 테스트 케이스 추가
-        testCaseRepository.deleteByProblem_ProblemId(id);
+        testCaseRepository.deleteByProblemId(id);
         updateProblem.getTestcases().forEach(testcaseReqDTO -> {
             Testcase testcase = modelMapper.map(testcaseReqDTO, Testcase.class);
-            testcase.setProblem(foundProblem); // 문제와 테스트 케이스 연결 설정
+            testcase.updateProblemId(foundProblem.getProblemId()); // 문제 ID 설정
             testCaseRepository.save(testcase);
         });
-
-
     }
 
     @Transactional
@@ -68,6 +67,23 @@ public class ProblemDomainService {
         // 문제와 연관된 테스트 케이스 모두 삭제 후 문제 삭제
         testCaseRepository.deleteById(problemId);
         repository.deleteById(problemId);
+    }
+
+    public List<ProblemResDTO> selectOneProblem(Long problemId) {
+        QProblem qProblem = QProblem.problem;
+        QTestcase qTestcase = QTestcase.testcase;
+        return queryFactory.select(Projections.constructor(ProblemResDTO.class,
+                qProblem.problemId,
+                qProblem.title,
+                qProblem.content,
+                qProblem.problemLevel,
+                qTestcase.testcaseId,
+                qTestcase.input,
+                qTestcase.output))
+                .from(qProblem)
+                .leftJoin(qTestcase).on(qTestcase.problemId.eq(qProblem.problemId))
+                .where(qProblem.problemId.eq(problemId))
+                .fetch();
     }
 
     public List<FindMyProblemResDTO> findAllMyProblem(Long userId) {
