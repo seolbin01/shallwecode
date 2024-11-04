@@ -2,6 +2,7 @@ package com.shallwecode.backend.problem.application.controller;
 
 import com.shallwecode.backend.problem.application.dto.ProblemReqDTO;
 import com.shallwecode.backend.problem.application.dto.ProblemResDTO;
+import com.shallwecode.backend.problem.application.dto.ProblemResListDTO;
 import com.shallwecode.backend.problem.application.service.ProblemService;
 import com.shallwecode.backend.problem.domain.service.ProblemDomainService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -79,5 +80,14 @@ public class ProblemController {
         List<ProblemResDTO> oneProblem = problemService.selectOneProblem(problemId);
 
         return ResponseEntity.ok().body(oneProblem);
+    }
+
+    /* 문제 목록 조회 - 관리자가 문제 관리 클릭시 문제 목록 조회 */
+    @GetMapping("/list")
+    public ResponseEntity<List<ProblemResListDTO>> selectProblemList() {
+        /* 데이터 조회 */
+        List<ProblemResListDTO> problemList = problemService.selectProblemList();
+
+        return ResponseEntity.ok().body(problemList);
     }
 }
