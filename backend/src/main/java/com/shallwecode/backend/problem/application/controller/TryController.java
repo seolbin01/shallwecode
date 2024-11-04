@@ -53,7 +53,7 @@ public class TryController {
         return new ResponseEntity<>(myTryList, HttpStatus.OK);
     }
 
-    @GetMapping("/{tryId}")
+    @GetMapping("/try/{tryId}")
     @Operation(summary = "특정 풀이 시도 조회", description = "특정 풀이 시도를 조회 한다.")
     public ResponseEntity<FindTryResDTO> findTry(@PathVariable Long tryId) {
 
