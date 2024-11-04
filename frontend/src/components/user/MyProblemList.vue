@@ -3,92 +3,107 @@ import {ref, computed, watch, onMounted} from 'vue'
 import axios from 'axios';
 
 const ROWS_PER_PAGE = 7;
-
 const itemsPerPage = 7;
 
 const problems = ref([]);
+const trys = ref([]);
+const selectedProblem = ref(null);
+const currentPage = ref(1);
+const tryCurrentPage = ref(1);
+const searchQuery = ref('');
 
 const fetchMyProblemList = async () => {
   try {
     const response = await axios.get('http://localhost:8080/problem/list');
-
     problems.value = response.data;
   } catch (error) {
     console.error('내 풀이 문제 목록을 불러오는 중 에러가 발생했습니다.', error.response ? error.response.data : error.message);
   }
 };
 
-const trys = ref([
-  {id: 1, language: 'JAVA', status: '해결', createdAt: '2024-10-30\n' + '16:09:20'},
-  {id: 2, language: 'JAVA', status: '해결', createdAt: '2024-10-30\n' + '16:09:20'},
-  {id: 3, language: 'PYTHON', status: '해결', createdAt: '2024-10-30\n' + '16:09:20'}
-])
-
-const currentPage = ref(1)
-const searchQuery = ref('')
+const fetchTryList = async (problemId) => {
+  try {
+    const response = await axios.get(`http://localhost:8080/api/v1/problem/${problemId}/try`);
+    trys.value = response.data;
+  } catch (error) {
+    console.error('풀이 시도 목록을 불러오는 중 에러가 발생했습니다.', error.response ? error.response.data : error.message);
+  }
+};
 
 const filteredProblems = computed(() => {
-  if (!searchQuery.value) return problems.value
-
+  if (!searchQuery.value) return problems.value;
   return problems.value.filter(problem =>
       problem.title.toLowerCase().includes(searchQuery.value.toLowerCase())
-  )
-})
+  );
+});
 
 const filteredTrys = computed(() => {
-  if (!searchQuery.value) return trys.value
-
-  return trys.value.filter(try$ =>
-      trys.title.toLowerCase().includes(searchQuery.value.toLowerCase())
-  )
-})
+  return trys.value;
+});
 
 const totalProblemPages = computed(() =>
     Math.ceil(filteredProblems.value.length / ROWS_PER_PAGE)
-)
+);
 
 const totalTryPages = computed(() =>
     Math.ceil(filteredTrys.value.length / ROWS_PER_PAGE)
-)
+);
 
 const displayedProblems = computed(() => {
-  const startIdx = (currentPage.value - 1) * ROWS_PER_PAGE
-  const endIdx = startIdx + ROWS_PER_PAGE
-  return filteredProblems.value.slice(startIdx, endIdx)
-})
+  const startIdx = (currentPage.value - 1) * ROWS_PER_PAGE;
+  const endIdx = startIdx + ROWS_PER_PAGE;
+  return filteredProblems.value.slice(startIdx, endIdx);
+});
 
 const displayedTrys = computed(() => {
-  const startIdx = (currentPage.value - 1) * ROWS_PER_PAGE
-  const endIdx = startIdx + ROWS_PER_PAGE
-  return filteredTrys.value.slice(startIdx, endIdx)
-})
+  const startIdx = (tryCurrentPage.value - 1) * ROWS_PER_PAGE;
+  const endIdx = startIdx + ROWS_PER_PAGE;
+  return filteredTrys.value.slice(startIdx, endIdx);
+});
 
 const emptyRowsProblemCount = computed(() =>
     ROWS_PER_PAGE - displayedProblems.value.length
-)
+);
 
 const emptyRowsTryCount = computed(() =>
     ROWS_PER_PAGE - displayedTrys.value.length
-)
+);
 
-const changePage = (page) => {
+const changeProblemPage = (page) => {
   if (page === 'prev' && currentPage.value > 1) {
-    currentPage.value--
-  } else if (page === 'next' && currentPage.value < totalPages.value) {
-    currentPage.value++
+    currentPage.value--;
+  } else if (page === 'next' && currentPage.value < totalProblemPages.value) {
+    currentPage.value++;
   } else if (typeof page === 'number') {
-    currentPage.value = page
+    currentPage.value = page;
   }
-}
+};
+
+const changeTryPage = (page) => {
+  if (page === 'prev' && tryCurrentPage.value > 1) {
+    tryCurrentPage.value--;
+  } else if (page === 'next' && tryCurrentPage.value < totalTryPages.value) {
+    tryCurrentPage.value++;
+  } else if (typeof page === 'number') {
+    tryCurrentPage.value = page;
+  }
+};
+
+const selectProblem = async (problem) => {
+  selectedProblem.value = problem;
+  tryCurrentPage.value = 1;
+  await fetchTryList(problem.problemId);
+};
 
 watch(searchQuery, () => {
-  currentPage.value = 1
-})
+  currentPage.value = 1;
+});
 
 onMounted(() => {
   fetchMyProblemList();
-})
+});
 </script>
+
 <template>
   <div class="container">
     <div class="problem-container">
@@ -114,14 +129,19 @@ onMounted(() => {
         </tr>
         </thead>
         <tbody>
-        <tr v-for="(problem, index) in displayedProblems" :key="problem.id">
+        <tr
+            v-for="(problem, index) in displayedProblems"
+            :key="problem.id"
+            @click="selectProblem(problem)"
+            :class="{ 'selected-row': selectedProblem?.problemId === problem.problemId }"
+        >
           <td>{{ (currentPage - 1) * itemsPerPage + index + 1 }}</td>
           <td>{{ problem.title }}</td>
           <td><span class="level-badge">Lv. {{ problem.problemLevel }}</span></td>
           <td>
-            <span :class="['status', problem.solved ? 'status-solved' : 'status-unsolved']">
-            {{ problem.solved ? '해결' : '미해결' }}
-          </span>
+              <span :class="['status', problem.solved ? 'status-solved' : 'status-unsolved']">
+                {{ problem.solved ? '해결' : '미해결' }}
+              </span>
           </td>
         </tr>
         <tr v-for="i in emptyRowsProblemCount" :key="`empty-${i}`" class="empty-row">
@@ -135,30 +155,34 @@ onMounted(() => {
 
       <div class="pagination">
         <button
-            @click="changePage('prev')"
+            @click="changeProblemPage('prev')"
             :disabled="currentPage === 1"
-        >◀
-        </button>
+        >◀</button>
         <button
             v-for="page in totalProblemPages"
             :key="page"
-            @click="changePage(page)"
+            @click="changeProblemPage(page)"
             :class="{ active: currentPage === page }"
         >
           {{ page }}
         </button>
         <button
-            @click="changePage('next')"
+            @click="changeProblemPage('next')"
             :disabled="currentPage === totalProblemPages"
-        >▶
-        </button>
+        >▶</button>
       </div>
     </div>
+
     <div class="try-container">
       <h1 class="title">풀이 시도</h1>
 
       <div class="try-area">
-        <h1>왼쪽에서 선택된 문제의 풀이 시도가 보입니다.</h1>
+        <h3 v-if="selectedProblem">
+          "{{ selectedProblem.title }}" 문제의 풀이 시도
+        </h3>
+        <h3 v-else>
+          왼쪽에서 문제를 선택해주세요
+        </h3>
         <button class="filter-button">해결 ▼</button>
       </div>
 
@@ -172,13 +196,13 @@ onMounted(() => {
         </tr>
         </thead>
         <tbody>
-        <tr v-for="try$ in displayedTrys" :key="try$.id">
-          <td>{{ try$.id }}</td>
-          <td>{{ try$.language }}</td>
+        <tr v-for="(try$, index) in displayedTrys" :key="try$.id">
+          <td>{{ (tryCurrentPage - 1) * itemsPerPage + index + 1 }}</td>
+          <td>{{ try$.tryLanguage }}</td>
           <td>
-            <span :class="['status', try$.status === '해결' ? 'status-solved' : 'status-unsolved']">
-              {{ try$.status }}
-            </span>
+              <span :class="['status', try$.solved ? 'status-solved' : 'status-unsolved']">
+                {{ try$.solved ? '해결' : '미해결' }}
+              </span>
           </td>
           <td>{{ try$.createdAt }}</td>
         </tr>
@@ -193,23 +217,21 @@ onMounted(() => {
 
       <div class="pagination">
         <button
-            @click="changePage('prev')"
-            :disabled="currentPage === 1"
-        >◀
-        </button>
+            @click="changeTryPage('prev')"
+            :disabled="tryCurrentPage === 1"
+        >◀</button>
         <button
             v-for="page in totalTryPages"
             :key="page"
-            @click="changePage(page)"
-            :class="{ active: currentPage === page }"
+            @click="changeTryPage(page)"
+            :class="{ active: tryCurrentPage === page }"
         >
           {{ page }}
         </button>
         <button
-            @click="changePage('next')"
-            :disabled="currentPage === totalTryPages"
-        >▶
-        </button>
+            @click="changeTryPage('next')"
+            :disabled="tryCurrentPage === totalTryPages"
+        >▶</button>
       </div>
     </div>
   </div>
@@ -241,6 +263,12 @@ onMounted(() => {
   margin-bottom: 16px;
   gap: 12px;
   align-items: center;
+}
+
+.try-area h3 {
+  margin: 0;
+  font-size: 16px;
+  color: #666;
 }
 
 .search-area {
@@ -291,6 +319,18 @@ onMounted(() => {
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
+}
+
+.problem-table tr:not(.empty-row) {
+  cursor: pointer;
+}
+
+.problem-table tr:not(.empty-row):hover {
+  background-color: #f5f5f5;
+}
+
+.selected-row {
+  background-color: #f0f7ff !important;
 }
 
 .level-badge {

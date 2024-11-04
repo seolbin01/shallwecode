@@ -43,7 +43,7 @@ public class TryController {
     }
 
     @GetMapping("/{problemId}/try")
-    @Operation(summary = "내 문제 풀이 시도 조회", description = "내 문제 풀이 시도를 조회 한다.")
+    @Operation(summary = "내 풀이 시도 조회", description = "내 풀이 시도를 조회 한다.")
     public ResponseEntity<List<FindMyTryResDTO>> findAllMyTry(@PathVariable Long problemId) {
 
         Long userId = 1L;   // 추후 로그인된 회원의 userId를 가져오도록 수정
