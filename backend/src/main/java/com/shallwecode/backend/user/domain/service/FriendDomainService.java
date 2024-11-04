@@ -1,9 +1,9 @@
 package com.shallwecode.backend.user.domain.service;
 
 import com.querydsl.jpa.impl.JPAQueryFactory;
-import com.shallwecode.backend.user.application.dto.FindUserDTO;
-import com.shallwecode.backend.user.application.dto.SaveFriendDTO;
-import com.shallwecode.backend.user.application.dto.SaveFriendReqDTO;
+import com.shallwecode.backend.common.exception.CustomException;
+import com.shallwecode.backend.common.exception.ErrorCode;
+import com.shallwecode.backend.user.application.dto.*;
 import com.shallwecode.backend.user.domain.aggregate.Friend;
 import com.shallwecode.backend.user.domain.aggregate.FriendStatus;
 import com.shallwecode.backend.user.domain.aggregate.QFriend;
@@ -49,7 +49,32 @@ public class FriendDomainService {
                         .or(friend.fromUser.userId.eq(toUserId).and(friend.toUser.userId.eq(loginUserId))))
                 .where(friend.friendStatus.eq(FriendStatus.PENDING))
                 .fetchOne();
+        System.out.println(count);
 
-        return count != null || count > 0;
+        return count == null || count > 0;
+    }
+
+    public FindFriendDTO findMyFriend(UpdateFriendReqDTO updateFriendReqDTO) {
+
+        Long loginUserId = 3L;
+        Friend findfriend = friendRepository.findByFromUser_UserIdAndToUser_UserId(updateFriendReqDTO.getFromUserId(), loginUserId)
+                .orElseThrow(() -> new CustomException(ErrorCode.NOT_FOUND_FRIEND));
+
+        return modelMapper.map(findfriend, FindFriendDTO.class);
+    }
+
+    public void deleteFriend(FindFriendDTO findFriendDTO) {
+        friendRepository.deleteById(findFriendDTO.getFriendId());
+    }
+
+    public void updateFriendStatus(FindFriendDTO findFriendDTO) {
+
+        Friend findFriend = friendRepository.findById(findFriendDTO.getFriendId())
+                .orElseThrow(() -> new CustomException(ErrorCode.NOT_FOUND_FRIEND));
+
+        System.out.println(findFriend.getFriendId());
+
+        modelMapper.map(findFriendDTO, findFriend);
+        System.out.println(findFriend.getFriendStatus());
     }
 }
