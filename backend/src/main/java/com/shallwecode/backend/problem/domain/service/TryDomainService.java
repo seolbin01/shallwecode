@@ -41,14 +41,22 @@ public class TryDomainService {
         tryRepository.deleteById(tryId);
     }
 
-    public List<FindMyTryResDTO> findAllMyTry(Long userId) {
+    public List<FindMyTryResDTO> findAllMyTry(Long userId, Long problemId) {
 
         QTry qTry = QTry.try$;
 
         return queryFactory
-                .select(Projections.constructor(FindMyTryResDTO.class, qTry.tryId, qTry.problemId))
+                .select(Projections.constructor(FindMyTryResDTO.class,
+                        qTry.tryId,
+                        qTry.coopList,
+                        qTry.isSolved,
+                        qTry.tryLanguage.stringValue(),
+                        qTry.createdAt))
                 .from(qTry)
-                .where(qTry.userId.eq(userId))
+                .where(
+                        qTry.userId.eq(userId)
+                                .and(qTry.problemId.eq(problemId))
+                )
                 .fetch();
     }
 }

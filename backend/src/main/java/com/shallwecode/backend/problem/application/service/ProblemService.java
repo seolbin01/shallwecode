@@ -1,9 +1,10 @@
 package com.shallwecode.backend.problem.application.service;
 
+import com.shallwecode.backend.problem.application.dto.FindMyProblemResDTO;
+import com.shallwecode.backend.problem.domain.service.ProblemDomainService;
 import com.shallwecode.backend.problem.application.dto.ProblemReqDTO;
 import com.shallwecode.backend.problem.application.dto.ProblemResDTO;
 import com.shallwecode.backend.problem.application.dto.ProblemResListDTO;
-import com.shallwecode.backend.problem.domain.service.ProblemDomainService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -14,6 +15,11 @@ import java.util.List;
 public class ProblemService {
 
     private final ProblemDomainService problemDomainService;
+
+    public List<FindMyProblemResDTO> findAllMyProblem(Long userId) {
+
+        return problemDomainService.findAllMyProblem(userId);
+    }
 
     public List<ProblemResDTO> selectOneProblem(Long problemId) {
         return problemDomainService.selectOneProblem(problemId);

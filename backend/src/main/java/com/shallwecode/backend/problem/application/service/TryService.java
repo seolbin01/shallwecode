@@ -37,8 +37,8 @@ public class TryService {
         tryDomainService.delete(tryId);
     }
 
-    public List<FindMyTryResDTO> findAllMyTry(Long userId) {
+    public List<FindMyTryResDTO> findAllMyTry(Long userId, Long problemId) {
 
-        return tryDomainService.findAllMyTry(userId);
+        return tryDomainService.findAllMyTry(userId, problemId);
     }
 }

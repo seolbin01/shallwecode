@@ -1,5 +1,6 @@
 package com.shallwecode.backend.problem.application.controller;
 
+import com.shallwecode.backend.problem.application.dto.FindMyProblemResDTO;
 import com.shallwecode.backend.problem.application.dto.ProblemReqDTO;
 import com.shallwecode.backend.problem.application.dto.ProblemResDTO;
 import com.shallwecode.backend.problem.application.dto.ProblemResListDTO;
@@ -75,6 +76,16 @@ public class ProblemController {
         List<ProblemResDTO> oneProblem = problemService.selectOneProblem(problemId);
 
         return ResponseEntity.ok().body(oneProblem);
+    }
+
+    @GetMapping("/list")
+    @Operation(summary = "내 문제 목록 전체 조회", description = "내 문제 목록을 전체 조회 한다.")
+    public ResponseEntity<List<FindMyProblemResDTO>> findAllMyProblem() {
+
+        Long userId = 1L;   // 추후 로그인된 회원의 userId를 가져오도록 수정
+        List<FindMyProblemResDTO> myProblemList = problemService.findAllMyProblem(userId);
+
+        return new ResponseEntity<>(myProblemList, HttpStatus.OK);
     }
 
     /* 문제 목록 조회 - 관리자가 문제 관리 클릭시 문제 목록 조회 */
