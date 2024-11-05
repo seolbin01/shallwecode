@@ -1,10 +1,11 @@
 package com.shallwecode.backend.problem.application.controller;
 
 import com.shallwecode.backend.problem.application.dto.FindMyProblemResDTO;
+import com.shallwecode.backend.problem.application.dto.ProblemOneResDTO;
 import com.shallwecode.backend.problem.application.dto.ProblemReqDTO;
-import com.shallwecode.backend.problem.application.dto.ProblemResDTO;
-import com.shallwecode.backend.problem.application.dto.ProblemResListDTO;
+import com.shallwecode.backend.problem.application.dto.ProblemListResDTO;
 import com.shallwecode.backend.problem.application.service.ProblemService;
+import com.shallwecode.backend.problem.domain.service.ProblemDomainService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
@@ -23,6 +24,7 @@ import java.util.List;
 public class ProblemController {
 
     private final ProblemService problemService;
+    private final ProblemDomainService problemDomainService;
 
     /* 문제 등록 */
     @Operation(
@@ -70,10 +72,10 @@ public class ProblemController {
             description = "관리자가 문제를 상세 조회하는 기능입니다."
     )
     @GetMapping("/{problemId}")
-    public ResponseEntity<List<ProblemResDTO>> selectProblem(@PathVariable Long problemId) {
+    public ResponseEntity<List<ProblemOneResDTO>> selectProblem(@PathVariable Long problemId) {
 
         /* 데이터 조회 */
-        List<ProblemResDTO> oneProblem = problemService.selectOneProblem(problemId);
+        List<ProblemOneResDTO> oneProblem = problemService.selectOneProblem(problemId);
 
         return ResponseEntity.ok().body(oneProblem);
     }
@@ -93,12 +95,14 @@ public class ProblemController {
             summary = "문제 목록 조회 기능",
             description = "문제 목록을 조회하는 기능입니다."
     )
-    @GetMapping("/list")
-    public ResponseEntity<List<ProblemResListDTO>> selectProblemList() {
+    @GetMapping("/adminList")
+    public ResponseEntity<ProblemListResDTO> selectProblemList(@RequestParam(defaultValue = "1")Integer page,
+                                  @RequestParam(defaultValue = "10")Long size,
+                                  @RequestParam(required = false)String keyword,
+                                  @RequestParam(required = false)Integer option) {
 
-        /* 데이터 조회 */
-        List<ProblemResListDTO> problemList = problemService.selectProblemList();
+        ProblemListResDTO problemListResDTO = problemService.selectProblemList(page, size, keyword, option);
 
-        return ResponseEntity.ok().body(problemList);
+        return ResponseEntity.ok().body(problemListResDTO);
     }
 }
