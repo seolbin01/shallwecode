@@ -28,7 +28,7 @@ public class CoopController {
     }
 
 
-    @DeleteMapping("/{codingroomId}")
+    @DeleteMapping("/{codingroomId}/friend")
     @Operation(summary = "코딩방 나가기", description = "코딩방에서 나간다.")
     public ResponseEntity<Void> deleteCoop(@PathVariable Long codingroomId) {
 
