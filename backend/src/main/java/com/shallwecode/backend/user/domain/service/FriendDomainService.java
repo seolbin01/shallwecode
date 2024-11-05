@@ -126,4 +126,9 @@ public class FriendDomainService {
                         .and(friend.friendStatus.eq(FriendStatus.PENDING)))
                 .fetch();
     }
+
+    public void deleteFriendByIds(Long userId, Long loginUserId) {
+        friendRepository.deleteByFromUser_UserIdAndToUser_UserId(userId, loginUserId);
+        friendRepository.deleteByFromUser_UserIdAndToUser_UserId(loginUserId, userId);
+    }
 }
