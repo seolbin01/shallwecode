@@ -13,6 +13,7 @@ import java.time.LocalDateTime;
 @NoArgsConstructor
 public class NotiResListDTO {
 
+    private Long notiId;
     private Long codingRoomId;
     private String content;
     private Integer isRead;
