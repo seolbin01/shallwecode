@@ -1,5 +1,4 @@
 <script setup>
-
 import axios from "axios";
 import {computed, onMounted, ref} from "vue";
 
@@ -15,6 +14,19 @@ const fetchMyNotiList = async () => {
     notis.value = response.data;
   } catch (error) {
     console.error('알림 목록을 불러오는 중 에러가 발생했습니다.', error.response ? error.response.data : error.message);
+  }
+};
+
+const handleNotiClick = async (noti) => {
+  try {
+    if(!noti.isRead) {
+      await axios.put(`http://localhost:8080/api/v1/noti`, {
+        notiId: noti.notiId
+      });
+      await fetchMyNotiList();
+    }
+  } catch (error) {
+    console.error('알림 읽음 상태 변경 중 에러가 발생했습니다.', error.response ? error.response.data : error.message);
   }
 };
 
@@ -74,7 +86,10 @@ onMounted(() => {
         </tr>
         </thead>
         <tbody>
-        <tr v-for="(noti, index) in displayedNotis">
+        <tr
+            v-for="(noti, index) in displayedNotis"
+            @click="handleNotiClick(noti)"
+        >
           <td>{{ (currentPage - 1) * ROWS_PER_PAGE + index + 1 }}</td>
           <td>{{ noti.content }}</td>
           <td>
