@@ -1,9 +1,11 @@
 package com.shallwecode.backend.user.application.service;
 
 import com.shallwecode.backend.user.application.dto.NotiResListDTO;
+import com.shallwecode.backend.user.application.dto.UpdateNotiReqDTO;
 import com.shallwecode.backend.user.domain.service.NotiDomainService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
@@ -20,5 +22,10 @@ public class NotiService {
         } else {
             return notiDomainService.findMyNoti(loginUserId, result);
         }
+    }
+
+    @Transactional
+    public void updateNoti(UpdateNotiReqDTO updateNotiReqDTO) {
+        notiDomainService.updateNotiStatus(updateNotiReqDTO);
     }
 }

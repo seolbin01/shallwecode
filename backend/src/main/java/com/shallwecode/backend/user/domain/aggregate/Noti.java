@@ -34,4 +34,8 @@ public class Noti {
         isRead = 0; // 읽지 않음
         createdAt = LocalDateTime.now();
     }
+
+    public void updateStatus() {
+        isRead = 1;
+    }
 }
