@@ -3,9 +3,12 @@
 </script>
 
 <template>
-  <h1>푸터 입니다.</h1>
+  <div class="container"/>
 </template>
 
 <style scoped>
-
+.container {
+  height: 100px;
+  background-color: var(--background-color);
+}
 </style>
