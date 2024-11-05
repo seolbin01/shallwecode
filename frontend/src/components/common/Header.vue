@@ -163,4 +163,14 @@ onUnmounted(() => {
   color: #666;
   font-size: 0.875rem;
 }
+
+
+.notification-item {
+  cursor: pointer;
+}
+
+.notification-item:hover {
+  background-color: #f5f5f5;
+}
+
 </style>
