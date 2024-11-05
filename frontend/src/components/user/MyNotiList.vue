@@ -75,7 +75,7 @@ onMounted(() => {
 
 <template>
   <div class="container">
-    <div class="friend-container">
+    <div class="noti-container">
       <h1 class="title">알림 목록</h1>
 
       <table class="table">
