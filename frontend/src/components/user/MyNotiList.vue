@@ -1,12 +1,12 @@
 <script setup>
 import axios from "axios";
-import {computed, onMounted, ref} from "vue";
+import {computed, inject, onMounted, ref} from "vue";
 
 const ROWS_PER_PAGE = 7;
-
 const currentPage = ref(1);
-
 const notis = ref([]);
+
+const refreshNotiList = inject('refreshNotiList');
 
 const fetchMyNotiList = async () => {
   try {
@@ -16,6 +16,8 @@ const fetchMyNotiList = async () => {
     console.error('알림 목록을 불러오는 중 에러가 발생했습니다.', error.response ? error.response.data : error.message);
   }
 };
+
+refreshNotiList.value = fetchMyNotiList;
 
 const handleNotiClick = async (noti) => {
   try {

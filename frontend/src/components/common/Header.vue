@@ -1,11 +1,12 @@
 <script setup>
-import {onMounted, onUnmounted, ref} from 'vue'
+import {inject, onMounted, onUnmounted, ref} from 'vue'
 import axios from "axios";
 
 const showNotis = ref(false);
 const notis = ref([]);
+const refreshNotiList = inject('refreshNotiList');
 
-const fetchMyNotiList = async () => {
+const fetchMyNotReadNotiList = async () => {
   try {
     const response = await axios.get('http://localhost:8080/api/v1/noti');
     notis.value = response.data;
@@ -19,7 +20,8 @@ const handleNotiClick = async (noti) => {
     await axios.put(`http://localhost:8080/api/v1/noti`, {
       notiId: noti.notiId
     });
-    await fetchMyNotiList();
+    await fetchMyNotReadNotiList();
+    refreshNotiList.value();
   } catch (error) {
     console.error('알림 읽음 상태 변경 중 에러가 발생했습니다.', error.response ? error.response.data : error.message);
   }
@@ -28,7 +30,7 @@ const handleNotiClick = async (noti) => {
 const toggleNotis = async () => {
   showNotis.value = !showNotis.value
   if (showNotis.value) {
-    await fetchMyNotiList();
+    await fetchMyNotReadNotiList();
   }
 }
 
@@ -55,7 +57,7 @@ const formatDate = (dateString) => {
 };
 
 onMounted(() => {
-  fetchMyNotiList();
+  fetchMyNotReadNotiList();
   document.addEventListener('click', closeNotis)
 })
 
