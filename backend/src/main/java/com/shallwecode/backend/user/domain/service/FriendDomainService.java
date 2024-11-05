@@ -93,7 +93,8 @@ public class FriendDomainService {
                         friend.fromUser.nickname))
                 .from(friend)
                 .join(friend.toUser, user)
-                .where(user.userId.eq(loginUserId))
+                .where(user.userId.eq(loginUserId)
+                        .and(friend.friendStatus.eq(FriendStatus.ACCEPTED)))
                 .fetch();
 
         List<FriendResListDTO> list2 = queryFactory
@@ -102,7 +103,8 @@ public class FriendDomainService {
                         friend.toUser.nickname))
                 .from(friend)
                 .join(friend.fromUser, user)
-                .where(user.userId.eq(loginUserId))
+                .where(user.userId.eq(loginUserId)
+                        .and(friend.friendStatus.eq(FriendStatus.ACCEPTED)))
                 .fetch();
 
         list1.addAll(list2);
