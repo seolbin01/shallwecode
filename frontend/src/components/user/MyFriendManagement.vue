@@ -13,7 +13,7 @@ const searchRequestQuery = ref('');
 const isLoading = ref(false);
 
 const friends = ref([]);
-// const requests = ref([]);
+const requests = ref([]);
 
 const fetchMyFriendList = async () => {
   try {
@@ -26,26 +26,21 @@ const fetchMyFriendList = async () => {
 
 const fetchMyRequestList = async () => {
   try {
-    const response = await axios.get('http://localhost:8080/api/v1/friend/list');
+    const response = await axios.get('http://localhost:8080/api/v1/friend/request');
     requests.value = response.data;
   } catch (error) {
     console.error('친구 요청 목록을 불러오는 중 에러가 발생했습니다.', error.response ? error.response.data : error.message);
   }
 };
 
-const requests = ref([
-  { nickname: 'sdfsdfsdf' },
-  { nickname: 'testtesttest' }
-]);
-
-const acceptFriendRequest = async () => {
+const acceptFriendRequest = async (request) => {
   isLoading.value = true;
   try {
     await axios.post(`http://localhost:8080/api/v1/friend/request/accept`, {
-      fromUserId: 3
+      fromUserId: request.userId
     });
     alert('친구 요청을 수락했습니다.');
-    // await fetchMyRequestList();
+    await fetchMyRequestList();
     await fetchMyFriendList();
   } catch (error) {
     console.error('친구 요청 수락 중 에러가 발생했습니다.', error.response ? error.response.data : error.message);
@@ -55,14 +50,14 @@ const acceptFriendRequest = async () => {
   }
 };
 
-const rejectFriendRequest = async () => {
+const rejectFriendRequest = async (request) => {
   isLoading.value = true;
   try {
     await axios.post(`http://localhost:8080/api/v1/friend/request/reject`, {
-      fromUserId: 5
+      fromUserId: request.userId
     });
     alert('친구 요청을 거절했습니다.');
-    // await fetchMyRequestList();
+    await fetchMyRequestList();
     await fetchMyFriendList();
   } catch (error) {
     console.error('친구 요청 거절 중 에러가 발생했습니다.', error.response ? error.response.data : error.message);
@@ -144,6 +139,7 @@ watch(searchRequestQuery, () => {
 
 onMounted(() => {
   fetchMyFriendList();
+  fetchMyRequestList()
 });
 </script>
 
@@ -229,13 +225,13 @@ onMounted(() => {
           <td>{{ request.nickname }}</td>
           <td>
             <button class="accept-btn"
-                    @click="acceptFriendRequest"
+                    @click="acceptFriendRequest(request)"
                     :disabled="isLoading"
             >
               {{ isLoading ? '처리중...' : '수락' }}
             </button>
             <button class="reject-btn"
-                    @click="rejectFriendRequest"
+                    @click="rejectFriendRequest(request)"
                     :disabled="isLoading"
             >
               {{ isLoading ? '처리중...' : '거절' }}
