@@ -35,6 +35,7 @@ public class NotiDomainService {
         if (result) { // 헤더 알림
             return queryFactory
                     .select(Projections.constructor(NotiResListDTO.class,
+                            noti.notiId,
                             noti.codingRoomId,
                             noti.content,
                             noti.isRead,
@@ -46,6 +47,7 @@ public class NotiDomainService {
         } else { // 마이페이지 알림
             return queryFactory
                     .select(Projections.constructor(NotiResListDTO.class,
+                            noti.notiId,
                             noti.codingRoomId,
                             noti.content,
                             noti.isRead,
