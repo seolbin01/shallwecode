@@ -1,11 +1,12 @@
 package com.shallwecode.backend.problem.domain.service;
 
+import com.querydsl.core.BooleanBuilder;
 import com.querydsl.core.types.Projections;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import com.shallwecode.backend.problem.application.dto.FindMyProblemResDTO;
+import com.shallwecode.backend.problem.application.dto.ProblemDTO;
+import com.shallwecode.backend.problem.application.dto.ProblemOneResDTO;
 import com.shallwecode.backend.problem.application.dto.ProblemReqDTO;
-import com.shallwecode.backend.problem.application.dto.ProblemResDTO;
-import com.shallwecode.backend.problem.application.dto.ProblemResListDTO;
 import com.shallwecode.backend.problem.domain.aggregate.Problem;
 import com.shallwecode.backend.problem.domain.aggregate.QProblem;
 import com.shallwecode.backend.problem.domain.aggregate.QTry;
@@ -70,12 +71,12 @@ public class ProblemDomainService {
         repository.deleteById(problemId);
     }
 
-    public List<ProblemResDTO> selectOneProblem(Long problemId) {
+    public List<ProblemOneResDTO> selectOneProblem(Long problemId) {
 
         QProblem qProblem = QProblem.problem;
         QTestcase qTestcase = QTestcase.testcase;
 
-        return queryFactory.select(Projections.constructor(ProblemResDTO.class,
+        return queryFactory.select(Projections.constructor(ProblemOneResDTO.class,
                 qProblem.problemId,
                 qProblem.title,
                 qProblem.content,
@@ -112,16 +113,37 @@ public class ProblemDomainService {
     }
 
     /* 문제 목록 조회 기능 */
-    public List<ProblemResListDTO> selectProblemList() {
+    public List<ProblemDTO> selectProblemList(String keyword, Integer option, Long offset, Long size) {
+        QProblem qProblem = QProblem.problem;
+        BooleanBuilder whereClause = new BooleanBuilder();
 
+        // 조건 추가 (BooleanBuilder 사용하면 동적으로 조건 추가 가능)
+        if (keyword != null) {
+            whereClause.and(qProblem.title.like("%" + keyword + "%"));
+        }
+        if (option != null) {
+            whereClause.and(qProblem.problemLevel.eq(option));
+        }
+
+        return queryFactory.select(Projections.constructor(ProblemDTO.class,
+                        qProblem.problemId,
+                        qProblem.title,
+                        qProblem.content,
+                        qProblem.problemLevel))
+                .from(qProblem)
+                .where(whereClause)
+                .orderBy(qProblem.problemId.asc())
+                .limit(size)
+                .offset(offset)
+                .fetch();
+    }
+
+    /* 문제 count 조회 */
+    public Long selectProblemCount() {
         QProblem qProblem = QProblem.problem;
 
-        return queryFactory.select(Projections.constructor(ProblemResListDTO.class,
-                qProblem.problemId,
-                qProblem.title,
-                qProblem.content,
-                qProblem.problemLevel))
+        return queryFactory.select(qProblem.problemId.count())
                 .from(qProblem)
-                .fetch();
+                .fetchOne();
     }
 }
