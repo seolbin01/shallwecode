@@ -1,17 +1,19 @@
 package com.shallwecode.backend.problem.application.dto;
 
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.Setter;
-import lombok.ToString;
+import lombok.*;
+
+import java.util.List;
 
 @Getter
 @Setter
 @ToString
 @AllArgsConstructor
-public class ProblemResListDTO {
+public class ProblemOneResDTO {
     private Long problemId;
     private String title;
     private String content;
     private int problemLevel;
+    private Long testcaseId;
+    private String input;
+    private String output;
 }
