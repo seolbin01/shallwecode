@@ -1,5 +1,4 @@
 <script setup>
-
 import {computed, onMounted, ref, watch} from "vue";
 import axios from "axios";
 
@@ -115,6 +114,7 @@ const changeFriendPage = (page) => {
   } else if (page === 'next' && currentFriendPage.value < totalFriendPages.value) {
     currentFriendPage.value++;
   } else if (typeof page === 'number') {
+    currentFriendPage.value = page;
     currentFriendPage.value = page;
   }
 };
@@ -330,7 +330,7 @@ onMounted(() => {
 }
 
 .table {
-  width: 120%;
+  width: 100%;
   border-collapse: collapse;
   margin-bottom: 24px;
 }
