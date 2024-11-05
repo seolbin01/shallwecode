@@ -8,7 +8,7 @@ import java.util.List;
 @Setter
 @ToString
 @AllArgsConstructor
-public class ProblemResDTO {
+public class ProblemOneResDTO {
     private Long problemId;
     private String title;
     private String content;
