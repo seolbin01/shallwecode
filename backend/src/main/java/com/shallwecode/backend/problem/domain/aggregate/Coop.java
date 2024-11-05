@@ -19,12 +19,4 @@ public class Coop {
     private Long userId;
     private boolean isHost;
 
-    public void updateCoopUser(Long userId) {
-        this.userId = userId;
-    }
-
-    public void updateCodingRoom(Long codingRoomId) {
-        this.codingRoomId = codingRoomId;
-    }
-
 }

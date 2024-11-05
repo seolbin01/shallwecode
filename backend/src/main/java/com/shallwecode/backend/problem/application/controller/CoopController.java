@@ -1,5 +1,6 @@
 package com.shallwecode.backend.problem.application.controller;
 
+import com.shallwecode.backend.problem.application.dto.CoopReqDTO;
 import com.shallwecode.backend.problem.application.service.CoopService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -18,25 +19,34 @@ public class CoopController {
 
     @PostMapping("/{codingroomId}/friend")
     @Operation(summary = "협업 친구 초대", description = "코딩방에 협업 친구를 초대한다.")
-    public ResponseEntity<Void> saveCoopFriend(@PathVariable Long codingroomId) {
+    public ResponseEntity<Void> saveCoopFriend(@PathVariable Long codingroomId, @RequestBody CoopReqDTO coopReqDTO) {
 
-        // 코딩방에 존재하는 회원만 친구 초대 가능
-
-        // 이미 코딩방에 존재하는 친구는 재초대하면 안됨
-
-        // 친구 초대시 userId 값으로 초대하되, 본인의 친구여야 함
-
-
+        Long userId = 1L; // 초대할 친구 id
+        coopService.saveCoopFriend(codingroomId, userId, coopReqDTO);
 
         return ResponseEntity.status(HttpStatus.CREATED).build();
     }
 
+
+    @DeleteMapping("/{codingroomId}")
+    @Operation(summary = "코딩방 나가기", description = "코딩방에서 나간다.")
+    public ResponseEntity<Void> deleteCoop(@PathVariable Long codingroomId) {
+
+        // 유저 id와 코딩방 id를 가지고 coopId 찾기
+        Long userId = 4L; // 유저 id
+        coopService.deleteCoop(codingroomId, userId);
+
+        return ResponseEntity.noContent().build();
+    }
+
+
     @DeleteMapping("{codingroomId}/friend/{coopId}")
-    @Operation(summary = "협업 친구 강퇴", description = "코딩방에 있는 협업 친구를 강퇴한다.")
+    @Operation(summary = "협업 친구 강퇴하기", description = "코딩방에 있는 협업 친구를 강퇴한다.")
     public ResponseEntity<Void> deleteCoopFriend(@PathVariable Long codingroomId, @PathVariable Long coopId) {
 
-        Long userId = 1L; // 추후 로그인된 회원의 아이디를 가져오도록 수정
-        coopService.deleteCoopFriend(userId, codingroomId, coopId);
+        Long userId = 3L; // 호스트 유저 아이디
+
+        coopService.deleteCoopFriend(codingroomId, userId ,coopId);
 
         return ResponseEntity.noContent().build();
     }
