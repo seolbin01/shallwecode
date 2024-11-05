@@ -14,6 +14,17 @@ const fetchMyNotiList = async () => {
   }
 };
 
+const handleNotiClick = async (noti) => {
+  try {
+    await axios.put(`http://localhost:8080/api/v1/noti`, {
+      notiId: noti.notiId
+    });
+    await fetchMyNotiList();
+  } catch (error) {
+    console.error('알림 읽음 상태 변경 중 에러가 발생했습니다.', error.response ? error.response.data : error.message);
+  }
+};
+
 const toggleNotis = () => {
   showNotis.value = !showNotis.value
 }
@@ -63,7 +74,8 @@ onUnmounted(() => {
         <div v-if="showNotis" class="notifications-dropdown">
           <div v-if="notis.length" class="notifications-list">
             <div v-for="noti in notis"
-                 class="notification-item">
+                 class="notification-item"
+                 @click="handleNotiClick(noti)">
               <span class="notification-message">{{ noti.content }}</span>
               <span class="notification-date">{{ formatDate(noti.createdAt) }}</span>
             </div>
