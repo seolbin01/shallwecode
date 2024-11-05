@@ -62,7 +62,7 @@ const selectMenu = (menu) => {
   border-radius: 12px;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
   padding: 8px;
-  margin: 0;
+  margin: 20px;
   border: 1px solid var(--gray-line);
 }
 
