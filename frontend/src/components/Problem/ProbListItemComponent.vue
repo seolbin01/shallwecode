@@ -9,9 +9,9 @@ const props = defineProps({
 
 <template>
   <tr>
-    <td>{{ problem.problemId }}</td>
-    <td>{{ problem.title }}</td>
-    <td :class="`level level-${problem.problemLevel}`">Lv. {{ problem.problemLevel }}</td>
+    <td>{{ props.problem.problemId }}</td>
+    <td>{{ props.problem.title }}</td>
+    <td :class="`level level-${props.problem.problemLevel}`">Lv. {{ props.problem.problemLevel }}</td>
     <td>수정</td>
     <td>삭제</td>
   </tr>

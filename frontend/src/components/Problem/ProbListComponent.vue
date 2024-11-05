@@ -6,10 +6,7 @@ const props = defineProps({
   problemList: {
     type: Array,
     required: true
-  },
-  currentPage: Number,
-  totalPages: Number,
-  totalItems: Number
+  }
 });
 </script>
 
@@ -29,7 +26,7 @@ const props = defineProps({
     </tr>
     </thead>
     <tbody>
-    <ProbListItemComponent v-for="problem in problemList" :key="problem.problemId" :problem="problem"/>
+    <ProbListItemComponent v-for="problem in props.problemList" :key="problem.problemId" :problem="problem"/>
     </tbody>
   </table>
 

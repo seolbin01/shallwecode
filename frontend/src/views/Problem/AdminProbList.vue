@@ -43,10 +43,7 @@ onMounted(async () => {
     <SideComponent />
     <!-- 메인 컨텐츠 -->
       <div class="content">
-        <ProbListComponent :problemList="adminProblemList.problemList"
-                           :currentPage="adminProblemList.currentPage"
-                           :totalPages="adminProblemList.totalPages"
-                           :totalItem="adminProblemList.totalItems" />
+        <ProbListComponent :problemList="adminProblemList.problemList" />
       </div>
   </div>
 </template>
