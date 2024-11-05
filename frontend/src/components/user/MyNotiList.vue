@@ -174,6 +174,10 @@ onMounted(() => {
   line-height: 20px;
 }
 
+.table tr:not(.empty-row) {
+  cursor: pointer;
+}
+
 .table tr:not(.empty-row):hover {
   background-color: #f5f5f5;
 }
