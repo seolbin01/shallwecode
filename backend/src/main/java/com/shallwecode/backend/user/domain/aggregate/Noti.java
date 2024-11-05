@@ -26,12 +26,12 @@ public class Noti {
     private NotiType notiType;
     private Long codingRoomId;
     private String content;
-    private Integer IsRead = 0;
+    private Integer isRead = 0;
     private LocalDateTime createdAt;
 
     @PrePersist
     protected void onCreate() {
-        IsRead = 0; // 읽지 않음
+        isRead = 0; // 읽지 않음
         createdAt = LocalDateTime.now();
     }
 }
