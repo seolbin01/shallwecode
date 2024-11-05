@@ -1,5 +1,6 @@
 package com.shallwecode.backend.user.application.controller;
 
+import com.shallwecode.backend.user.application.dto.FriendResListDTO;
 import com.shallwecode.backend.user.application.dto.SaveFriendReqDTO;
 import com.shallwecode.backend.user.application.dto.UpdateFriendReqDTO;
 import com.shallwecode.backend.user.application.service.FriendService;
@@ -8,10 +9,9 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 @RestController
 @RequiredArgsConstructor
@@ -40,5 +40,14 @@ public class FriendController {
     public ResponseEntity<Void> rejectFriend(@Valid @RequestBody UpdateFriendReqDTO updateFriendReqDTO) {
         friendService.updateFriend(updateFriendReqDTO, false);
         return ResponseEntity.ok().build();
+    }
+
+    @Operation(summary = "친구 목록 조회", description = "친구 목록을 조회한다.")
+    @GetMapping
+    public ResponseEntity<List<FriendResListDTO>> findAllFriend() {
+
+        Long loginUserId = 1L;
+        List<FriendResListDTO> friendList = friendService.findAllFriend(loginUserId);
+        return ResponseEntity.ok(friendList);
     }
 }

@@ -5,12 +5,13 @@ import com.shallwecode.backend.common.exception.ErrorCode;
 import com.shallwecode.backend.user.application.dto.*;
 import com.shallwecode.backend.user.domain.aggregate.FriendStatus;
 import com.shallwecode.backend.user.domain.aggregate.NotiType;
-import com.shallwecode.backend.user.domain.repository.FriendRepository;
 import com.shallwecode.backend.user.domain.service.FriendDomainService;
 import com.shallwecode.backend.user.domain.service.NotiDomainService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.util.List;
 
 @Service
 @RequiredArgsConstructor
@@ -76,5 +77,10 @@ public class FriendService {
         } catch (Exception e) {
             throw new CustomException(ErrorCode.NOT_CHANGED_FRIEND);
         }
+    }
+
+    @Transactional(readOnly = true)
+    public List<FriendResListDTO> findAllFriend(Long loginUserId) {
+        return friendDomainService.findAllFriend(loginUserId);
     }
 }
