@@ -2,8 +2,11 @@ package com.shallwecode.backend.user.domain.service;
 
 import com.querydsl.core.types.Projections;
 import com.querydsl.jpa.impl.JPAQueryFactory;
+import com.shallwecode.backend.common.exception.CustomException;
+import com.shallwecode.backend.common.exception.ErrorCode;
 import com.shallwecode.backend.user.application.dto.NotiResListDTO;
 import com.shallwecode.backend.user.application.dto.SaveNotiDTO;
+import com.shallwecode.backend.user.application.dto.UpdateNotiReqDTO;
 import com.shallwecode.backend.user.domain.aggregate.Noti;
 import com.shallwecode.backend.user.domain.aggregate.QNoti;
 import com.shallwecode.backend.user.domain.repository.NotiRepository;
@@ -51,5 +54,12 @@ public class NotiDomainService {
                     .where(noti.user.userId.eq(loginUserId))
                     .fetch();
         }
+    }
+
+    public void updateNotiStatus(UpdateNotiReqDTO updateNotiReqDTO) {
+        Noti findNoti = notiRepository.findById(updateNotiReqDTO.getNotiId())
+                .orElseThrow(() -> new CustomException(ErrorCode.NOT_FOUND_NOTI));
+
+        findNoti.updateStatus();
     }
 }
