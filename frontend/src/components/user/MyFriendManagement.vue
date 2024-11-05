@@ -10,6 +10,8 @@ const currentRequestPage = ref(1);
 const searchFriendQuery = ref('');
 const searchRequestQuery = ref('');
 
+const isLoading = ref(false);
+
 const friends = ref([]);
 // const requests = ref([]);
 
@@ -35,6 +37,40 @@ const requests = ref([
   { nickname: 'sdfsdfsdf' },
   { nickname: 'testtesttest' }
 ]);
+
+const acceptFriendRequest = async () => {
+  isLoading.value = true;
+  try {
+    await axios.post(`http://localhost:8080/api/v1/friend/request/accept`, {
+      fromUserId: 3
+    });
+    alert('친구 요청을 수락했습니다.');
+    // await fetchMyRequestList();
+    await fetchMyFriendList();
+  } catch (error) {
+    console.error('친구 요청 수락 중 에러가 발생했습니다.', error.response ? error.response.data : error.message);
+    alert('친구 요청 수락에 실패했습니다.');
+  } finally {
+    isLoading.value = false;
+  }
+};
+
+const rejectFriendRequest = async () => {
+  isLoading.value = true;
+  try {
+    await axios.post(`http://localhost:8080/api/v1/friend/request/reject`, {
+      fromUserId: 5
+    });
+    alert('친구 요청을 거절했습니다.');
+    // await fetchMyRequestList();
+    await fetchMyFriendList();
+  } catch (error) {
+    console.error('친구 요청 거절 중 에러가 발생했습니다.', error.response ? error.response.data : error.message);
+    alert('친구 요청 거절에 실패했습니다.');
+  } finally {
+    isLoading.value = false;
+  }
+};
 
 const filteredFriends = computed(() => {
   if (!searchFriendQuery.value) return friends.value;
@@ -192,8 +228,18 @@ onMounted(() => {
           <td>{{ (currentRequestPage - 1) * ROWS_PER_PAGE + index + 1 }}</td>
           <td>{{ request.nickname }}</td>
           <td>
-            <button class="accept-btn">수락</button>
-            <button class="reject-btn">거절</button>
+            <button class="accept-btn"
+                    @click="acceptFriendRequest"
+                    :disabled="isLoading"
+            >
+              {{ isLoading ? '처리중...' : '수락' }}
+            </button>
+            <button class="reject-btn"
+                    @click="rejectFriendRequest"
+                    :disabled="isLoading"
+            >
+              {{ isLoading ? '처리중...' : '거절' }}
+            </button>
           </td>
         </tr>
         <tr v-for="i in emptyRowsRequestCount" :key="`empty-${i}`" class="empty-row">
