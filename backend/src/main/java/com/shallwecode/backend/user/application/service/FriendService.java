@@ -84,7 +84,20 @@ public class FriendService {
         return friendDomainService.findAllFriend(loginUserId);
     }
 
+    @Transactional(readOnly = true)
     public List<FriendResListDTO> findAllFriendReq(Long loginUserId) {
         return friendDomainService.findAllFriendReq(loginUserId);
+    }
+
+    @Transactional
+    public void deleteFriend(Long userId) {
+        FindFriendDTO findFriendDTO = new FindFriendDTO();
+        findFriendDTO.setFriendId(userId);
+
+        try {
+            friendDomainService.deleteFriend(findFriendDTO);
+        } catch (Exception e) {
+            throw new CustomException(ErrorCode.NOT_DELETED_FRIEND);
+        }
     }
 }

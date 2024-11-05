@@ -59,4 +59,12 @@ public class FriendController {
         List<FriendResListDTO> friendReqList = friendService.findAllFriendReq(loginUserId);
         return ResponseEntity.ok(friendReqList);
     }
+
+    @Operation(summary = "친구 삭제", description = "친구를 삭제한다.")
+    @DeleteMapping
+    public ResponseEntity<Void> deleteFriend(@RequestParam Long userId) {
+
+        friendService.deleteFriend(userId);
+        return ResponseEntity.ok().build();
+    }
 }
