@@ -30,7 +30,7 @@ const emitSearch = () => {
       <option value="4">Lv. 4</option>
     </select>
     <input type="text" v-model="search.keyword" placeholder="검색할 문제 입력">
-    <button @click="problemSearch">검색</button>
+    <button @click="emitSearch">검색</button>
   </div>
 </template>
 
