@@ -1,128 +1,322 @@
 <script setup>
-import {ref, computed, watch} from 'vue'
+import {ref, computed, watch, onMounted} from 'vue'
+import axios from 'axios';
 
-const ROWS_PER_PAGE = 7
+const ROWS_PER_PAGE = 7;
+const itemsPerPage = 7;
 
-const problems = ref([
-  { id: 1, title: '어려운 문제', level: 1, status: '해결' },
-  { id: 2, title: '진짜 어려운 문제', level: 2, status: '해결' },
-  { id: 3, title: '매우 어려운 문제', level: 3, status: '해결' },
-  { id: 4, title: '너무 어려운 문제', level: 3, status: '미해결' },
-  { id: 5, title: '어렵지만 어려운 문제', level: 3, status: '미해결' },
-  { id: 6, title: '어렵고 어려운 문제', level: 3, status: '해결' },
-  { id: 7, title: '복잡한예제', level: 3, status: '해결' }
-])
-const currentPage = ref(1)
-const searchQuery = ref('')
+const problems = ref([]);
+const trys = ref([]);
+const selectedProblem = ref(null);
+const currentPage = ref(1);
+const tryCurrentPage = ref(1);
+const searchQuery = ref('');
+const curTry = ref('');
+const isModalOpen = ref(false);
+
+const fetchMyProblemList = async () => {
+  try {
+    const response = await axios.get('http://localhost:8080/api/v1/problem/mylist');
+    problems.value = response.data;
+  } catch (error) {
+    console.error('내 풀이 문제 목록을 불러오는 중 에러가 발생했습니다.', error.response ? error.response.data : error.message);
+  }
+};
+
+const fetchTryList = async (problemId) => {
+  try {
+    const response = await axios.get(`http://localhost:8080/api/v1/problem/${problemId}/try`);
+    trys.value = response.data;
+  } catch (error) {
+    console.error('풀이 시도 목록을 불러오는 중 에러가 발생했습니다.', error.response ? error.response.data : error.message);
+  }
+};
+
+const handleTryClick = async (tryId) => {
+  try {
+    const response = await axios.get(
+        `http://localhost:8080/api/v1/problem/try/${tryId}`
+    );
+
+    curTry.value = response.data;
+    console.log(curTry.value)
+    isModalOpen.value = true;
+
+  } catch (error) {
+    console.error('풀이 시도 상세 조회 실패', error);
+  }
+};
+
+const closeModal = () => {
+  isModalOpen.value = false;
+  curTry.value = null;
+};
+
+const formatDate = (dateString) => {
+  const date = new Date(dateString);
+  return date.toLocaleString('ko-KR', {
+    year: 'numeric',
+    month: '2-digit',
+    day: '2-digit',
+    hour: '2-digit',
+    minute: '2-digit',
+    second: '2-digit'
+  });
+};
 
 const filteredProblems = computed(() => {
-  if (!searchQuery.value) return problems.value
-
+  if (!searchQuery.value) return problems.value;
   return problems.value.filter(problem =>
       problem.title.toLowerCase().includes(searchQuery.value.toLowerCase())
-  )
-})
+  );
+});
 
-const totalPages = computed(() =>
+const filteredTrys = computed(() => {
+  return trys.value;
+});
+
+const totalProblemPages = computed(() =>
     Math.ceil(filteredProblems.value.length / ROWS_PER_PAGE)
-)
+);
+
+const totalTryPages = computed(() =>
+    Math.ceil(filteredTrys.value.length / ROWS_PER_PAGE)
+);
 
 const displayedProblems = computed(() => {
-  const startIdx = (currentPage.value - 1) * ROWS_PER_PAGE
-  const endIdx = startIdx + ROWS_PER_PAGE
-  return filteredProblems.value.slice(startIdx, endIdx)
-})
+  const startIdx = (currentPage.value - 1) * ROWS_PER_PAGE;
+  const endIdx = startIdx + ROWS_PER_PAGE;
+  return filteredProblems.value.slice(startIdx, endIdx);
+});
 
-const emptyRowsCount = computed(() =>
+const displayedTrys = computed(() => {
+  const startIdx = (tryCurrentPage.value - 1) * ROWS_PER_PAGE;
+  const endIdx = startIdx + ROWS_PER_PAGE;
+  return filteredTrys.value.slice(startIdx, endIdx);
+});
+
+const emptyRowsProblemCount = computed(() =>
     ROWS_PER_PAGE - displayedProblems.value.length
-)
+);
 
-const changePage = (page) => {
+const emptyRowsTryCount = computed(() =>
+    ROWS_PER_PAGE - displayedTrys.value.length
+);
+
+const changeProblemPage = (page) => {
   if (page === 'prev' && currentPage.value > 1) {
-    currentPage.value--
-  } else if (page === 'next' && currentPage.value < totalPages.value) {
-    currentPage.value++
+    currentPage.value--;
+  } else if (page === 'next' && currentPage.value < totalProblemPages.value) {
+    currentPage.value++;
   } else if (typeof page === 'number') {
-    currentPage.value = page
+    currentPage.value = page;
   }
-}
+};
+
+const changeTryPage = (page) => {
+  if (page === 'prev' && tryCurrentPage.value > 1) {
+    tryCurrentPage.value--;
+  } else if (page === 'next' && tryCurrentPage.value < totalTryPages.value) {
+    tryCurrentPage.value++;
+  } else if (typeof page === 'number') {
+    tryCurrentPage.value = page;
+  }
+};
+
+const selectProblem = async (problem) => {
+  selectedProblem.value = problem;
+  tryCurrentPage.value = 1;
+  await fetchTryList(problem.problemId);
+};
 
 watch(searchQuery, () => {
-  currentPage.value = 1
-})
+  currentPage.value = 1;
+});
+
+onMounted(() => {
+  fetchMyProblemList();
+});
 </script>
+
 <template>
   <div class="container">
-    <h1 class="title">풀이 문제 목록</h1>
+    <div class="problem-container">
+      <h1 class="title">풀이 문제 목록</h1>
 
-    <div class="search-area">
-      <input
-          type="text"
-          class="search-input"
-          placeholder="문제 검색"
-          v-model="searchQuery"
-      >
-      <button class="filter-button">해결 ▼</button>
+      <div class="search-area">
+        <input
+            type="text"
+            class="search-input"
+            placeholder="문제 검색"
+            v-model="searchQuery"
+        >
+        <button class="filter-button">해결 ▼</button>
+      </div>
+
+      <table class="problem-table">
+        <thead>
+        <tr>
+          <th>번호</th>
+          <th>문제명</th>
+          <th>난이도</th>
+          <th>상태</th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr
+            v-for="(problem, index) in displayedProblems"
+            :key="problem.id"
+            @click="selectProblem(problem)"
+            :class="{ 'selected-row': selectedProblem?.problemId === problem.problemId }"
+        >
+          <td>{{ (currentPage - 1) * itemsPerPage + index + 1 }}</td>
+          <td>{{ problem.title }}</td>
+          <td><span class="level-badge">Lv. {{ problem.problemLevel }}</span></td>
+          <td>
+              <span :class="['status', problem.solved ? 'status-solved' : 'status-unsolved']">
+                {{ problem.solved ? '해결' : '미해결' }}
+              </span>
+          </td>
+        </tr>
+        <tr v-for="i in emptyRowsProblemCount" :key="`empty-${i}`" class="empty-row">
+          <td>-</td>
+          <td>-</td>
+          <td>-</td>
+          <td>-</td>
+        </tr>
+        </tbody>
+      </table>
+
+      <div class="pagination">
+        <button
+            @click="changeProblemPage('prev')"
+            :disabled="currentPage === 1"
+        >◀</button>
+        <button
+            v-for="page in totalProblemPages"
+            :key="page"
+            @click="changeProblemPage(page)"
+            :class="{ active: currentPage === page }"
+        >
+          {{ page }}
+        </button>
+        <button
+            @click="changeProblemPage('next')"
+            :disabled="currentPage === totalProblemPages"
+        >▶</button>
+      </div>
     </div>
 
-    <table class="problem-table">
-      <thead>
-      <tr>
-        <th>번호</th>
-        <th>문제명</th>
-        <th>난이도</th>
-        <th>상태</th>
-      </tr>
-      </thead>
-      <tbody>
-      <tr v-for="problem in displayedProblems" :key="problem.id">
-        <td>{{ problem.id }}</td>
-        <td>{{ problem.title }}</td>
-        <td><span class="level-badge">Lv. {{ problem.level }}</span></td>
-        <td>
-            <span :class="['status', problem.status === '해결' ? 'status-solved' : 'status-unsolved']">
-              {{ problem.status }}
-            </span>
-        </td>
-      </tr>
-      <tr v-for="i in emptyRowsCount" :key="`empty-${i}`" class="empty-row">
-        <td>-</td>
-        <td>-</td>
-        <td>-</td>
-        <td>-</td>
-      </tr>
-      </tbody>
-    </table>
+    <div class="try-container">
+      <h1 class="title">풀이 시도</h1>
 
-    <div class="pagination">
-      <button
-          @click="changePage('prev')"
-          :disabled="currentPage === 1"
-      >◀</button>
-      <button
-          v-for="page in totalPages"
-          :key="page"
-          @click="changePage(page)"
-          :class="{ active: currentPage === page }"
-      >
-        {{ page }}
-      </button>
-      <button
-          @click="changePage('next')"
-          :disabled="currentPage === totalPages"
-      >▶</button>
+      <div class="try-area">
+        <h3 v-if="selectedProblem">
+          "{{ selectedProblem.title }}" 문제의 풀이 시도
+        </h3>
+        <h3 v-else>
+          왼쪽에서 문제를 선택해주세요
+        </h3>
+        <button class="filter-button">해결 ▼</button>
+      </div>
+
+      <table class="problem-table">
+        <thead>
+        <tr>
+          <th>번호</th>
+          <th>언어</th>
+          <th>상태</th>
+          <th>제출 일자</th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr v-for="(try$, index) in displayedTrys"
+            :key="try$.id"
+            @click="handleTryClick(try$.tryId)"
+        >
+          <td>{{ (tryCurrentPage - 1) * itemsPerPage + index + 1 }}</td>
+          <td>{{ try$.tryLanguage }}</td>
+          <td>
+              <span :class="['status', try$.solved ? 'status-solved' : 'status-unsolved']">
+                {{ try$.solved ? '해결' : '미해결' }}
+              </span>
+          </td>
+          <td>{{ formatDate(try$.createdAt) }}</td>
+        </tr>
+        <tr v-for="i in emptyRowsTryCount" :key="`empty-${i}`" class="empty-row">
+          <td>-</td>
+          <td>-</td>
+          <td>-</td>
+          <td>-</td>
+        </tr>
+        </tbody>
+      </table>
+
+      <div class="pagination">
+        <button
+            @click="changeTryPage('prev')"
+            :disabled="tryCurrentPage === 1"
+        >◀</button>
+        <button
+            v-for="page in totalTryPages"
+            :key="page"
+            @click="changeTryPage(page)"
+            :class="{ active: tryCurrentPage === page }"
+        >
+          {{ page }}
+        </button>
+        <button
+            @click="changeTryPage('next')"
+            :disabled="tryCurrentPage === totalTryPages"
+        >▶</button>
+      </div>
+    </div>
+    <div v-if="isModalOpen" class="modal-overlay" @click="closeModal">
+      <div class="modal-content" @click.stop>
+        <div class="modal-header">
+          <h2 class="modal-title">풀이 시도 상세</h2>
+          <button class="modal-close" @click="closeModal">&times;</button>
+        </div>
+        <div class="modal-body">
+          <div v-if="curTry" class="try-detail">
+            <div class="info-group">
+              <div class="info-row">
+                <span class="info-label">제출 언어:</span>
+                <span class="info-value">{{ curTry.tryLanguage }}</span>
+              </div>
+              <div class="info-row">
+                <span class="info-label">제출 상태:</span>
+                <span :class="['info-value', 'status', curTry.solved ? 'status-solved' : 'status-unsolved']">
+                  {{ curTry.solved ? '해결' : '미해결' }}
+                </span>
+              </div>
+              <div class="info-row">
+                <span class="info-label">제출 시간:</span>
+                <span class="info-value">{{ formatDate(curTry.createdAt) }}</span>
+              </div>
+            </div>
+            <div class="code-section">
+              <h3>제출한 코드</h3>
+              <pre class="code-block">{{ curTry.codeContent }}</pre>
+            </div>
+          </div>
+        </div>
+      </div>
     </div>
   </div>
 </template>
 
 <style scoped>
 .container {
-  width: 800px;
+  width: 1000px;
   background: white;
   border-radius: 16px;
   padding: 24px;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Apple SD Gothic Neo', 'Noto Sans KR', sans-serif;
+  display: flex;
+  justify-content: center;
+  gap: 50px;
 }
 
 .title {
@@ -130,6 +324,20 @@ watch(searchQuery, () => {
   font-size: 20px;
   font-weight: 600;
   margin-bottom: 24px;
+}
+
+.try-area {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 16px;
+  gap: 12px;
+  align-items: center;
+}
+
+.try-area h3 {
+  margin: 0;
+  font-size: 16px;
+  color: #666;
 }
 
 .search-area {
@@ -177,6 +385,21 @@ watch(searchQuery, () => {
   padding: 12px;
   border-bottom: 1px solid #e1e1e1;
   font-size: 14px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.problem-table tr:not(.empty-row) {
+  cursor: pointer;
+}
+
+.problem-table tr:not(.empty-row):hover {
+  background-color: #f5f5f5;
+}
+
+.selected-row {
+  background-color: #f0f7ff !important;
 }
 
 .level-badge {
@@ -187,7 +410,6 @@ watch(searchQuery, () => {
 }
 
 .status {
-  padding: 4px 12px;
   border-radius: 4px;
   font-size: 12px;
 }
@@ -224,5 +446,107 @@ watch(searchQuery, () => {
 
 .pagination button:hover:not(.active) {
   background: #f5f5f5;
+}
+
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.5);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+}
+
+.modal-content {
+  background: white;
+  border-radius: 8px;
+  width: 90%;
+  max-width: 800px;
+  max-height: 90vh;
+  overflow-y: auto;
+  position: relative;
+}
+
+.modal-header {
+  padding: 16px 24px;
+  border-bottom: 1px solid #e1e1e1;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.modal-title {
+  font-size: 20px;
+  font-weight: 600;
+  margin: 0;
+}
+
+.modal-close {
+  background: none;
+  border: none;
+  font-size: 24px;
+  cursor: pointer;
+  padding: 0;
+  color: #666;
+}
+
+.modal-body {
+  padding: 24px;
+}
+
+.try-detail {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.info-group {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.info-row {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+
+.info-label {
+  font-weight: 500;
+  color: #666;
+  width: 100px;
+}
+
+.info-value {
+  flex: 1;
+}
+
+.code-section {
+  background: #f5f5f5;
+  border-radius: 8px;
+  padding: 16px;
+}
+
+.code-section h3 {
+  margin: 0 0 16px 0;
+  font-size: 16px;
+  color: #333;
+}
+
+.code-block {
+  background: #fff;
+  padding: 16px;
+  border-radius: 4px;
+  border: 1px solid #e1e1e1;
+  overflow-x: auto;
+  font-family: monospace;
+  line-height: 1.5;
+  margin: 0;
+  white-space: pre-wrap;
 }
 </style>

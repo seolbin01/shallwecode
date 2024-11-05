@@ -1,19 +1,18 @@
 package com.shallwecode.backend.user.application.dto;
 
-import jakarta.persistence.*;
+import lombok.AllArgsConstructor;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.Setter;
-
-import java.util.Date;
 
 @Getter
 @Setter
-public class UserSaveDTO {
+@NoArgsConstructor
+@AllArgsConstructor
+public class FindUserDTO {
+
     private Long userId;
-    private String provider;
-    private String ProviderId;
     private String email;
     private String nickname;
     private String auth;
-    private Date createdAt;
 }
