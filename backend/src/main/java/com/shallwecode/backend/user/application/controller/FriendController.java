@@ -64,7 +64,9 @@ public class FriendController {
     @DeleteMapping
     public ResponseEntity<Void> deleteFriend(@RequestParam Long userId) {
 
-        friendService.deleteFriend(userId);
+        Long loginUserId = 1L;
+
+        friendService.deleteFriend(userId, loginUserId);
         return ResponseEntity.ok().build();
     }
 }

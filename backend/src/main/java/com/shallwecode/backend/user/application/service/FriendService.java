@@ -90,12 +90,10 @@ public class FriendService {
     }
 
     @Transactional
-    public void deleteFriend(Long userId) {
-        FindFriendDTO findFriendDTO = new FindFriendDTO();
-        findFriendDTO.setFriendId(userId);
+    public void deleteFriend(Long userId, Long loginUserId) {
 
         try {
-            friendDomainService.deleteFriend(findFriendDTO);
+            friendDomainService.deleteFriendByIds(userId, loginUserId);
         } catch (Exception e) {
             throw new CustomException(ErrorCode.NOT_DELETED_FRIEND);
         }
