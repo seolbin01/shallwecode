@@ -11,10 +11,12 @@ const selectedProblem = ref(null);
 const currentPage = ref(1);
 const tryCurrentPage = ref(1);
 const searchQuery = ref('');
+const curTry = ref('');
+const isModalOpen = ref(false);
 
 const fetchMyProblemList = async () => {
   try {
-    const response = await axios.get('http://localhost:8080/problem/list');
+    const response = await axios.get('http://localhost:8080/api/v1/problem/mylist');
     problems.value = response.data;
   } catch (error) {
     console.error('내 풀이 문제 목록을 불러오는 중 에러가 발생했습니다.', error.response ? error.response.data : error.message);
@@ -28,6 +30,38 @@ const fetchTryList = async (problemId) => {
   } catch (error) {
     console.error('풀이 시도 목록을 불러오는 중 에러가 발생했습니다.', error.response ? error.response.data : error.message);
   }
+};
+
+const handleTryClick = async (tryId) => {
+  try {
+    const response = await axios.get(
+        `http://localhost:8080/api/v1/problem/try/${tryId}`
+    );
+
+    curTry.value = response.data;
+    console.log(curTry.value)
+    isModalOpen.value = true;
+
+  } catch (error) {
+    console.error('풀이 시도 상세 조회 실패', error);
+  }
+};
+
+const closeModal = () => {
+  isModalOpen.value = false;
+  curTry.value = null;
+};
+
+const formatDate = (dateString) => {
+  const date = new Date(dateString);
+  return date.toLocaleString('ko-KR', {
+    year: 'numeric',
+    month: '2-digit',
+    day: '2-digit',
+    hour: '2-digit',
+    minute: '2-digit',
+    second: '2-digit'
+  });
 };
 
 const filteredProblems = computed(() => {
@@ -196,7 +230,10 @@ onMounted(() => {
         </tr>
         </thead>
         <tbody>
-        <tr v-for="(try$, index) in displayedTrys" :key="try$.id">
+        <tr v-for="(try$, index) in displayedTrys"
+            :key="try$.id"
+            @click="handleTryClick(try$.tryId)"
+        >
           <td>{{ (tryCurrentPage - 1) * itemsPerPage + index + 1 }}</td>
           <td>{{ try$.tryLanguage }}</td>
           <td>
@@ -204,7 +241,7 @@ onMounted(() => {
                 {{ try$.solved ? '해결' : '미해결' }}
               </span>
           </td>
-          <td>{{ try$.createdAt }}</td>
+          <td>{{ formatDate(try$.createdAt) }}</td>
         </tr>
         <tr v-for="i in emptyRowsTryCount" :key="`empty-${i}`" class="empty-row">
           <td>-</td>
@@ -232,6 +269,38 @@ onMounted(() => {
             @click="changeTryPage('next')"
             :disabled="tryCurrentPage === totalTryPages"
         >▶</button>
+      </div>
+    </div>
+    <div v-if="isModalOpen" class="modal-overlay" @click="closeModal">
+      <div class="modal-content" @click.stop>
+        <div class="modal-header">
+          <h2 class="modal-title">풀이 시도 상세</h2>
+          <button class="modal-close" @click="closeModal">&times;</button>
+        </div>
+        <div class="modal-body">
+          <div v-if="curTry" class="try-detail">
+            <div class="info-group">
+              <div class="info-row">
+                <span class="info-label">제출 언어:</span>
+                <span class="info-value">{{ curTry.tryLanguage }}</span>
+              </div>
+              <div class="info-row">
+                <span class="info-label">제출 상태:</span>
+                <span :class="['info-value', 'status', curTry.solved ? 'status-solved' : 'status-unsolved']">
+                  {{ curTry.solved ? '해결' : '미해결' }}
+                </span>
+              </div>
+              <div class="info-row">
+                <span class="info-label">제출 시간:</span>
+                <span class="info-value">{{ formatDate(curTry.createdAt) }}</span>
+              </div>
+            </div>
+            <div class="code-section">
+              <h3>제출한 코드</h3>
+              <pre class="code-block">{{ curTry.codeContent }}</pre>
+            </div>
+          </div>
+        </div>
       </div>
     </div>
   </div>
@@ -377,5 +446,107 @@ onMounted(() => {
 
 .pagination button:hover:not(.active) {
   background: #f5f5f5;
+}
+
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.5);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+}
+
+.modal-content {
+  background: white;
+  border-radius: 8px;
+  width: 90%;
+  max-width: 800px;
+  max-height: 90vh;
+  overflow-y: auto;
+  position: relative;
+}
+
+.modal-header {
+  padding: 16px 24px;
+  border-bottom: 1px solid #e1e1e1;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.modal-title {
+  font-size: 20px;
+  font-weight: 600;
+  margin: 0;
+}
+
+.modal-close {
+  background: none;
+  border: none;
+  font-size: 24px;
+  cursor: pointer;
+  padding: 0;
+  color: #666;
+}
+
+.modal-body {
+  padding: 24px;
+}
+
+.try-detail {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.info-group {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.info-row {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+
+.info-label {
+  font-weight: 500;
+  color: #666;
+  width: 100px;
+}
+
+.info-value {
+  flex: 1;
+}
+
+.code-section {
+  background: #f5f5f5;
+  border-radius: 8px;
+  padding: 16px;
+}
+
+.code-section h3 {
+  margin: 0 0 16px 0;
+  font-size: 16px;
+  color: #333;
+}
+
+.code-block {
+  background: #fff;
+  padding: 16px;
+  border-radius: 4px;
+  border: 1px solid #e1e1e1;
+  overflow-x: auto;
+  font-family: monospace;
+  line-height: 1.5;
+  margin: 0;
+  white-space: pre-wrap;
 }
 </style>

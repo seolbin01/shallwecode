@@ -1,6 +1,7 @@
 package com.shallwecode.backend.problem.application.controller;
 
 import com.shallwecode.backend.problem.application.dto.FindMyTryResDTO;
+import com.shallwecode.backend.problem.application.dto.FindTryResDTO;
 import com.shallwecode.backend.problem.application.dto.SaveTryReqDTO;
 import com.shallwecode.backend.problem.application.service.TryService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -50,5 +51,15 @@ public class TryController {
         List<FindMyTryResDTO> myTryList = tryService.findAllMyTry(userId, problemId);
 
         return new ResponseEntity<>(myTryList, HttpStatus.OK);
+    }
+
+    @GetMapping("/try/{tryId}")
+    @Operation(summary = "특정 풀이 시도 조회", description = "특정 풀이 시도를 조회 한다.")
+    public ResponseEntity<FindTryResDTO> findTry(@PathVariable Long tryId) {
+
+        Long userId = 1L;   // 추후 로그인된 회원의 userId를 가져오도록 수정
+        FindTryResDTO tryResDTO = tryService.findTry(tryId);
+
+        return new ResponseEntity<>(tryResDTO, HttpStatus.OK);
     }
 }

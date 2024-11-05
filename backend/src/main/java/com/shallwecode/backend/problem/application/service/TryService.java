@@ -41,4 +41,9 @@ public class TryService {
 
         return tryDomainService.findAllMyTry(userId, problemId);
     }
+
+    public FindTryResDTO findTry(Long tryId) {
+
+        return tryDomainService.findById(tryId);
+    }
 }
