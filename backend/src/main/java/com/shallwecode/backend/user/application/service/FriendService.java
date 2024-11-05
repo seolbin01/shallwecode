@@ -83,4 +83,8 @@ public class FriendService {
     public List<FriendResListDTO> findAllFriend(Long loginUserId) {
         return friendDomainService.findAllFriend(loginUserId);
     }
+
+    public List<FriendResListDTO> findAllFriendReq(Long loginUserId) {
+        return friendDomainService.findAllFriendReq(loginUserId);
+    }
 }
