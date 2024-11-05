@@ -110,4 +110,20 @@ public class FriendDomainService {
         list1.addAll(list2);
         return list1;
     }
+
+    public List<FriendResListDTO> findAllFriendReq(Long loginUserId) {
+
+        QFriend friend = QFriend.friend;
+        QUserInfo user = QUserInfo.userInfo;
+
+        return queryFactory
+                .select(Projections.constructor(FriendResListDTO.class,
+                        friend.fromUser.userId,
+                        friend.fromUser.nickname))
+                .from(friend)
+                .join(friend.toUser, user)
+                .where(user.userId.eq(loginUserId)
+                        .and(friend.friendStatus.eq(FriendStatus.PENDING)))
+                .fetch();
+    }
 }
