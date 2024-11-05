@@ -1,62 +1,52 @@
 <script setup>
 import {onMounted, onUnmounted, ref} from 'vue'
+import axios from "axios";
 
-const showNotifications = ref(false)
-const notifications = ref([
-  {
-    id: 1,
-    message: 'user02님이 친구 요청을 보냈습니다.',
-    date: '2024-10-30'
-  },
-  {
-    id: 2,
-    message: 'user02님이 친구 요청을 보냈습니다.',
-    date: '2024-10-30'
-  },
-  {
-    id: 3,
-    message: 'user02님이 친구 요청을 보냈습니다.',
-    date: '2024-10-30'
-  },
-  {
-    id: 4,
-    message: 'user02님이 친구 요청을 보냈습니다.',
-    date: '2024-10-30'
-  },
-  {
-    id: 5,
-    message: 'user02님이 친구 요청을 보냈습니다.',
-    date: '2024-10-30'
-  },
-  {
-    id: 6,
-    message: 'user02님이 친구 요청을 보냈습니다.',
-    date: '2024-10-30'
+const showNotis = ref(false);
+const notis = ref([]);
+
+const fetchMyNotiList = async () => {
+  try {
+    const response = await axios.get('http://localhost:8080/api/v1/noti');
+    notis.value = response.data;
+  } catch (error) {
+    console.error('알림 목록을 불러오는 중 에러가 발생했습니다.', error.response ? error.response.data : error.message);
   }
-])
+};
 
-const toggleNotifications = () => {
-  showNotifications.value = !showNotifications.value
+const toggleNotis = () => {
+  showNotis.value = !showNotis.value
 }
 
 // 알림창 외부 클릭시 닫기
-const closeNotifications = (event) => {
+const closeNotis = (event) => {
   const dropdown = document.querySelector('.notifications-dropdown')
-  const notificationBtn = document.querySelector('.notification-btn')
+  const notiBtn = document.querySelector('.notification-btn')
 
-  if (dropdown && !dropdown.contains(event.target) && !notificationBtn.contains(event.target)) {
-    showNotifications.value = false
+  if (dropdown && !dropdown.contains(event.target) && !notiBtn.contains(event.target)) {
+    showNotis.value = false
   }
 }
 
-// 컴포넌트 마운트 시 이벤트 리스너 추가
+const formatDate = (dateString) => {
+  const date = new Date(dateString);
+  return date.toLocaleString('ko-KR', {
+    year: 'numeric',
+    month: '2-digit',
+    day: '2-digit',
+    hour: '2-digit',
+    minute: '2-digit',
+    second: '2-digit'
+  });
+};
+
 onMounted(() => {
-  document.addEventListener('click', closeNotifications)
+  fetchMyNotiList();
+  document.addEventListener('click', closeNotis)
 })
 
-// 컴포넌트 언마운트 시 이벤트 리스너 제거
 onUnmounted(() => {
-  document.removeEventListener('click', closeNotifications)
+  document.removeEventListener('click', closeNotis)
 })
 </script>
 
@@ -67,16 +57,15 @@ onUnmounted(() => {
       <router-link to="/user-list" class="menu-item">회원 목록</router-link>
       <router-link to="/logout" class="menu-item">로그아웃</router-link>
       <div class="notification-container">
-        <button @click="toggleNotifications" class="menu-item notification-btn">
+        <button @click="toggleNotis" class="menu-item notification-btn">
           알림
         </button>
-        <div v-if="showNotifications" class="notifications-dropdown">
-          <div v-if="notifications.length" class="notifications-list">
-            <div v-for="notification in notifications"
-                 :key="notification.id"
+        <div v-if="showNotis" class="notifications-dropdown">
+          <div v-if="notis.length" class="notifications-list">
+            <div v-for="noti in notis"
                  class="notification-item">
-              <span class="notification-message">{{ notification.message }}</span>
-              <span class="notification-date">{{ notification.date }}</span>
+              <span class="notification-message">{{ noti.content }}</span>
+              <span class="notification-date">{{ formatDate(noti.createdAt) }}</span>
             </div>
           </div>
           <div v-else class="no-notifications">
