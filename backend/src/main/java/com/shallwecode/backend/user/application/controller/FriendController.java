@@ -50,4 +50,13 @@ public class FriendController {
         List<FriendResListDTO> friendList = friendService.findAllFriend(loginUserId);
         return ResponseEntity.ok(friendList);
     }
+
+    @Operation(summary = "친구 신청 목록 조회", description = "친구 신청이 온 목록을 조회한다.")
+    @GetMapping("/request")
+    public ResponseEntity<List<FriendResListDTO>> findAllFriendReq() {
+
+        Long loginUserId = 1L;
+        List<FriendResListDTO> friendReqList = friendService.findAllFriendReq(loginUserId);
+        return ResponseEntity.ok(friendReqList);
+    }
 }
