@@ -56,14 +56,14 @@ const handleGoogleLogin = () => {
   background: white;
   width: 400px;
   padding: 40px;
-  margin: 300px;
+  margin: 150px;
   border-radius: 16px;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
   text-align: center;
 }
 
 .login-title {
-  font-size: 44px;
+  font-size: 32px;
   font-weight: bold;
   margin-bottom: 30px;
   color: #333;
@@ -109,7 +109,6 @@ const handleGoogleLogin = () => {
   font-weight: bold;
 }
 
-/* 호버 효과 */
 .login-button:hover {
   transform: translateY(-1px);
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
