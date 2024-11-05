@@ -1,5 +1,6 @@
 package com.shallwecode.backend.user.domain.service;
 
+import com.querydsl.core.types.Projections;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import com.shallwecode.backend.common.exception.CustomException;
 import com.shallwecode.backend.common.exception.ErrorCode;
@@ -7,10 +8,13 @@ import com.shallwecode.backend.user.application.dto.*;
 import com.shallwecode.backend.user.domain.aggregate.Friend;
 import com.shallwecode.backend.user.domain.aggregate.FriendStatus;
 import com.shallwecode.backend.user.domain.aggregate.QFriend;
+import com.shallwecode.backend.user.domain.aggregate.QUserInfo;
 import com.shallwecode.backend.user.domain.repository.FriendRepository;
 import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
 import org.springframework.stereotype.Service;
+
+import java.util.List;
 
 @Service
 @RequiredArgsConstructor
@@ -76,5 +80,32 @@ public class FriendDomainService {
 
         modelMapper.map(findFriendDTO, findFriend);
         System.out.println(findFriend.getFriendStatus());
+    }
+
+    public List<FriendResListDTO> findAllFriend(Long loginUserId) {
+
+        QFriend friend = QFriend.friend;
+        QUserInfo user = QUserInfo.userInfo;
+
+        List<FriendResListDTO> list1 = queryFactory
+                .select(Projections.constructor(FriendResListDTO.class,
+                        friend.fromUser.userId,
+                        friend.fromUser.nickname))
+                .from(friend)
+                .join(friend.toUser, user)
+                .where(user.userId.eq(loginUserId))
+                .fetch();
+
+        List<FriendResListDTO> list2 = queryFactory
+                .select(Projections.constructor(FriendResListDTO.class,
+                        friend.toUser.userId,
+                        friend.toUser.nickname))
+                .from(friend)
+                .join(friend.fromUser, user)
+                .where(user.userId.eq(loginUserId))
+                .fetch();
+
+        list1.addAll(list2);
+        return list1;
     }
 }
