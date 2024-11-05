@@ -57,7 +57,7 @@ public class ProblemDomainService {
     public void deleteProblem(Long problemId) {
 
         // 문제와 연관된 테스트 케이스 모두 삭제 후 문제 삭제
-        testCaseRepository.deleteById(problemId);
+        testCaseRepository.deleteByProblemId(problemId);
         repository.deleteById(problemId);
     }
 
