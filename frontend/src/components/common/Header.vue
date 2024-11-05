@@ -25,8 +25,11 @@ const handleNotiClick = async (noti) => {
   }
 };
 
-const toggleNotis = () => {
+const toggleNotis = async () => {
   showNotis.value = !showNotis.value
+  if (showNotis.value) {
+    await fetchMyNotiList();
+  }
 }
 
 // 알림창 외부 클릭시 닫기
