@@ -1,7 +1,12 @@
 package com.shallwecode.backend.problem.domain.service;
 
+import com.querydsl.core.types.Projections;
+import com.querydsl.jpa.impl.JPAQueryFactory;
 import com.shallwecode.backend.problem.application.dto.CodingRoomReqDTO;
+import com.shallwecode.backend.problem.application.dto.FindMyCodingRoomResDTO;
 import com.shallwecode.backend.problem.domain.aggregate.CodingRoom;
+import com.shallwecode.backend.problem.domain.aggregate.QCodingRoom;
+import com.shallwecode.backend.problem.domain.aggregate.QCoop;
 import com.shallwecode.backend.problem.domain.repository.CodingRoomRepository;
 import com.shallwecode.backend.problem.domain.repository.CoopRepository;
 import jakarta.transaction.Transactional;
@@ -9,6 +14,8 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.modelmapper.ModelMapper;
 import org.springframework.stereotype.Service;
+
+import java.util.List;
 
 @Slf4j
 @Service
@@ -18,6 +25,7 @@ public class CodingRoomDomainService {
     private final CodingRoomRepository repository;
     private final CoopRepository coopRepository;
     private final ModelMapper modelMapper;
+    private final JPAQueryFactory queryFactory;
 
     @Transactional
     public void saveCodingRoom(CodingRoomReqDTO newCodingRoom) {
@@ -39,4 +47,20 @@ public class CodingRoomDomainService {
 
     }
 
+    public List<FindMyCodingRoomResDTO> findMyCodingRoom(Long userId) {
+
+        QCodingRoom codingRoom = QCodingRoom.codingRoom;
+        QCoop coop = QCoop.coop;
+
+        return queryFactory
+                .select(Projections.constructor(FindMyCodingRoomResDTO.class,
+                        coop.userId,
+                        codingRoom.codingRoomId,
+                        codingRoom.problemId,
+                        codingRoom.isOpen))
+                .from(codingRoom)
+                .join(coop).on(codingRoom.codingRoomId.eq(coop.codingRoomId))
+                .where(coop.userId.eq(userId))
+                .fetch();
+    }
 }
