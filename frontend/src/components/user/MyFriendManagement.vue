@@ -66,6 +66,24 @@ const rejectFriendRequest = async (request) => {
   }
 };
 
+const deleteFriend = async (friend) => {
+  isLoading.value = true;
+  try {
+    await axios.delete(`http://localhost:8080/api/v1/friend`, {
+      params: {
+        userId: friend.userId
+      }
+    });
+    alert('친구를 삭제했습니다.');
+    await fetchMyFriendList();
+  } catch (error) {
+    console.error('친구 삭제 중 에러가 발생했습니다.', error.response ? error.response.data : error.message);
+    alert('친구 삭제 실패했습니다.');
+  } finally {
+    isLoading.value = false;
+  }
+};
+
 const filteredFriends = computed(() => {
   if (!searchFriendQuery.value) return friends.value;
   return friends.value.filter(friend =>
@@ -155,7 +173,7 @@ onMounted(() => {
             placeholder="닉네임 검색"
             v-model="searchFriendQuery"
         >
-        </div>
+      </div>
 
       <table class="table">
         <thead>
@@ -169,7 +187,14 @@ onMounted(() => {
         <tr v-for="(friend, index) in displayedFriends">
           <td>{{ (currentFriendPage - 1) * ROWS_PER_PAGE + index + 1 }}</td>
           <td>{{ friend.nickname }}</td>
-          <td class="delete-button"><button>삭제</button></td>
+          <td class="delete-button">
+            <button
+                @click="deleteFriend(friend)"
+                :disabled="isLoading"
+            >
+              {{ isLoading ? '처리중...' : '삭제' }}
+            </button>
+          </td>
         </tr>
         <tr v-for="i in emptyRowsFriendCount" :key="`empty-${i}`" class="empty-row">
           <td>-</td>
@@ -183,7 +208,8 @@ onMounted(() => {
         <button
             @click="changeFriendPage('prev')"
             :disabled="currentFriendPage === 1"
-        >◀</button>
+        >◀
+        </button>
         <button
             v-for="page in totalFriendPages"
             :key="page"
@@ -195,7 +221,8 @@ onMounted(() => {
         <button
             @click="changeFriendPage('next')"
             :disabled="currentFriendPage === totalFriendPages"
-        >▶</button>
+        >▶
+        </button>
       </div>
     </div>
 
@@ -250,7 +277,8 @@ onMounted(() => {
         <button
             @click="changeRequestPage('prev')"
             :disabled="currentRequestPage === 1"
-        >◀</button>
+        >◀
+        </button>
         <button
             v-for="page in totalRequestPages"
             :key="page"
@@ -262,7 +290,8 @@ onMounted(() => {
         <button
             @click="changeRequestPage('next')"
             :disabled="currentRequestPage === totalRequestPages"
-        >▶</button>
+        >▶
+        </button>
       </div>
     </div>
   </div>
