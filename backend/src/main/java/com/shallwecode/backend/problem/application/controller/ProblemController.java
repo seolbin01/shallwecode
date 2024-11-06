@@ -1,11 +1,7 @@
 package com.shallwecode.backend.problem.application.controller;
 
-import com.shallwecode.backend.problem.application.dto.FindMyProblemResDTO;
-import com.shallwecode.backend.problem.application.dto.ProblemOneResDTO;
-import com.shallwecode.backend.problem.application.dto.ProblemReqDTO;
-import com.shallwecode.backend.problem.application.dto.ProblemListResDTO;
+import com.shallwecode.backend.problem.application.dto.*;
 import com.shallwecode.backend.problem.application.service.ProblemService;
-import com.shallwecode.backend.problem.domain.service.ProblemDomainService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
@@ -24,7 +20,6 @@ import java.util.List;
 public class ProblemController {
 
     private final ProblemService problemService;
-    private final ProblemDomainService problemDomainService;
 
     /* 문제 등록 */
     @Operation(
@@ -105,4 +100,35 @@ public class ProblemController {
 
         return ResponseEntity.ok().body(problemListResDTO);
     }
+
+    @Operation(summary = "미시도 문제 개수 조회", description = "시도하지 않는 문제 개수를 조회합니다.")
+    @GetMapping("/mylist/notry")
+    public ResponseEntity<Long> findAllMyUnTryProblemCount() {
+
+        Long userId = 1L; // 추후 로그인된 회원의 userId를 가져오도록 수정
+        Long myNoTryProblemCount = problemService.findAllNoTryProblemCount(userId);
+
+        return new ResponseEntity<>(myNoTryProblemCount, HttpStatus.OK);
+    }
+
+    @Operation(summary = "미해결 문제 개수 조회", description = "시도했지만 아직 해결하지 못한 문제 개수를 조회합니다.")
+    @GetMapping("/mylist/unsolved")
+    public ResponseEntity<Long> findAllMyUnsolvedProblemCount() {
+
+        Long userId = 1L; // 추후 로그인된 회원의 userId를 가져오도록 수정
+        Long myUnsolvedProblemCount = problemService.findAllUnSolvedProblemCount(userId);
+
+        return new ResponseEntity<>(myUnsolvedProblemCount, HttpStatus.OK);
+    }
+
+    @Operation(summary = "해결 문제 개수 조회", description = "해결한 문제 개수를 조회합니다.")
+    @GetMapping("/mylist/solved")
+    public ResponseEntity<Long> findAllMySolvedProblemCount() {
+
+        long userId = 1L;
+        Long mySolvedProblemCount = problemService.findAllSolvedProblemCount(userId);
+
+        return new ResponseEntity<>(mySolvedProblemCount, HttpStatus.OK);
+    }
+
 }

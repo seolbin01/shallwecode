@@ -71,6 +71,59 @@ public class ProblemDomainService {
         repository.deleteById(problemId);
     }
 
+    // 시도하지 않은 문제 개수 조회
+    public Long findAllNoTryProblemCount(Long userId) {
+        QProblem qProblem = QProblem.problem;
+        QTry qTry = QTry.try$;
+
+        return queryFactory.select(qProblem.count())
+                .from(qProblem)
+                .leftJoin(qTry).on(qTry.problemId.eq(qProblem.problemId)
+                        .and(qTry.userId.eq(userId)
+                                .or(qTry.coopList.contains("," + userId + ",")
+                                        .or(qTry.coopList.startsWith(userId + ",")
+                                                .or(qTry.coopList.endsWith("," + userId)
+                                                        .or(qTry.coopList.eq(String.valueOf(userId))))))))
+                .where(qTry.problemId.isNull()) // 유저와 협업 친구가 시도하지 않은 문제만 선택
+                .fetchOne();
+    }
+
+    // 시도했지만, 해결하지 못한 문제 개수 조회
+    public Long findAllUnSolvedProblemCount(Long userId) {
+        QProblem qProblem = QProblem.problem;
+        QTry qTry = QTry.try$;
+
+        return queryFactory.select(qProblem.problemId.countDistinct())
+                .from(qProblem)
+                .innerJoin(qTry).on(qTry.problemId.eq(qProblem.problemId)
+                        .and(qTry.isSolved.eq(false))
+                        .and(qTry.userId.eq(userId)
+                                .or(qTry.coopList.contains("," + userId + ",")
+                                        .or(qTry.coopList.startsWith(userId + ",")
+                                                .or(qTry.coopList.endsWith("," + userId)
+                                                        .or(qTry.coopList.eq(String.valueOf(userId))))))))
+                .fetchOne();
+    }
+
+    // 해결한 문제 개수 조회
+    public Long findAllSolvedProblemCount(long userId) {
+        QProblem qProblem = QProblem.problem;
+        QTry qTry = QTry.try$;
+
+        return queryFactory.select(qProblem.problemId.countDistinct())
+                .from(qProblem)
+                .innerJoin(qTry).on(qTry.problemId.eq(qProblem.problemId)
+                        .and(qTry.isSolved.eq(true))
+                        .and(qTry.userId.eq(userId)
+                                .or(qTry.coopList.contains("," + userId + ",")
+                                        .or(qTry.coopList.startsWith(userId + ",")
+                                                .or(qTry.coopList.endsWith("," + userId)
+                                                        .or(qTry.coopList.eq(String.valueOf(userId))))))))
+                .fetchOne();
+    }
+
+
+
     public List<ProblemOneResDTO> selectOneProblem(Long problemId) {
 
         QProblem qProblem = QProblem.problem;
@@ -146,4 +199,6 @@ public class ProblemDomainService {
                 .from(qProblem)
                 .fetchOne();
     }
+
+
 }
