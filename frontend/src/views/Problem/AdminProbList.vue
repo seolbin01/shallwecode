@@ -1,15 +1,15 @@
 <script setup>
 import SideComponent from "@/components/Problem/SideComponent.vue";
 import ProbListComponent from "@/components/Problem/ProbListComponent.vue";
-import {reactive, onMounted, onUnmounted} from "vue"
+import {reactive, onMounted} from "vue"
 import axios from "axios";
 
 /* 필요한 객체 생성부 */
 const adminProblemList = reactive({
   problemList : [],
-  currentPage: '',
-  totalPages: '',
-  totalItems: '',
+  currentPage: 0,
+  totalPages: 0,
+  totalItems: 0,
   keyword: '',
   option: ''
 });
@@ -58,7 +58,10 @@ onMounted(async () => {
     <!-- 메인 컨텐츠 -->
       <div class="content">
         <ProbListComponent :problemList="adminProblemList.problemList"
-                         @problemSearch="problemSearch" />
+                           :currentPage="adminProblemList.currentPage"
+                           :totalPages="adminProblemList.totalPages"
+                           :totalItems="adminProblemList.totalItems"
+                           @problemSearch="problemSearch" />
       </div>
   </div>
 </template>
