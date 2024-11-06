@@ -20,12 +20,13 @@ public class CodingRoomDomainService {
     private final ModelMapper modelMapper;
 
     @Transactional
-    public void saveCodingRoom(CodingRoomReqDTO newCodingRoom) {
+    public Long saveCodingRoom(CodingRoomReqDTO newCodingRoom) {
 
         CodingRoom codingRoom = modelMapper.map(newCodingRoom, CodingRoom.class);
         repository.save(codingRoom);
 
-        // 추가적으로 설정이 필요한지 DB 관계 고려해보기
+        return codingRoom.getCodingRoomId();
+
     }
 
     // 코딩방 수정 기능은 제공하지 않음.
