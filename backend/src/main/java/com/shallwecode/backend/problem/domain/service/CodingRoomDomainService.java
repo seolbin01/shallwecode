@@ -6,10 +6,12 @@ import com.querydsl.jpa.JPAExpressions;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import com.shallwecode.backend.problem.application.dto.CodingRoomReqDTO;
 import com.shallwecode.backend.problem.application.dto.FindMyCodingRoomResDTO;
-import com.shallwecode.backend.problem.domain.aggregate.CodingRoom;
 import com.shallwecode.backend.problem.domain.aggregate.QCodingRoom;
 import com.shallwecode.backend.problem.domain.aggregate.QCoop;
 import com.shallwecode.backend.problem.domain.aggregate.QProblem;
+import com.shallwecode.backend.problem.application.dto.SendCodeDTO;
+import com.shallwecode.backend.problem.domain.aggregate.CodingRoom;
+import com.shallwecode.backend.problem.domain.aggregate.Problem;
 import com.shallwecode.backend.problem.domain.repository.CodingRoomRepository;
 import com.shallwecode.backend.problem.domain.repository.CoopRepository;
 import jakarta.transaction.Transactional;
@@ -31,16 +33,16 @@ public class CodingRoomDomainService {
     private final JPAQueryFactory queryFactory;
 
     @Transactional
-    public void saveCodingRoom(CodingRoomReqDTO newCodingRoom) {
+    public Long saveCodingRoom(CodingRoomReqDTO newCodingRoom) {
 
         CodingRoom codingRoom = modelMapper.map(newCodingRoom, CodingRoom.class);
         repository.save(codingRoom);
 
-        // 추가적으로 설정이 필요한지 DB 관계 고려해보기
+        return codingRoom.getCodingRoomId();
+
     }
 
     // 코딩방 수정 기능은 제공하지 않음.
-
     @Transactional
     public void deleteCodingRoom(Long codingRoomId) {
 
@@ -71,5 +73,13 @@ public class CodingRoomDomainService {
                 .join(problem).on(codingRoom.problemId.eq(problem.problemId))
                 .where(coop.userId.eq(userId))
                 .fetch();
+    }
+  
+    /* 코드 실시간 DB 업데이트 */
+    @Transactional
+    public void updateCode(SendCodeDTO sendCodeDTO) {
+        // 코드 수정
+        CodingRoom foundCodingRoom = repository.findById(sendCodeDTO.getCodingRoomId()).orElseThrow(() -> new RuntimeException("해당 코딩방이 존재하지 않습니다."));
+        foundCodingRoom.updateCodeContent(sendCodeDTO.getCodeContent());
     }
 }

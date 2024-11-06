@@ -19,4 +19,8 @@ public class CodingRoom {
     private String codeContent;
     private boolean isOpen;
 
+    /* 코드 업데이트 메소드 */
+    public void updateCodeContent(String codeContent) {
+        this.codeContent = codeContent;
+    }
 }

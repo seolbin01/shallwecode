@@ -1,8 +1,7 @@
 package com.shallwecode.backend.user.domain.aggregate;
 
 import jakarta.persistence.*;
-import lombok.Getter;
-import lombok.ToString;
+import lombok.*;
 
 import java.util.Date;
 import java.util.List;
@@ -11,16 +10,17 @@ import java.util.List;
 @Table(name="user_info")
 @Getter
 @ToString
+@AllArgsConstructor
+@Builder
 public class UserInfo {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long userId;
-    private String provider;
-    private String providerId;
+    private SocialType provider;
     @Column(unique = true, nullable = false)
     private String email;
     private String nickname;
-    private String auth;
+    private AuthType auth;
     private Date createdAt;
 
     @OneToMany(mappedBy = "fromUser", cascade = CascadeType.ALL, fetch = FetchType.LAZY)

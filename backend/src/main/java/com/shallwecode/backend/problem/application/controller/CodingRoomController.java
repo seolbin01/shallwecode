@@ -21,7 +21,6 @@ import java.util.List;
 @RequiredArgsConstructor
 public class CodingRoomController {
 
-    private final CodingRoomDomainService codingRoomDomainService;
     private final CodingRoomService codingRoomService;
 
     /* 코딩방 등록 */
@@ -32,7 +31,7 @@ public class CodingRoomController {
     @PostMapping
     public ResponseEntity<String> saveCodingRoom(@RequestBody CodingRoomReqDTO newCodingRoomInfo) {
 
-        codingRoomDomainService.saveCodingRoom(newCodingRoomInfo);
+        codingRoomService.saveCodingRoom(newCodingRoomInfo);
         return new ResponseEntity<>("코딩방 생성 완료", HttpStatus.CREATED);
     }
 
@@ -46,7 +45,7 @@ public class CodingRoomController {
 
         // 호스트인지 여부를 확인해야 함
 
-        codingRoomDomainService.deleteCodingRoom(codingroomId);
+        codingRoomService.deleteCodingRoom(codingroomId);
         return ResponseEntity.noContent().build();
     }
 

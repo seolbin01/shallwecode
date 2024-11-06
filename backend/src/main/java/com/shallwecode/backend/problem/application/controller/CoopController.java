@@ -27,18 +27,16 @@ public class CoopController {
         return ResponseEntity.status(HttpStatus.CREATED).build();
     }
 
-
     @DeleteMapping("/{codingroomId}/friend")
     @Operation(summary = "코딩방 나가기", description = "코딩방에서 나간다.")
     public ResponseEntity<Void> deleteCoop(@PathVariable Long codingroomId) {
 
         // 유저 id와 코딩방 id를 가지고 coopId 찾기
-        Long userId = 4L; // 유저 id
+        Long userId = 3L; // 유저 id
         coopService.deleteCoop(codingroomId, userId);
 
         return ResponseEntity.noContent().build();
     }
-
 
     @DeleteMapping("{codingroomId}/friend/{coopId}")
     @Operation(summary = "협업 친구 강퇴하기", description = "코딩방에 있는 협업 친구를 강퇴한다.")
@@ -50,6 +48,5 @@ public class CoopController {
 
         return ResponseEntity.noContent().build();
     }
-
 
 }

@@ -22,6 +22,18 @@ public class ProblemService {
         return problemDomainService.selectOneProblem(problemId);
     }
 
+    public Long findAllNoTryProblemCount(Long userId) {
+        return problemDomainService.findAllNoTryProblemCount(userId);
+    }
+
+    public Long findAllUnSolvedProblemCount(Long userId) {
+            return problemDomainService.findAllUnSolvedProblemCount(userId);
+    }
+
+    public Long findAllSolvedProblemCount(long userId) {
+        return problemDomainService.findAllSolvedProblemCount(userId);
+    }
+
     public void deleteProblem(Long problemId) {
         problemDomainService.deleteProblem(problemId);
     }
