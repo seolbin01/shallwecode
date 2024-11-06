@@ -11,7 +11,6 @@ import java.util.List;
 @Entity
 @Table(name="user_info")
 @Getter
-@Setter
 @ToString
 public class UserInfo {
     @Id
