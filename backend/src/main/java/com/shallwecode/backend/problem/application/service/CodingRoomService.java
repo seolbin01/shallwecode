@@ -17,7 +17,7 @@ public class CodingRoomService {
     public void saveCodingRoom(CodingRoomReqDTO codingRoomReqDTO) {
 
         // 해당 번호의 문제가 있는지 확인해야 하지만 프론트에서 문제를 조회해서
-        // 확인 후 문제 생성 예정이므로 패스
+        // 확인 후 코딩방 생성 예정이므로 패스
 
         Long codingRoomId = codingRoomDomainService.saveCodingRoom(codingRoomReqDTO);
 
