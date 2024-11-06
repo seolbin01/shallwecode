@@ -1,12 +1,16 @@
 <script setup>
 import SearchBar from "@/components/Problem/SearchBar.vue";
 import ProbListItemComponent from "@/components/Problem/ProbListItemComponent.vue";
+import PageBar from "@/components/Problem/PageBar.vue";
 
 const props = defineProps({
   problemList: {
     type: Array,
     required: true
-  }
+  },
+  currentPage: Number,
+  totalPages: Number,
+  totalItems: Number
 });
 
 const emit = defineEmits(['problemSearch']);
@@ -36,15 +40,11 @@ const problemSearch = (searchParam) => {
     <ProbListItemComponent v-for="problem in props.problemList" :key="problem.problemId" :problem="problem"/>
     </tbody>
   </table>
-
-  <!-- 페이지네이션 -->
-  <div class="pagination">
-    <button>&lt;</button>
-    <button>1</button>
-    <button>2</button>
-    <button>3</button>
-    <button>&gt;</button>
-  </div>
+  <!-- 페이징바 -->
+  <PageBar :currentPage="props.currentPage"
+           :totalPages="props.totalPages"
+           :totalItems="props.totalItems"
+          @page-change="problemSearch"/>
 </template>
 
 <style scoped>
@@ -62,19 +62,5 @@ const problemSearch = (searchParam) => {
 .table th {
   background-color: #f0f0f0;
   font-weight: bold;
-}
-
-.pagination {
-  display: flex;
-  justify-content: center;
-  margin-top: 20px;
-  gap: 10px;
-}
-
-.pagination button {
-  background: none;
-  border: none;
-  cursor: pointer;
-  font-size: 1rem;
 }
 </style>
