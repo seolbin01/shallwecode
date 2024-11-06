@@ -18,8 +18,8 @@ class CodingRoomDomainServiceTest {
     private static Stream<Arguments> updateSendCode() {
         return Stream.of(
                 Arguments.of(
-                        1,
-                        1,
+                        1L,
+                        1L,
                         "JAVA",
                         "Update Code"
                 )
