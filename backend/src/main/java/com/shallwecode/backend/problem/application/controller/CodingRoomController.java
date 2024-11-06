@@ -1,7 +1,7 @@
 package com.shallwecode.backend.problem.application.controller;
 
 import com.shallwecode.backend.problem.application.dto.CodingRoomReqDTO;
-import com.shallwecode.backend.problem.domain.service.CodingRoomDomainService;
+import com.shallwecode.backend.problem.application.service.CodingRoomService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
@@ -17,7 +17,7 @@ import org.springframework.web.bind.annotation.*;
 @RequiredArgsConstructor
 public class CodingRoomController {
 
-    private final CodingRoomDomainService codingRoomDomainService;
+    private final CodingRoomService codingRoomService;
 
     /* 코딩방 등록 */
     @Operation(
@@ -27,7 +27,7 @@ public class CodingRoomController {
     @PostMapping
     public ResponseEntity<String> saveCodingRoom(@RequestBody CodingRoomReqDTO newCodingRoomInfo) {
 
-        codingRoomDomainService.saveCodingRoom(newCodingRoomInfo);
+        codingRoomService.saveCodingRoom(newCodingRoomInfo);
         return new ResponseEntity<>("코딩방 생성 완료", HttpStatus.CREATED);
     }
 
@@ -41,7 +41,7 @@ public class CodingRoomController {
 
         // 호스트인지 여부를 확인해야 함
 
-        codingRoomDomainService.deleteCodingRoom(codingroomId);
+        codingRoomService.deleteCodingRoom(codingroomId);
         return ResponseEntity.noContent().build();
 
     }
