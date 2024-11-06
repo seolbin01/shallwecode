@@ -1,12 +1,15 @@
 package com.shallwecode.backend.problem.domain.service;
 
 import com.querydsl.core.types.Projections;
+import com.querydsl.core.types.dsl.Expressions;
+import com.querydsl.jpa.JPAExpressions;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import com.shallwecode.backend.problem.application.dto.CodingRoomReqDTO;
 import com.shallwecode.backend.problem.application.dto.FindMyCodingRoomResDTO;
 import com.shallwecode.backend.problem.domain.aggregate.CodingRoom;
 import com.shallwecode.backend.problem.domain.aggregate.QCodingRoom;
 import com.shallwecode.backend.problem.domain.aggregate.QCoop;
+import com.shallwecode.backend.problem.domain.aggregate.QProblem;
 import com.shallwecode.backend.problem.domain.repository.CodingRoomRepository;
 import com.shallwecode.backend.problem.domain.repository.CoopRepository;
 import jakarta.transaction.Transactional;
@@ -51,15 +54,21 @@ public class CodingRoomDomainService {
 
         QCodingRoom codingRoom = QCodingRoom.codingRoom;
         QCoop coop = QCoop.coop;
+        QProblem problem = QProblem.problem;
 
         return queryFactory
                 .select(Projections.constructor(FindMyCodingRoomResDTO.class,
-                        coop.userId,
                         codingRoom.codingRoomId,
-                        codingRoom.problemId,
-                        codingRoom.isOpen))
+                        problem.title,
+                        codingRoom.isOpen,
+                        Expressions.asNumber(
+                                JPAExpressions.select(coop.userId.count())
+                                        .from(coop)
+                                        .where(coop.codingRoomId.eq(codingRoom.codingRoomId))
+                        ).intValue()))
                 .from(codingRoom)
                 .join(coop).on(codingRoom.codingRoomId.eq(coop.codingRoomId))
+                .join(problem).on(codingRoom.problemId.eq(problem.problemId))
                 .where(coop.userId.eq(userId))
                 .fetch();
     }
