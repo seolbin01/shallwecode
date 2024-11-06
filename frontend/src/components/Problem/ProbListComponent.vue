@@ -8,11 +8,18 @@ const props = defineProps({
     required: true
   }
 });
+
+const emit = defineEmits(['problemSearch']);
+
+const problemSearch = (searchParam) => {
+  emit('problemSearch', searchParam);
+};
+
 </script>
 
 <template>
   <!-- 필터바 -->
-  <SearchBar />
+  <SearchBar @problemSearch="problemSearch" />
 
   <!-- 문제 테이블 -->
   <table class="table">
