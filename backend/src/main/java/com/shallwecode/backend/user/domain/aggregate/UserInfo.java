@@ -3,6 +3,7 @@ package com.shallwecode.backend.user.domain.aggregate;
 import jakarta.persistence.*;
 import lombok.Builder;
 import lombok.Getter;
+import lombok.Setter;
 import lombok.ToString;
 
 import java.util.Date;
