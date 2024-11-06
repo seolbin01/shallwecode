@@ -1,9 +1,6 @@
 package com.shallwecode.backend.problem.application.controller;
 
-import com.shallwecode.backend.problem.application.dto.FindMyProblemResDTO;
-import com.shallwecode.backend.problem.application.dto.ProblemOneResDTO;
-import com.shallwecode.backend.problem.application.dto.ProblemReqDTO;
-import com.shallwecode.backend.problem.application.dto.ProblemListResDTO;
+import com.shallwecode.backend.problem.application.dto.*;
 import com.shallwecode.backend.problem.application.service.ProblemService;
 import com.shallwecode.backend.problem.domain.service.ProblemDomainService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -24,7 +21,6 @@ import java.util.List;
 public class ProblemController {
 
     private final ProblemService problemService;
-    private final ProblemDomainService problemDomainService;
 
     /* 문제 등록 */
     @Operation(
@@ -96,13 +92,22 @@ public class ProblemController {
             description = "문제 목록을 조회하는 기능입니다."
     )
     @GetMapping("/adminList")
-    public ResponseEntity<ProblemListResDTO> selectProblemList(@RequestParam(defaultValue = "1")Integer page,
-                                  @RequestParam(defaultValue = "10")Long size,
-                                  @RequestParam(required = false)String keyword,
-                                  @RequestParam(required = false)Integer option) {
+    public ResponseEntity<ProblemListResDTO> selectProblemList(@RequestParam(defaultValue = "1") Integer page,
+                                                               @RequestParam(defaultValue = "10") Long size,
+                                                               @RequestParam(required = false) String keyword,
+                                                               @RequestParam(required = false) Integer option) {
 
         ProblemListResDTO problemListResDTO = problemService.selectProblemList(page, size, keyword, option);
 
         return ResponseEntity.ok().body(problemListResDTO);
+    }
+
+    @GetMapping("/list")
+    @Operation(summary = "문제 전체 조회", description = "")
+    public ResponseEntity<List<FindProblemResDTO>> findAllProblem() {
+
+        List<FindProblemResDTO> problemList = problemService.findAllProblem();
+
+        return new ResponseEntity<>(problemList, HttpStatus.OK);
     }
 }
