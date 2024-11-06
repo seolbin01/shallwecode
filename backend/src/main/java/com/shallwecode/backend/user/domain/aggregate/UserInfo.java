@@ -2,6 +2,7 @@ package com.shallwecode.backend.user.domain.aggregate;
 
 import jakarta.persistence.*;
 import lombok.Getter;
+import lombok.Setter;
 import lombok.ToString;
 
 import java.util.Date;
@@ -10,6 +11,7 @@ import java.util.List;
 @Entity
 @Table(name="user_info")
 @Getter
+@Setter
 @ToString
 public class UserInfo {
     @Id
