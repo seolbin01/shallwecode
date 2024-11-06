@@ -2,11 +2,9 @@ package com.shallwecode.backend.problem.domain.service;
 
 import com.querydsl.core.BooleanBuilder;
 import com.querydsl.core.types.Projections;
+import com.querydsl.core.types.dsl.Expressions;
 import com.querydsl.jpa.impl.JPAQueryFactory;
-import com.shallwecode.backend.problem.application.dto.FindMyProblemResDTO;
-import com.shallwecode.backend.problem.application.dto.ProblemDTO;
-import com.shallwecode.backend.problem.application.dto.ProblemOneResDTO;
-import com.shallwecode.backend.problem.application.dto.ProblemReqDTO;
+import com.shallwecode.backend.problem.application.dto.*;
 import com.shallwecode.backend.problem.domain.aggregate.Problem;
 import com.shallwecode.backend.problem.domain.aggregate.QProblem;
 import com.shallwecode.backend.problem.domain.aggregate.QTry;
@@ -29,6 +27,7 @@ public class ProblemDomainService {
     private final TestcaseRepository testCaseRepository;
     private final ModelMapper modelMapper;
     private final JPAQueryFactory queryFactory;
+    private final ProblemRepository problemRepository;
 
     @Transactional
     public void saveProblem(ProblemReqDTO newProblem) {
@@ -145,5 +144,18 @@ public class ProblemDomainService {
         return queryFactory.select(qProblem.problemId.count())
                 .from(qProblem)
                 .fetchOne();
+    }
+
+    public List<FindProblemResDTO> findAllProblem() {
+
+        QProblem problem = QProblem.problem;
+
+        return queryFactory
+                .select(Projections.constructor(FindProblemResDTO.class,
+                        problem.problemId,
+                        problem.title,
+                        problem.problemLevel))
+                .from(problem)
+                .fetch();
     }
 }
