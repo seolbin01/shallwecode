@@ -13,18 +13,14 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.List;
+
 @Service
 @RequiredArgsConstructor
 public class UserService implements UserDetailsService {
     private final UserDomainService userDomainService;
     private final UserRepository userRepository;
     private final ModelMapper modelMapper;
-
-
-    @Override
-    public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
-        return null;
-    }
 
     // 회원 가입
     @Transactional
@@ -49,34 +45,15 @@ public class UserService implements UserDetailsService {
         userDomainService.deleteUser(userId);
     }
 
+    // 회원 상세 조회
+    @Override
+    public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
+        return null;
+    }
 
-//    private final BCryptPasswordEncoder passwordEncoder;
-//    private final UserRepository userRepository;
-//
-//    @Transactional
-//    public void createUser(CreateUserReqDTO newUser) {
-//        UserEntity user = modelMapper.map(newUser, UserEntity.class);
-//        user.encryptPassword(passwordEncoder.encode(newUser.getPwd()));
-//        userRepository.save(user);
-//    }
-//
-//    /* 로그인 요청 시 AuthenticationManager를 통해서 호출 될 메소드 */
-//    @Override
-//    public UserDetails loadUserByUsername(String userId) throws UsernameNotFoundException {
-//        /* 인증 토큰에 담긴 userId가 메소드로 넘어오므로 해당 값을 기준으로 DB에서 조회 한다. */
-//        UserEntity loginUser = userRepository.findByUserId(userId)
-//                .orElseThrow(() -> new UsernameNotFoundException(userId));
-//
-//        List<GrantedAuthority> grantedAuthorities = new ArrayList<>();
-//        grantedAuthorities.add(new SimpleGrantedAuthority(loginUser.getUserRole().name()));
-//
-//        return new User(loginUser.getUserId(), loginUser.getPwd(), grantedAuthorities);
-//    }
-//
-//    public UserInfoResponse getUserInfoById(Long id) {
-//
-//        UserEntity user = userRepository.findById(id).orElseThrow();
-//        return modelMapper.map(user, UserInfoResponse.class);
-//
-//    }
+    // 전체 회원 조회
+    @Transactional(readOnly = true)
+    public List<UserInfo> getAllUsers() {
+        return userRepository.findAll();
+    }
 }
