@@ -9,8 +9,8 @@ import lombok.Setter;
 @AllArgsConstructor
 public class FindMyCodingRoomResDTO {
 
-    private Long userId;
     private Long codingRoomId;
-    private Long problemId;
+    private String problemTitle;
     private boolean isOpen;
+    private int coopCount;
 }
