@@ -13,12 +13,11 @@ public class CodingRoomService {
 
     private final CodingRoomDomainService codingRoomDomainService;
     private final CoopDomainService coopDomainService;
-    private final ProblemService problemService;
 
     public void saveCodingRoom(CodingRoomReqDTO codingRoomReqDTO) {
 
-        // 해당 번호의 문제가 있는지 확인해야 함
-        problemService.selectOneProblem(codingRoomReqDTO.getProblemId());
+        // 해당 번호의 문제가 있는지 확인해야 하지만 프론트에서 문제를 조회해서
+        // 확인 후 문제 생성 예정이므로 패스
 
         Long codingRoomId = codingRoomDomainService.saveCodingRoom(codingRoomReqDTO);
 

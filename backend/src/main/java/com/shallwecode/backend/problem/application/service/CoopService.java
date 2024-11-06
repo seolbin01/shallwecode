@@ -3,6 +3,7 @@ package com.shallwecode.backend.problem.application.service;
 import com.shallwecode.backend.problem.application.dto.CoopDTO;
 import com.shallwecode.backend.problem.application.dto.CoopReqDTO;
 import com.shallwecode.backend.problem.application.dto.CoopResDTO;
+import com.shallwecode.backend.problem.domain.service.CodingRoomDomainService;
 import com.shallwecode.backend.problem.domain.service.CoopDomainService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -14,6 +15,7 @@ import java.util.Objects;
 public class CoopService {
 
     private final CoopDomainService coopDomainService;
+    private final CodingRoomDomainService codingRoomDomainService;
 
     public void saveCoopFriend(Long codingRoomId, Long userId, CoopReqDTO coopReqDTO) {
 
@@ -31,6 +33,13 @@ public class CoopService {
         CoopResDTO findCoop = coopDomainService.findByCoop(codingRoomId, userId);
 
         coopDomainService.delete(findCoop.getCoopId());
+
+        // 코딩방 호스트일 경우 코딩방 제거
+        // 호스트가 아닌 유저가 코딩방에 마지막까지 존재할수는 없음.
+        if(findCoop.isHost()){
+            codingRoomDomainService.deleteCodingRoom(findCoop.getCodingRoomId());
+        }
+
     }
 
     /* 코딩방에서 협업 친구 삭제 */

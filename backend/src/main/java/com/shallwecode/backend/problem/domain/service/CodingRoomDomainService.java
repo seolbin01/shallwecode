@@ -30,7 +30,6 @@ public class CodingRoomDomainService {
     }
 
     // 코딩방 수정 기능은 제공하지 않음.
-
     @Transactional
     public void deleteCodingRoom(Long codingRoomId) {
 
