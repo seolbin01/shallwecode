@@ -1,14 +1,12 @@
 package com.shallwecode.backend.problem.domain.service;
 
-import com.shallwecode.backend.problem.application.dto.ProblemResDTO;
-import com.shallwecode.backend.problem.application.dto.ProblemResListDTO;
+import com.shallwecode.backend.problem.application.dto.ProblemDTO;
+import com.shallwecode.backend.problem.application.dto.ProblemOneResDTO;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 
 import java.util.List;
-
-import static org.junit.jupiter.api.Assertions.*;
 
 @SpringBootTest
 class ProblemDomainServiceTest {
@@ -18,19 +16,19 @@ class ProblemDomainServiceTest {
 
     @Test
     void selectOneProblem() {
-        List<ProblemResDTO> problemResList = problemDomainService.selectOneProblem(1L);
+        List<ProblemOneResDTO> problemResList = problemDomainService.selectOneProblem(1L);
 
-        for(int i = 0; i < problemResList.size(); i++) {
-            System.out.println(problemResList.get(i).toString());
+        for (ProblemOneResDTO problemOneResDTO : problemResList) {
+            System.out.println(problemOneResDTO.toString());
         }
     }
 
     @Test
     void selectProblemList() {
-        List<ProblemResListDTO> problemList = problemDomainService.selectProblemList();
+        List<ProblemDTO> problemList = problemDomainService.selectProblemList(null, null, 1L, 10L);
 
-        for(ProblemResListDTO problemResListDTO : problemList) {
-            System.out.println(problemResListDTO.toString());
+        for(ProblemDTO problemDTO : problemList) {
+            System.out.println(problemDTO.toString());
         }
     }
 }

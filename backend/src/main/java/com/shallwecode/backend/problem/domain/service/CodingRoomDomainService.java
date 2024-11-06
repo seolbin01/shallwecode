@@ -1,7 +1,9 @@
 package com.shallwecode.backend.problem.domain.service;
 
 import com.shallwecode.backend.problem.application.dto.CodingRoomReqDTO;
+import com.shallwecode.backend.problem.application.dto.SendCodeDTO;
 import com.shallwecode.backend.problem.domain.aggregate.CodingRoom;
+import com.shallwecode.backend.problem.domain.aggregate.Problem;
 import com.shallwecode.backend.problem.domain.repository.CodingRoomRepository;
 import com.shallwecode.backend.problem.domain.repository.CoopRepository;
 import jakarta.transaction.Transactional;
@@ -39,4 +41,11 @@ public class CodingRoomDomainService {
 
     }
 
+    /* 코드 실시간 DB 업데이트 */
+    @Transactional
+    public void updateCode(SendCodeDTO sendCodeDTO) {
+        // 코드 수정
+        CodingRoom foundCodingRoom = repository.findById(sendCodeDTO.getCodingRoomId()).orElseThrow(() -> new RuntimeException("해당 코딩방이 존재하지 않습니다."));
+        foundCodingRoom.updateCodeContent(sendCodeDTO.getCodeContent());
+    }
 }
