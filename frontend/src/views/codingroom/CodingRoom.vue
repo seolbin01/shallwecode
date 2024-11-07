@@ -32,6 +32,7 @@ const selectLanguage = (language) => {
   } else if (language.id === 'java') {
     code.value = '// Java code here...';
   }
+  showDropdown.value = true;
 };
 
 const runCode = async () => {
