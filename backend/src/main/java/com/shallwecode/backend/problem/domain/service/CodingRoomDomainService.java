@@ -1,6 +1,14 @@
 package com.shallwecode.backend.problem.domain.service;
 
+import com.querydsl.core.types.Projections;
+import com.querydsl.core.types.dsl.Expressions;
+import com.querydsl.jpa.JPAExpressions;
+import com.querydsl.jpa.impl.JPAQueryFactory;
 import com.shallwecode.backend.problem.application.dto.CodingRoomReqDTO;
+import com.shallwecode.backend.problem.application.dto.FindMyCodingRoomResDTO;
+import com.shallwecode.backend.problem.domain.aggregate.QCodingRoom;
+import com.shallwecode.backend.problem.domain.aggregate.QCoop;
+import com.shallwecode.backend.problem.domain.aggregate.QProblem;
 import com.shallwecode.backend.problem.application.dto.SendCodeDTO;
 import com.shallwecode.backend.problem.domain.aggregate.CodingRoom;
 import com.shallwecode.backend.problem.domain.aggregate.Problem;
@@ -12,6 +20,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.modelmapper.ModelMapper;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
+
 @Slf4j
 @Service
 @RequiredArgsConstructor
@@ -20,6 +30,7 @@ public class CodingRoomDomainService {
     private final CodingRoomRepository repository;
     private final CoopRepository coopRepository;
     private final ModelMapper modelMapper;
+    private final JPAQueryFactory queryFactory;
 
     @Transactional
     public Long saveCodingRoom(CodingRoomReqDTO newCodingRoom) {
@@ -41,6 +52,29 @@ public class CodingRoomDomainService {
 
     }
 
+    public List<FindMyCodingRoomResDTO> findMyCodingRoom(Long userId) {
+
+        QCodingRoom codingRoom = QCodingRoom.codingRoom;
+        QCoop coop = QCoop.coop;
+        QProblem problem = QProblem.problem;
+
+        return queryFactory
+                .select(Projections.constructor(FindMyCodingRoomResDTO.class,
+                        codingRoom.codingRoomId,
+                        problem.title,
+                        codingRoom.isOpen,
+                        Expressions.asNumber(
+                                JPAExpressions.select(coop.userId.count())
+                                        .from(coop)
+                                        .where(coop.codingRoomId.eq(codingRoom.codingRoomId))
+                        ).intValue()))
+                .from(codingRoom)
+                .join(coop).on(codingRoom.codingRoomId.eq(coop.codingRoomId))
+                .join(problem).on(codingRoom.problemId.eq(problem.problemId))
+                .where(coop.userId.eq(userId))
+                .fetch();
+    }
+  
     /* 코드 실시간 DB 업데이트 */
     @Transactional
     public void updateCode(SendCodeDTO sendCodeDTO) {

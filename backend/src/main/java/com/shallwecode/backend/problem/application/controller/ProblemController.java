@@ -91,16 +91,25 @@ public class ProblemController {
             description = "문제 목록을 조회하는 기능입니다."
     )
     @GetMapping("/adminList")
-    public ResponseEntity<ProblemListResDTO> selectProblemList(@RequestParam(defaultValue = "1")Integer page,
-                                  @RequestParam(defaultValue = "10")Long size,
-                                  @RequestParam(required = false)String keyword,
-                                  @RequestParam(required = false)Integer option) {
+    public ResponseEntity<ProblemListResDTO> selectProblemList(@RequestParam(defaultValue = "1") Integer page,
+                                                               @RequestParam(defaultValue = "10") Long size,
+                                                               @RequestParam(required = false) String keyword,
+                                                               @RequestParam(required = false) Integer option) {
 
         ProblemListResDTO problemListResDTO = problemService.selectProblemList(page, size, keyword, option);
 
         return ResponseEntity.ok().body(problemListResDTO);
     }
 
+    @GetMapping("/list")
+    @Operation(summary = "문제 전체 조회", description = "")
+    public ResponseEntity<List<FindProblemResDTO>> findAllProblem() {
+
+        List<FindProblemResDTO> problemList = problemService.findAllProblem();
+
+        return new ResponseEntity<>(problemList, HttpStatus.OK);
+    }
+  
     @Operation(summary = "미시도 문제 개수 조회", description = "시도하지 않는 문제 개수를 조회합니다.")
     @GetMapping("/mylist/notry")
     public ResponseEntity<Long> findAllMyUnTryProblemCount() {
@@ -130,5 +139,4 @@ public class ProblemController {
 
         return new ResponseEntity<>(mySolvedProblemCount, HttpStatus.OK);
     }
-
 }

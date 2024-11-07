@@ -62,4 +62,8 @@ public class ProblemService {
                 .build();
     }
 
+    public List<FindProblemResDTO> findAllProblem() {
+
+        return problemDomainService.findAllProblem();
+    }
 }
