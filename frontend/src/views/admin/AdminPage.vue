@@ -1,9 +1,9 @@
 <script setup>
+import {ref} from "vue"
+import UserListComponent from "@/components/admin/UserListComponent.vue";
 import ProbListComponent from "@/components/admin/ProbListComponent.vue";
-import {reactive, onMounted, ref} from "vue"
-import axios from "axios";
 
-const selectedMenu = ref('myinfo');
+const selectedMenu = ref('user');
 
 const selectMenu = (menu) => {
   selectedMenu.value = menu;
@@ -13,15 +13,16 @@ const selectMenu = (menu) => {
 <template>
   <div class="container">
     <div class="menu-container">
-      <div class="menu-button" :class="{ 'active': selectedMenu === 'myinfo' }" @click="selectMenu('myinfo')">
+      <div class="menu-button" :class="{ 'active': selectedMenu === 'user' }" @click="selectMenu('user')">
         <a>회원 관리</a>
       </div>
-      <div class="menu-button" :class="{ 'active': selectedMenu === 'problem' }" @click="selectMenu('friend')">
+      <div class="menu-button" :class="{ 'active': selectedMenu === 'problem' }" @click="selectMenu('problem')">
         <a>문제 관리</a>
       </div>
     </div>
     <div class="content">
-      <ProbListComponent/>
+      <UserListComponent v-if="selectedMenu === 'user'"/>
+      <ProbListComponent v-else-if="selectedMenu === 'problem'"/>
     </div>
   </div>
 </template>
@@ -54,12 +55,13 @@ body {
   border: 1px solid var(--gray-line);
 }
 
-.menu-content {
-  flex: 1;
-  min-width: 300px;
-  max-width: 1035px;
-  background-color: var(--background-color);
+.content {
+  flex-grow: 1;
+  background-color: #ffffff;
   padding: 20px;
+  border-radius: 10px;
+  border: 1px solid #ddd;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
 }
 
 .menu-button {
@@ -83,14 +85,5 @@ body {
 
 .menu-button:not(:last-child) {
   border-bottom: 1px solid var(--gray-line);
-}
-
-.content {
-  flex-grow: 1;
-  background-color: #ffffff;
-  padding: 20px;
-  border-radius: 10px;
-  border: 1px solid #ddd;
-  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
 }
 </style>

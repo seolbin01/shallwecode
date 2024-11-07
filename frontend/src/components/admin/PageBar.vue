@@ -1,7 +1,6 @@
 <script setup>
 import { computed } from 'vue';
 
-/* 부모 컴포넌트로부터 전달 받음 */
 const props = defineProps({
   currentPage: {
     type: Number,
@@ -17,7 +16,6 @@ const props = defineProps({
   }
 });
 
-/* 부모 컴포넌트로 이벤트 전달 */
 const emit = defineEmits(['page-changed']);
 
 const changePage = (page) => {
@@ -28,9 +26,9 @@ const changePage = (page) => {
 
 const visiblePages = computed(() => {
   const pages = [];
-  const range = 5; // 현재 페이지를 기준으로 몇개의 페이지를 표시할 갯수
-  const start = Math.max(1, props.currentPage - range); // max 는 페이지 값이 음수가 나오지 않고 1로 나올 수 있게 보장하기 위함.
-  const end = Math.min(props.totalPages, props.currentPage + range); // min 은 페이지 값이 오버되지 않도록 할 수 있게 함.
+  const range = 5;
+  const start = Math.max(1, props.currentPage - range);
+  const end = Math.min(props.totalPages, props.currentPage + range);
 
   for(let i = start; i <= end; i++) {
     pages.push(i);
@@ -41,7 +39,6 @@ const visiblePages = computed(() => {
 </script>
 
 <template>
-  <!-- 페이지네이션 -->
   <div class="pagination">
     <button
       :disabled="currentPage === 1"
