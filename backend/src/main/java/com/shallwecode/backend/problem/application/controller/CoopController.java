@@ -1,5 +1,7 @@
 package com.shallwecode.backend.problem.application.controller;
 
+import com.shallwecode.backend.problem.application.dto.CoopUserResDTO;
+import com.shallwecode.backend.problem.application.dto.CoopUserResListDTO;
 import com.shallwecode.backend.problem.application.service.CoopService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -7,6 +9,8 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 @RestController
 @RequestMapping("/api/v1/codingroom")
@@ -43,4 +47,10 @@ public class CoopController {
         return ResponseEntity.noContent().build();
     }
 
+    @Operation(summary = "협업 친구 조회하기", description = "코딩방에 있는 협업 친구를 조회한다.")
+    @GetMapping("{codingRoomId}")
+    public ResponseEntity<CoopUserResListDTO> selectCoopFriend(@PathVariable Long codingRoomId) {
+        List<CoopUserResDTO> coopUserList = coopService.selectCoopFriend(codingRoomId);
+        return ResponseEntity.ok().body(new CoopUserResListDTO("조회 성공", coopUserList));
+    }
 }
