@@ -4,6 +4,7 @@ import Home from "@/views/Home.vue";
 
 import userRoutes from './user.js';
 import adminRoutes from './admin.js';
+import codingroomRoutes from "./codingroom.js";
 
 const routes = [
     {
@@ -11,7 +12,8 @@ const routes = [
         component: Home
     },
     ...userRoutes,
-    ...adminRoutes
+    ...adminRoutes,
+    ...codingroomRoutes
 ];
 
 const router = createRouter({
