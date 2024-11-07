@@ -118,7 +118,7 @@ public class ChatHandler extends TextWebSocketHandler {
 
     /* WebSocket 연결이 해제 되었을 때 */
     @Override
-    public void afterConnectionClosed(@NonNull WebSocketSession session, @NonNull CloseStatus status) throws Exception {
+    public void afterConnectionClosed(@NonNull WebSocketSession session, @NonNull CloseStatus status) {
         // 코딩방 Id 추출
         Integer codingRoomId = getCodingRoomUniqueNum(session);
 
