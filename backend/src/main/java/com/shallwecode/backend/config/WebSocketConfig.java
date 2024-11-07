@@ -18,6 +18,6 @@ public class WebSocketConfig implements WebSocketConfigurer {
     /* 핸들러 등록 */
     @Override
     public void registerWebSocketHandlers(@NonNull WebSocketHandlerRegistry registry) {
-        registry.addHandler(chatHandler, "ws/coding-room/#{codingRoomId}").setAllowedOrigins("*");
+        registry.addHandler(chatHandler, "ws/coding-room/{codingRoomId}").setAllowedOrigins("*");
     }
 }
