@@ -10,6 +10,11 @@ const messages = ref([]);
 const newMessage = ref('');
 const isTyping = ref(false);
 
+// 보낸 사람 이름 찾기 함수
+const getSenderName = (senderType) => {
+  return participants.value.find(p => p.type === senderType)?.name || '';
+};
+
 // 채팅 메시지 전송 함수
 const sendMessage = () => {
   if (newMessage.value.trim()) {
@@ -17,6 +22,7 @@ const sendMessage = () => {
       id: Date.now(),
       text: newMessage.value,
       sender: 'user',
+      senderName: getSenderName('user'),
       timestamp: new Date().toLocaleTimeString()
     });
     newMessage.value = '';
@@ -28,6 +34,7 @@ const sendMessage = () => {
         id: Date.now(),
         text: "코드에 대해 도움이 필요하시다면 말씀해 주세요!",
         sender: 'other',
+        senderName: getSenderName('other'),
         timestamp: new Date().toLocaleTimeString()
       });
       isTyping.value = false;
@@ -62,6 +69,7 @@ const sendMessage = () => {
           <div v-for="message in messages"
                :key="message.id"
                :class="['message', message.sender]">
+            <div class="sender-name">{{ message.senderName }}</div>
             <div class="message-content">
               {{ message.text }}
             </div>
@@ -92,7 +100,6 @@ const sendMessage = () => {
 </template>
 
 <style scoped>
-
 .chat-layout {
   display: flex;
   flex-direction: row;
@@ -185,6 +192,21 @@ const sendMessage = () => {
   color: #FFD700;
 }
 
+.sender-name {
+  font-size: 0.8em;
+  margin-bottom: 4px;
+  font-weight: 500;
+}
+
+.message.user .sender-name {
+  color: #FFD700;
+  text-align: right;
+}
+
+.message.other .sender-name {
+  color: #4CAF50;
+}
+
 .messages-section {
   flex: 1;
   display: flex;
@@ -202,6 +224,7 @@ const sendMessage = () => {
 }
 
 .message {
+  font-size: 12px;
   max-width: 100%;
   padding: 8px 12px;
   border-radius: 12px;
