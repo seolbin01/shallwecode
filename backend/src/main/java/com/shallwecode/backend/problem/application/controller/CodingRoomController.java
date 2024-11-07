@@ -3,7 +3,6 @@ package com.shallwecode.backend.problem.application.controller;
 import com.shallwecode.backend.problem.application.dto.CodingRoomReqDTO;
 import com.shallwecode.backend.problem.application.dto.FindMyCodingRoomResDTO;
 import com.shallwecode.backend.problem.application.service.CodingRoomService;
-import com.shallwecode.backend.problem.domain.service.CodingRoomDomainService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
@@ -42,8 +41,6 @@ public class CodingRoomController {
     )
     @DeleteMapping("/{codingroomId}")
     public ResponseEntity<String> deleteCodingRoom(@PathVariable Long codingroomId) {
-
-        // 호스트인지 여부를 확인해야 함
 
         codingRoomService.deleteCodingRoom(codingroomId);
         return ResponseEntity.noContent().build();

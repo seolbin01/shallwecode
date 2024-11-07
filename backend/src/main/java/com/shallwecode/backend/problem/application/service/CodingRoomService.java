@@ -1,7 +1,11 @@
 package com.shallwecode.backend.problem.application.service;
 
+import com.shallwecode.backend.common.exception.CustomException;
+import com.shallwecode.backend.common.exception.ErrorCode;
+import com.shallwecode.backend.problem.application.dto.CoopResDTO;
 import com.shallwecode.backend.problem.application.dto.FindMyCodingRoomResDTO;
 import com.shallwecode.backend.problem.domain.service.CodingRoomDomainService;
+import com.shallwecode.backend.problem.domain.service.CoopDomainService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import com.shallwecode.backend.problem.application.dto.CodingRoomReqDTO;
@@ -13,13 +17,12 @@ import java.util.List;
 public class CodingRoomService {
 
     private final CodingRoomDomainService codingRoomDomainService;
+    private final CoopDomainService coopDomainService;
 
     public List<FindMyCodingRoomResDTO> findMyCodingRoom(Long userId) {
 
         return codingRoomDomainService.findMyCodingRoom(userId);
     }
-  
-    private final CoopDomainService coopDomainService;
 
     public void saveCodingRoom(CodingRoomReqDTO codingRoomReqDTO) {
 
@@ -28,7 +31,7 @@ public class CodingRoomService {
 
         Long codingRoomId = codingRoomDomainService.saveCodingRoom(codingRoomReqDTO);
 
-        // 연관된 협업 친구 저장
+        // 호스트 정보 협업 친구 테이블에 저장하기
         Long loginUserId = 3L; // 로그인 유저 가져오기
 
         CoopDTO coopDTO = new CoopDTO();
@@ -41,6 +44,14 @@ public class CodingRoomService {
     }
 
     public void deleteCodingRoom(Long codingRoomId) {
+
+        // 호스트인지 여부를 확인해야 함
+        Long loginUserId = 3L;
+        CoopResDTO UserInfo = coopDomainService.findByCoop(codingRoomId, loginUserId);
+
+        if (!UserInfo.isHost()) {
+            throw new CustomException(ErrorCode.NOT_HOST);
+        }
 
         codingRoomDomainService.deleteCodingRoom(codingRoomId);
 
