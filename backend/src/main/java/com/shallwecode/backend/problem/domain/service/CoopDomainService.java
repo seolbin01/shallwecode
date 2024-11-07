@@ -24,9 +24,17 @@ public class CoopDomainService {
     }
 
     @Transactional
-    public CoopResDTO findByCoop(Long codingRoomId,Long userId) {
+    public CoopResDTO findByCoop(Long codingRoomId, Long userId) {
 
         return modelMapper.map(coopRepository.findByCodingRoomIdAndUserId(codingRoomId, userId), CoopResDTO.class);
+
+    }
+
+    @Transactional
+    public CoopResDTO findCoopByCoopId(Long codingRoomId, Long coopId) {
+
+        return modelMapper.map(coopRepository.findByCodingRoomIdAndCoopId(codingRoomId, coopId), CoopResDTO.class);
+
     }
 
     @Transactional
