@@ -2,6 +2,7 @@ package com.shallwecode.backend.problem.application.service;
 
 import com.shallwecode.backend.problem.application.dto.FindMyCodingRoomResDTO;
 import com.shallwecode.backend.problem.domain.service.CodingRoomDomainService;
+import com.shallwecode.backend.problem.domain.service.CoopDomainService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import com.shallwecode.backend.problem.application.dto.CodingRoomReqDTO;
