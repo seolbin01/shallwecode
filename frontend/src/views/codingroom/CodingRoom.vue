@@ -1,7 +1,7 @@
 <script setup>
 import CodeEditor from "@/components/codingroom/CodeEditor.vue";
 import ProblemDescription from "@/components/codingroom/ProblemDescription.vue";
-import Chat from "@/components/codingroom/Chat.vue";
+import Chat from "@/components/codingroom/ChatArea.vue";
 </script>
 
 <template>
