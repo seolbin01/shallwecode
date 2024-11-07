@@ -1,9 +1,42 @@
 <script setup>
-import {ref} from "vue";
+import {computed, onMounted, ref} from "vue";
+import axios from "axios";
 
 const username = ref('반짝이는 성운');
 const email = ref('testuser01@naver.com');
-const stats = ref({ challenge: 3, unSolved: 154, solved: 3 });
+
+const noTryCount = ref(0);
+const unSolvedCount = ref(0);
+const SolvedCount = ref(0);
+const stats = ({
+  challenge: computed(() => noTryCount.value),
+  unSolved: computed(() => unSolvedCount.value),
+  solved: computed(() => SolvedCount.value)
+});
+
+const fetchTryProblemCount = async () => {
+  try {
+    const noTryResponse = await axios.get('http://localhost:8080/api/v1/problem/mylist/notry');
+    noTryCount.value = noTryResponse.data;
+  } catch (error) {
+    console.error('미시도 문제 목록 개수를 불러오는데 에러가 발생했습니다.', error.response ? error.response.data : error.message);
+  }
+
+  try {
+    const unSolvedResponse = await axios.get('http://localhost:8080/api/v1/problem/mylist/unsolved');
+    unSolvedCount.value = unSolvedResponse.data;
+  } catch (error) {
+    console.error('미해결 문제 목록 개수를 불러오는데 에러가 발생했습니다.', error.response ? error.response.data : error.message);
+  }
+
+  try {
+    const solvedResponse = await axios.get('http://localhost:8080/api/v1/problem/mylist/solved');
+    SolvedCount.value = solvedResponse.data;
+  } catch (error) {
+    console.error('해결된 문제 목록 개수를 불러오는데 에러가 발생했습니다.', error.response ? error.response.data : error.message);
+  }
+};
+
 const isEditing = ref(false);
 const tempUsername = ref('');
 
@@ -15,7 +48,13 @@ const handleUpdateClick = () => {
     tempUsername.value = username.value;
     isEditing.value = true;
   }
+
 }
+
+onMounted(() => {
+  fetchTryProblemCount();
+});
+
 </script>
 
 <template>
