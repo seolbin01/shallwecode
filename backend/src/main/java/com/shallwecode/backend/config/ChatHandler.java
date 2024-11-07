@@ -1,6 +1,9 @@
 package com.shallwecode.backend.config;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.shallwecode.backend.common.exception.CustomException;
+import com.shallwecode.backend.common.exception.ErrorCode;
+import com.shallwecode.backend.problem.application.dto.SendChatDTO;
 import com.shallwecode.backend.problem.application.dto.SendCodeDTO;
 import com.shallwecode.backend.problem.domain.service.CodingRoomDomainService;
 import lombok.NonNull;
@@ -13,6 +16,7 @@ import org.springframework.web.socket.WebSocketSession;
 import org.springframework.web.socket.handler.TextWebSocketHandler;
 
 import java.io.IOException;
+import java.time.LocalDateTime;
 import java.util.*;
 
 @Component
@@ -24,9 +28,6 @@ public class ChatHandler extends TextWebSocketHandler {
     /* JSON -> 객체
      * 객체 -> JSON 변환해주는 Mapper */
     private final ObjectMapper objectMapper;
-
-    /* 코딩방에 접속한 Session 을 추적 관리할 List */
-    private final List<WebSocketSession> userList = new ArrayList<>();
 
     /* 코딩방 별 채팅을 구분하기 위한 Session Map */
     private final Map<Integer, List<WebSocketSession>> codingRoomSessionMap = new HashMap<>();
@@ -46,15 +47,37 @@ public class ChatHandler extends TextWebSocketHandler {
         /* type 추출 */
         String type = jsonObject.getString("type");
 
+        /* 프론트에서 요청되어 수신되는 예상 데이터 (채팅)
+         * type : 타입여부
+         * userId : 유저아이디
+         * userNickname : 유저닉네임
+         * chatContent : 채팅 메시지
+         * */
         if(type.equals("chat")) {
-            /* 채팅은 별도의 작업없이 바로 모든 Session 에게 채팅 메시지 전달 */
-            sendMessageAllSession(sessionsInRoom, message);
+            /* sendChatDTO 객체로 변환 */
+            SendChatDTO sendChatDTO = objectMapper.readValue(payload, SendChatDTO.class);
+
+            /* 보낸 시간 기록 */
+            sendChatDTO.setSendTime(LocalDateTime.now());
+
+            /* JSON 으로 직렬화하여 클라이언트에 전송할 채팅 준비 */
+            String responsePayload = objectMapper.writeValueAsString(sendChatDTO);
+
+            /* 해당 방 모든 세션에 채팅 전송 */
+            sendMessageAllSession(sessionsInRoom, new TextMessage(responsePayload));
         } else if(type.equals("code")){
             /* 아니라면 코드이므로 코딩방에 협업 코드를 실시간으로 통신하고 DB에 갱신해야 함. */
+            /* 프론트에서 요청되어 수신되는 예상 데이터 (채팅)
+             * type : 타입여부
+             * problemId : 문제번호
+             * codingRoomId : 코딩방 번호
+             * tryLanguage : 시도한 언어
+             * codeContent : 작성된 코드
+             * */
             /* 먼저 데이터를 송신한다. */
             sendMessageAllSession(sessionsInRoom, message);
 
-            /* JSON 데이터를 SendMessageDTO 객체로 변환 */
+            /* JSON 데이터를 sendCodeDTO 객체로 변환 */
             SendCodeDTO sendCodeDTO = objectMapper.readValue(payload, SendCodeDTO.class);
 
             /* 코드 DB에 저장 */
@@ -66,13 +89,46 @@ public class ChatHandler extends TextWebSocketHandler {
     * 채팅방 별로 관리할 List 에 추가 함. */
     @Override
     public void afterConnectionEstablished(@NonNull WebSocketSession session) throws Exception {
-        codingRoomSessionMap.computeIfAbsent(getCodingRoomUniqueNum(session), k -> userList).add(session);
+        /* 코딩방 Id 추출 */
+        Integer codingRoomId = getCodingRoomUniqueNum(session);
+
+        /* 코딩방 세션 추출 */
+        List<WebSocketSession> sessionsInRoom = codingRoomSessionMap.get(codingRoomId);
+
+        if(sessionsInRoom != null)
+            System.out.println(sessionsInRoom.size());
+
+        /* 세션이 비었거나 또는 Null 그리고 5명 이하라면 세션 추가 */
+        if(sessionsInRoom == null || sessionsInRoom.isEmpty()) {
+            codingRoomSessionMap.computeIfAbsent(getCodingRoomUniqueNum(session), k -> new ArrayList<>()).add(session);
+        } else if(sessionsInRoom.size() < 5){
+            /* 비어있지 않다면 해당 방 세션 리스트에 세션 추가 */
+            sessionsInRoom.add(session);
+        } else {
+            try {
+                /* 5명 이상으로 갈 시 제한 인원 초과한 예외 발생 */
+                throw new CustomException(ErrorCode.TOO_MANY_REQUESTS_ROOM);
+            }catch(CustomException e) {
+                /* 에러 메시지 해당 클라이언트에게 전송 */
+                session.sendMessage(new TextMessage("해당 코딩방의 인원이 가득 찼습니다."));
+                session.close();
+            }
+        }
     }
 
     /* WebSocket 연결이 해제 되었을 때 */
     @Override
     public void afterConnectionClosed(@NonNull WebSocketSession session, @NonNull CloseStatus status) throws Exception {
-        userList.remove(session);
+        // 코딩방 Id 추출
+        Integer codingRoomId = getCodingRoomUniqueNum(session);
+
+        // 해당 세션 리스트 추출
+        List<WebSocketSession> sessionsInRoom = codingRoomSessionMap.get(codingRoomId);
+
+        // 해당 session 삭제
+        if(sessionsInRoom != null) {
+            sessionsInRoom.remove(session);
+        }
     }
 
     /* url 에서 code 방 고유번호 추출 */
