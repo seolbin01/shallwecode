@@ -1,6 +1,6 @@
 <script setup>
-import SideComponent from "@/components/Problem/SideComponent.vue";
-import ProbListComponent from "@/components/Problem/ProbListComponent.vue";
+import SideComponent from "@/components/admin/SideComponent.vue";
+import ProbListComponent from "@/components/admin/ProbListComponent.vue";
 import {reactive, onMounted} from "vue"
 import axios from "axios";
 

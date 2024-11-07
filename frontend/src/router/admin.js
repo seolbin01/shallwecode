@@ -1,4 +1,4 @@
-import AdminProbList from "@/views/Problem/AdminProbList.vue";
+import AdminProbList from "@/views/admin/AdminProbList.vue";
 
 export default [
     {

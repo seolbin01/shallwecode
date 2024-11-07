@@ -1,7 +1,7 @@
 <script setup>
-import SearchBar from "@/components/Problem/SearchBar.vue";
-import ProbListItemComponent from "@/components/Problem/ProbListItemComponent.vue";
-import PageBar from "@/components/Problem/PageBar.vue";
+import SearchBar from "@/components/admin/SearchBar.vue";
+import ProbListItemComponent from "@/components/admin/ProbListItemComponent.vue";
+import PageBar from "@/components/admin/PageBar.vue";
 
 const props = defineProps({
   problemList: {
