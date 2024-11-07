@@ -22,7 +22,9 @@ public enum ErrorCode {
     NOT_INVITE_FRIEND(HttpStatus.CONFLICT, "친구만 코딩방에 초대할 수 있습니다."),
     NOT_HOST(HttpStatus.NOT_FOUND, "호스트가 아닙니다."),
     NOT_FIRED_SELF(HttpStatus.BAD_REQUEST, "자기 자신을 강퇴할 수 없습니다."),
-    NOT_COOP_USER(HttpStatus.NOT_FOUND, "코딩방에 해당 유저가 존재하지 않습니다.");
+    NOT_GUEST_COOP_USER(HttpStatus.NOT_FOUND, "해당 게스트 유저가 존재하지 않습니다."),
+    NOT_HOST_COOP_USER(HttpStatus.NOT_FOUND, "코딩방에 존재하지 않는 유저입니다. 해당 코딩방의 다른 유저를 강퇴할 수 없습니다. "),
+    NOT_AUTH_HOST(HttpStatus.BAD_REQUEST, "코딩방 게스트 유저는 강퇴 기능을 사용할 수 없습니다.");
 
 
     private final HttpStatus httpStatus;

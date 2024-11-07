@@ -72,19 +72,18 @@ public class CoopService {
         // coopId 값으로 조회한 결과를 반환
         CoopResDTO userInfo = coopDomainService.findCoopByCoopId(codingRoomId, coopId);
         if (userInfo == null) {
-            throw new CustomException(ErrorCode.NOT_COOP_USER);
+            throw new CustomException(ErrorCode.NOT_GUEST_COOP_USER);
         }
 
-        CoopResDTO hostInfo = coopDomainService.findByCoop(codingRoomId, loginUserId);
 
-        // 해당 유저는 호스트가 아닙니다 라는 에러 메세지로 바꿔야함
+        CoopResDTO hostInfo = coopDomainService.findByCoop(codingRoomId, loginUserId);
         if (hostInfo == null) {
-            throw new CustomException(ErrorCode.NOT_COOP_USER);
+            throw new CustomException(ErrorCode.NOT_HOST_COOP_USER);
         }
 
         // 호스트 여부 확인
         if (!hostInfo.isHost()) {
-            throw new CustomException(ErrorCode.NOT_HOST);
+            throw new CustomException(ErrorCode.NOT_AUTH_HOST);
         }
 
         // 2. 자기 자신인지 확인
