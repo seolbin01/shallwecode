@@ -8,15 +8,42 @@ const friendItemsPerPage = 2
 const ROWS_PER_PAGE = 7;
 const searchQuery = ref('');
 
+const noTryCount = ref(0);
+const unSolvedCount = ref(0);
+const SolvedCount = ref(0);
+
 const userProfile = ref({
   userId: 'USER01',
   email: 'testuser01@naver.com',
   stats: {
-    pendingIssues: 3,
-    unresolvedIssues: 154,
-    resolvedIssues: 3
+    pendingIssues: computed(() => noTryCount.value),
+    unresolvedIssues: computed(() => unSolvedCount.value),
+    resolvedIssues: computed(() => SolvedCount.value)
   }
-})
+});
+
+const fetchTryProblemCount = async () => {
+  try {
+    const noTryResponse = await axios.get('http://localhost:8080/api/v1/problem/mylist/notry');
+    noTryCount.value = noTryResponse.data;
+  } catch (error) {
+    console.error('미시도 문제 목록 개수를 불러오는데 에러가 발생했습니다.', error.response ? error.response.data : error.message);
+  }
+
+  try {
+    const unSolvedResponse = await axios.get('http://localhost:8080/api/v1/problem/mylist/unsolved');
+    unSolvedCount.value = unSolvedResponse.data;
+  } catch (error) {
+    console.error('미해결 문제 목록 개수를 불러오는데 에러가 발생했습니다.', error.response ? error.response.data : error.message);
+  }
+
+  try {
+    const solvedResponse = await axios.get('http://localhost:8080/api/v1/problem/mylist/solved');
+    SolvedCount.value = solvedResponse.data;
+  } catch (error) {
+    console.error('해결된 문제 목록 개수를 불러오는데 에러가 발생했습니다.', error.response ? error.response.data : error.message);
+  }
+};
 
 const friendsList = ref([
   {id: 1, username: 'user02'},
@@ -53,7 +80,7 @@ const users = ref([]);
 
 const fetchUserList = async () => {
   try {
-    const response = await axios.get('http://localhost:8080/api/v1/user/list');
+    const response = await axios.get('http://localhost:8080/api/v1/user');
     users.value = response.data;
   } catch (error) {
     console.error('회원 목록을 불러오는 중 에러가 발생했습니다.', error.response ? error.response.data : error.message);
@@ -85,6 +112,7 @@ const changeUserPage = (page) => {
 };
 
 onMounted(() => {
+  fetchTryProblemCount();
   fetchUserList();
 });
 </script>
@@ -241,11 +269,6 @@ onMounted(() => {
 }
 
 .search-area {
-  margin-bottom: 12px;
-  text-align: center;
-}
-
-.filter-area {
   margin-bottom: 12px;
   text-align: center;
 }
