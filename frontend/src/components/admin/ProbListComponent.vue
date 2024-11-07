@@ -2,30 +2,56 @@
 import SearchBar from "@/components/admin/SearchBar.vue";
 import ProbListItemComponent from "@/components/admin/ProbListItemComponent.vue";
 import PageBar from "@/components/admin/PageBar.vue";
+import {onMounted, ref} from "vue";
+import axios from "axios";
 
-const props = defineProps({
-  problemList: {
-    type: Array,
-    required: true
-  },
-  currentPage: Number,
-  totalPages: Number,
-  totalItems: Number
-});
+const problemList = ref([]);
+const currentPage = ref(0);
+const totalPages = ref(0);
+const totalItems = ref(0);
+const keyword = ref('');
+const option = ref('');
 
-const emit = defineEmits(['problemSearch']);
+const token = ref('');
 
-const problemSearch = (searchParam) => {
-  emit('problemSearch', searchParam);
-};
+const fetchProblemList = async (page = 1) => {
+  try {
+    const response = await axios.get(`http://localhost:8080/api/v1/problem/adminList`, {
+      headers: {
+        Authorization: `Bearer ${token.value}`
+      },
+      params: {
+        page,
+        keyword: keyword.value,
+        option: option.value
+      },
+      withCredentials: true
+    });
+
+    problemList.value = response.data.problemList;
+    currentPage.value = response.data.currentPage;
+    totalPages.value = response.data.totalPages;
+    totalItems.value = response.data.totalItems;
+  } catch (error) {
+    console.error('문제 목록을 불러오는데 문제가 발생했습니다.');
+  }
+}
+
+const problemSearch = (searchParams) => {
+  keyword.value = searchParams.keyword;
+  option.value = searchParams.option;
+  fetchProblemList(1);
+}
+
+onMounted(async () => {
+  await fetchProblemList();
+})
 
 </script>
 
 <template>
-  <!-- 필터바 -->
   <SearchBar @problemSearch="problemSearch" />
 
-  <!-- 문제 테이블 -->
   <table class="table">
     <thead>
     <tr>
@@ -37,13 +63,12 @@ const problemSearch = (searchParam) => {
     </tr>
     </thead>
     <tbody>
-    <ProbListItemComponent v-for="problem in props.problemList" :key="problem.problemId" :problem="problem"/>
+    <ProbListItemComponent v-for="problem in problemList" :key="problem.problemId" :problem="problem"/>
     </tbody>
   </table>
-  <!-- 페이징바 -->
-  <PageBar :currentPage="props.currentPage"
-           :totalPages="props.totalPages"
-           :totalItems="props.totalItems"
+  <PageBar :currentPage="currentPage"
+           :totalPages="totalPages"
+           :totalItems="totalItems"
           @page-change="problemSearch"/>
 </template>
 

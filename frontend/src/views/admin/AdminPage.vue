@@ -8,50 +8,6 @@ const selectedMenu = ref('myinfo');
 const selectMenu = (menu) => {
   selectedMenu.value = menu;
 };
-
-const adminProblemList = reactive({
-  problemList: [],
-  currentPage: 0,
-  totalPages: 0,
-  totalItems: 0,
-  keyword: '',
-  option: ''
-});
-
-/* 필요한 문제 목록 통신 */
-const fetchProblemList = async (page = 1) => {
-  try {
-    const response = await axios.get(`http://localhost:8080/api/v1/problem/adminList`, {
-      headers: {
-        Authorization: 'Bearer eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJjaGF0QGdtYWlsLmNvbSIsImF1dGgiOlsiUk9MRV9VU0VSIl0sImV4cCI6MTczMDI1MTc5N30.aM3knHn_RuZanzSNI9Hd-dsXIEQaaJUTEWD0fEg-9WCUfb7VahwTzza5e4tQ4EnrtzFPH_TnJsKtgKXqXFAWDQ'
-      },
-      params: {
-        page,
-        keyword: adminProblemList.keyword,
-        option: adminProblemList.option
-      },
-      withCredentials: true
-    });
-
-    adminProblemList.problemList = response.data.problemList;
-    adminProblemList.currentPage = response.data.currentPage;
-    adminProblemList.totalPages = response.data.totalPages;
-    adminProblemList.totalItems = response.data.totalItems;
-  } catch (error) {
-    console.error('문제 목록을 불러오는데 문제가 발생했습니다.');
-  }
-}
-
-const problemSearch = (searchParams) => {
-  adminProblemList.keyword = searchParams.keyword;
-  adminProblemList.option = searchParams.option;
-  fetchProblemList(1);
-}
-
-// DOM 로드 전 데이터 셋팅
-onMounted(async () => {
-  await fetchProblemList();
-})
 </script>
 
 <template>
@@ -65,11 +21,7 @@ onMounted(async () => {
       </div>
     </div>
     <div class="content">
-      <ProbListComponent :problemList="adminProblemList.problemList"
-                         :currentPage="adminProblemList.currentPage"
-                         :totalPages="adminProblemList.totalPages"
-                         :totalItems="adminProblemList.totalItems"
-                         @problemSearch="problemSearch"/>
+      <ProbListComponent/>
     </div>
   </div>
 </template>
@@ -133,7 +85,6 @@ body {
   border-bottom: 1px solid var(--gray-line);
 }
 
-/* 메인 컨텐츠 */
 .content {
   flex-grow: 1;
   background-color: #ffffff;
