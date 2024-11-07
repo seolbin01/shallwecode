@@ -1,8 +1,8 @@
-import AdminProbList from "@/views/Problem/AdminProbList.vue";
+import AdminPage from "@/views/admin/AdminPage.vue";
 
 export default [
     {
-        path: '/admin/problemList',
-        component: AdminProbList
+        path: '/admin',
+        component: AdminPage
     }
 ];
