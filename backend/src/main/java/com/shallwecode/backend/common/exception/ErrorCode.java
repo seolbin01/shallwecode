@@ -17,6 +17,7 @@ public enum ErrorCode {
     NOT_DELETED_FRIEND(HttpStatus.BAD_REQUEST, "친구 삭제 과정에서 오류가 발생했습니다."),
     NOT_FOUND_NOTI(HttpStatus.NOT_FOUND, "해당 알림은 존재하지 않습니다."),
 
+
     // 코딩방 및 협업 친구
     DUPLICATED_COOP_USER(HttpStatus.CONFLICT, "이미 코딩방에 존재하는 사람을 초대 할 수 없습니다."),
     NOT_INVITE_FRIEND(HttpStatus.CONFLICT, "친구만 코딩방에 초대할 수 있습니다."),
@@ -26,7 +27,8 @@ public enum ErrorCode {
     NOT_HOST_COOP_USER(HttpStatus.NOT_FOUND, "코딩방에 존재하지 않는 유저입니다. 해당 코딩방의 다른 유저를 강퇴할 수 없습니다. "),
     NOT_AUTH_HOST(HttpStatus.BAD_REQUEST, "코딩방 게스트 유저는 강퇴 기능을 사용할 수 없습니다.");
 
-
+    TOO_MANY_REQUESTS_ROOM(HttpStatus.TOO_MANY_REQUESTS, "해당 코딩방의 인원이 가득 찼습니다.");
+  
     private final HttpStatus httpStatus;
     private final String message;
 }
