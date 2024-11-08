@@ -1,10 +1,15 @@
 <script setup>
-import {ref, shallowRef} from "vue";
+import {ref, onMounted, shallowRef} from "vue";
+import * as Y from 'yjs';
+import {WebsocketProvider} from "y-websocket";
+import {MonacoBinding} from "y-monaco";
+import * as monaco from 'monaco-editor';
 
 const MONACO_EDITOR_OPTIONS = {
   automaticLayout: true,
   formatOnType: true,
   formatOnPaste: true,
+  theme: 'vs-dark'
 };
 
 const languages = [
@@ -13,12 +18,36 @@ const languages = [
 ];
 
 const code = ref('// Java code here...');
-const editorRef = shallowRef();
+const editorInstance = shallowRef(null);
 const showDropdown = ref(false);
 const selectedLanguage = ref(languages[0]);
 const isRunning = ref(false);
+const monacoEl = ref(null);
 
-const handleMount = editor => (editorRef.value = editor);
+onMounted(() => {
+  const ydocument = new Y.Doc();
+  const provider = new WebsocketProvider('ws://localhost:1234', 'monaco', ydocument);
+  const type = ydocument.getText('monaco');
+
+  const editor = monaco.editor.create(monacoEl.value, {
+    value: code.value,
+    language: selectedLanguage.value.id.toLowerCase(),
+    ...MONACO_EDITOR_OPTIONS
+  });
+
+  editorInstance.value = editor;
+
+  const binding = new MonacoBinding(
+      type,
+      editor.getModel(),
+      new Set([editor]),
+      provider.awareness
+  );
+
+  editor.onDidChangeModelContent(() => {
+    code.value = editor.getValue();
+  });
+});
 
 const toggleDropdown = () => {
   showDropdown.value = !showDropdown.value;
@@ -27,20 +56,26 @@ const toggleDropdown = () => {
 const selectLanguage = (language) => {
   selectedLanguage.value = language;
   showDropdown.value = false;
-  if (language.id === 'python') {
-    code.value = '# Python code here...';
-  } else if (language.id === 'java') {
-    code.value = '// Java code here...';
-  }
-  showDropdown.value = true;
-};
 
+  if (editorInstance.value) {
+    monaco.editor.setModelLanguage(
+        editorInstance.value.getModel(),
+        language.id.toLowerCase()
+    );
+
+    const defaultCode = language.id === 'python' ?
+        '# Python code here...' :
+        '// Java code here...';
+
+    editorInstance.value.setValue(defaultCode);
+  }
+};
 
 const runCode = async () => {
   isRunning.value = true;
   try {
     // 여기에 코드 실행 로직 추가
-    await new Promise(resolve => setTimeout(resolve, 1000)); // 실행 시뮬레이션
+    await new Promise(resolve => setTimeout(resolve, 1000));
     console.log('Code executed:', code.value);
   } catch (error) {
     console.error('Execution error:', error);
@@ -79,14 +114,7 @@ const runCode = async () => {
         <span v-else class="loader"></span>
       </button>
     </div>
-    <div class="editor-container">
-      <vue-monaco-editor
-          v-model:value="code"
-          theme="vs-dark"
-          :options="MONACO_EDITOR_OPTIONS"
-          @mount="handleMount"
-      />
-    </div>
+    <div ref="monacoEl" class="editor-container"></div>
   </div>
 </template>
 
