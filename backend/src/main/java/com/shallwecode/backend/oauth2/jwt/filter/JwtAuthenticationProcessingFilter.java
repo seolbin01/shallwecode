@@ -25,7 +25,8 @@ public class JwtAuthenticationProcessingFilter extends OncePerRequestFilter {
             new AntPathRequestMatcher("/v3/api-docs/**"),
             new AntPathRequestMatcher("/swagger-resources/**"),
             new AntPathRequestMatcher("/login/oauth2/code/kakao", "GET"),
-            new AntPathRequestMatcher("/api/v1/problem/list", "GET")
+            new AntPathRequestMatcher("/api/v1/problem/list", "GET"),
+            new AntPathRequestMatcher("/api/v1/user", "PUT")
     };
     private final JwtService jwtService;
 
