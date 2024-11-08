@@ -4,6 +4,7 @@ import ProbListItemComponent from "@/components/admin/ProbListItemComponent.vue"
 import PageBar from "@/components/admin/PageBar.vue";
 import {onMounted, ref} from "vue";
 import axios from "axios";
+import router from "@/router/index.js";
 
 const problemList = ref([]);
 const currentPage = ref(0);
@@ -43,6 +44,28 @@ const problemSearch = (searchParams) => {
   fetchProblemList(1);
 }
 
+function goToProblemSave(){
+  router.push('/admin/problem')
+}
+
+// 문제 수정 처리 함수
+
+
+const handleEditProblem = (problemId) => {
+
+  console.log('수정할 문제 ID:', problemId);
+  // 문제 수정 페이지로 이동
+  router.push(`/admin/problem/${problemId}`);
+};
+
+
+// 문제 삭제 처리 함수
+const handleDeleteProblem = (problemId) => {
+  console.log('삭제할 문제 ID:', problemId);
+  // 삭제 로직을 추가하세요
+};
+
+
 onMounted(async () => {
   await fetchProblemList();
 })
@@ -63,13 +86,22 @@ onMounted(async () => {
     </tr>
     </thead>
     <tbody>
-    <ProbListItemComponent v-for="problem in problemList" :key="problem.problemId" :problem="problem"/>
+    <ProbListItemComponent v-for="problem in problemList" :key="problem.problemId" :problem="problem"
+                           @edit-problem="handleEditProblem"
+                           @delete-problem="handleDeleteProblem"/>
     </tbody>
   </table>
   <PageBar :currentPage="currentPage"
            :totalPages="totalPages"
            :totalItems="totalItems"
-          @page-change="problemSearch"/>
+           @page-change="problemSearch"/>
+
+  <!-- 문제 등록하기 버튼 -->
+  <div class="line">
+
+    <button @click="goToProblemSave" class="register-button">문제 등록하기</button>
+  </div>
+
 </template>
 
 <style scoped>
@@ -88,4 +120,11 @@ onMounted(async () => {
   background-color: #f0f0f0;
   font-weight: bold;
 }
+
+.line {
+  display: flex;
+  justify-content: flex-end;
+
+}
+
 </style>
