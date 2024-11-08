@@ -1,5 +1,6 @@
 package com.shallwecode.backend.user.application.controller;
 
+import com.shallwecode.backend.common.util.CustomUserUtils;
 import com.shallwecode.backend.user.application.dto.FriendResListDTO;
 import com.shallwecode.backend.user.application.dto.SaveFriendReqDTO;
 import com.shallwecode.backend.user.application.dto.UpdateFriendReqDTO;
@@ -46,7 +47,7 @@ public class FriendController {
     @GetMapping
     public ResponseEntity<List<FriendResListDTO>> findAllFriend() {
 
-        Long loginUserId = 1L;
+        Long loginUserId = CustomUserUtils.getCurrentUserSeq();
         List<FriendResListDTO> friendList = friendService.findAllFriend(loginUserId);
         return ResponseEntity.ok(friendList);
     }

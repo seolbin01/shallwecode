@@ -1,5 +1,6 @@
 package com.shallwecode.backend.problem.application.controller;
 
+import com.shallwecode.backend.common.util.CustomUserUtils;
 import com.shallwecode.backend.problem.application.dto.*;
 import com.shallwecode.backend.problem.application.service.ProblemService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -114,7 +115,7 @@ public class ProblemController {
     @GetMapping("/mylist/notry")
     public ResponseEntity<Long> findAllMyUnTryProblemCount() {
 
-        Long userId = 1L; // 추후 로그인된 회원의 userId를 가져오도록 수정
+        Long userId = CustomUserUtils.getCurrentUserSeq(); // 추후 로그인된 회원의 userId를 가져오도록 수정
         Long myNoTryProblemCount = problemService.findAllNoTryProblemCount(userId);
 
         return new ResponseEntity<>(myNoTryProblemCount, HttpStatus.OK);
@@ -124,7 +125,7 @@ public class ProblemController {
     @GetMapping("/mylist/unsolved")
     public ResponseEntity<Long> findAllMyUnsolvedProblemCount() {
 
-        Long userId = 1L; // 추후 로그인된 회원의 userId를 가져오도록 수정
+        Long userId = CustomUserUtils.getCurrentUserSeq(); // 추후 로그인된 회원의 userId를 가져오도록 수정
         Long myUnsolvedProblemCount = problemService.findAllUnSolvedProblemCount(userId);
 
         return new ResponseEntity<>(myUnsolvedProblemCount, HttpStatus.OK);
@@ -134,7 +135,7 @@ public class ProblemController {
     @GetMapping("/mylist/solved")
     public ResponseEntity<Long> findAllMySolvedProblemCount() {
 
-        long userId = 1L;
+        long userId = CustomUserUtils.getCurrentUserSeq();
         Long mySolvedProblemCount = problemService.findAllSolvedProblemCount(userId);
 
         return new ResponseEntity<>(mySolvedProblemCount, HttpStatus.OK);
