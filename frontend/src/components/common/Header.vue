@@ -3,6 +3,8 @@ import {inject, onMounted, onUnmounted, ref} from 'vue'
 import axios from "axios";
 import {useAuthStore} from "@/stores/auth.js";
 
+const authStore = useAuthStore();
+
 const showNotis = ref(false);
 const notis = ref([]);
 const refreshNotiList = inject('refreshNotiList');
@@ -11,7 +13,12 @@ const isLogin = ref(false);
 
 const fetchMyNotReadNotiList = async () => {
   try {
-    const response = await axios.get('http://localhost:8080/api/v1/noti');
+    const response = await axios.get('http://localhost:8080/api/v1/noti', {
+      headers: {
+        Authorization: `Bearer ${authStore.accessToken}`,
+        'Authorization-refresh': `Bearer ${authStore.refreshToken}`
+      }
+    });
     notis.value = response.data;
   } catch (error) {
     console.error('알림 목록을 불러오는 중 에러가 발생했습니다.', error.response ? error.response.data : error.message);

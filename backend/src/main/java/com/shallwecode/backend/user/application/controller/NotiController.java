@@ -1,5 +1,6 @@
 package com.shallwecode.backend.user.application.controller;
 
+import com.shallwecode.backend.common.util.CustomUserUtils;
 import com.shallwecode.backend.user.application.dto.NotiResListDTO;
 import com.shallwecode.backend.user.application.dto.UpdateNotiReqDTO;
 import com.shallwecode.backend.user.application.service.NotiService;
@@ -22,7 +23,7 @@ public class NotiController {
     @Operation(summary = "헤더 알림 조회", description = "헤더 알림을 조회한다.")
     @GetMapping
     public ResponseEntity<List<NotiResListDTO>> findHeaderNotiList() {
-        Long loginUserId = 1L;
+        Long loginUserId = CustomUserUtils.getCurrentUserSeq();
 
         List<NotiResListDTO> headerNotiResList = notiService.findMyNoti(loginUserId, true);
         return ResponseEntity.ok(headerNotiResList);
@@ -31,7 +32,7 @@ public class NotiController {
     @Operation(summary = "마이페이지 알림 조회", description = "마이페이지 알림을 조회한다.")
     @GetMapping("/all")
     public ResponseEntity<List<NotiResListDTO>> findMyPageNotiList() {
-        Long loginUserId = 1L;
+        Long loginUserId = CustomUserUtils.getCurrentUserSeq();
 
         List<NotiResListDTO> headerNotiResList = notiService.findMyNoti(loginUserId, false);
         return ResponseEntity.ok(headerNotiResList);
