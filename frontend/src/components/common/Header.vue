@@ -7,6 +7,7 @@ const showNotis = ref(false);
 const notis = ref([]);
 const refreshNotiList = inject('refreshNotiList');
 const store = useAuthStore();
+const isLogin = ref(false);
 
 const fetchMyNotReadNotiList = async () => {
   try {
@@ -36,7 +37,6 @@ const toggleNotis = async () => {
   }
 }
 
-// 알림창 외부 클릭시 닫기
 const closeNotis = (event) => {
   const dropdown = document.querySelector('.notifications-dropdown')
   const notiBtn = document.querySelector('.notification-btn')
@@ -60,11 +60,20 @@ const formatDate = (dateString) => {
 
 const handleLogoutClick = () => {
   store.logout();
+  alert('로그아웃 되었습니다.');
+  window.location.reload();
 }
 
 onMounted(() => {
-  fetchMyNotReadNotiList();
-  document.addEventListener('click', closeNotis)
+
+  if(store.accessToken != null) {
+    isLogin.value = true;
+  }
+
+  if(isLogin) {
+    fetchMyNotReadNotiList();
+    document.addEventListener('click', closeNotis)
+  }
 })
 
 onUnmounted(() => {
@@ -75,9 +84,9 @@ onUnmounted(() => {
 <template>
   <header class="header">
     <router-link to="/" class="logo">ShallWeCode</router-link>
-    <div class="menu">
+    <div v-if=isLogin class="menu">
       <router-link to="/user-list" class="menu-item">회원 목록</router-link>
-      <button @click="handleLogoutClick">로그아웃</button>
+      <div class="log-out" @click="handleLogoutClick">로그아웃</div>
       <div class="notification-container">
         <button @click="toggleNotis" class="menu-item notification-btn">
           알림
@@ -96,6 +105,9 @@ onUnmounted(() => {
           </div>
         </div>
       </div>
+    </div>
+    <div v-else class="menu">
+      <router-link to="/login" class="menu-item">로그인</router-link>
     </div>
   </header>
 </template>
@@ -196,4 +208,7 @@ onUnmounted(() => {
   background-color: #f5f5f5;
 }
 
+.log-out {
+  cursor: pointer;
+}
 </style>
