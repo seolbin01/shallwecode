@@ -136,25 +136,22 @@ onMounted(() => {
           <thead>
           <tr>
             <th>번호</th>
+            <th>이메일</th>
             <th>닉네임</th>
-            <th></th>
+            <th></th> <!-- 삭제 버튼을 위한 열 -->
           </tr>
           </thead>
           <tbody>
-          <tr
-              v-for="(user, index) in displayedUsers"
-          >
-            <td>{{ (currentUserPage - 1) * ROWS_PER_PAGE + index + 1 }}</td>
-            <td>{{ user.title }}</td>
-            <td><span class="level-badge">Lv. {{ user.level }}</span></td>
-          </tr>
-          <tr v-for="i in emptyRowsCount" :key="`empty-${i}`" class="empty-row">
-            <td>-</td>
-            <td>-</td>
-            <td>-</td>
+          <tr v-for="(user, index) in displayedUsers" :key="user.userId">
+            <td>{{ (currentUserPage - 1) * ROWS_PER_PAGE + index + 1 }}</td> <!-- 순번 -->
+            <td>{{ user.email }}</td> <!-- 이메일 -->
+            <td>{{ user.nickname }}</td> <!-- 닉네임 -->
+            <td><button @click="deleteUser(user.userId)">친구 신청</button></td> <!-- 삭제 버튼 -->
           </tr>
           </tbody>
         </table>
+
+
 
         <div class="pagination">
           <button
@@ -312,13 +309,6 @@ button {
   cursor: pointer;
   margin-left: 4px;
   margin-right: 4px;
-}
-
-.level-badge {
-  background: #f0f0f0;
-  padding: 4px 8px;
-  border-radius: 4px;
-  font-size: 12px;
 }
 
 .pagination {
