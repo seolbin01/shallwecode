@@ -66,10 +66,16 @@ const selectLanguage = (language) => {
 
     const defaultCode = language.id === 'python' ?
         '# Python code here...' :
-        '// Java code here...';
+        'public class Solution {\n' +
+        '    public static void main(String[] args) {\n' +
+        '        \n' +
+        '    }\n' +
+        '}';
 
     editorInstance.value.setValue(defaultCode);
   }
+
+  showDropdown.value = true;
 };
 
 const runCode = async () => {
