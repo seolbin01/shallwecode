@@ -48,7 +48,7 @@ public class UserController {
     }
 
     // 회원 조회
-    @PostMapping
+    @GetMapping
     @Operation(summary = "회원 전체 조회", description = "전체 회원을 조회한다.")
     public ResponseEntity<List<UserInfo>> getAllUser() {
         List<UserInfo> userList = userService.getAllUsers();
