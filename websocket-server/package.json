@@ -10,6 +10,7 @@
   "license": "ISC",
   "description": "",
   "dependencies": {
+    "minimist": "^1.2.8",
     "we": "^1.5.10",
     "y-websocket": "^2.0.4"
   }
