@@ -45,12 +45,16 @@ const fetchTryProblemCount = async () => {
   }
 };
 
-const friendsList = ref([
-  {id: 1, username: 'user02'},
-  {id: 2, username: 'user03'},
-  {id: 3, username: 'user04'},
-  {id: 4, username: 'user05'}
-])
+const friendsList = ref([]);
+
+const fetchFriendList = async () => {
+  try {
+    const response = await axios.get('http://localhost:8080/api/v1/friend');
+    friendsList.value = response.data;
+  } catch (error) {
+    console.error('친구 목록을 가져오는 중 오류가 발생했습니다:', error);
+  }
+};
 
 const totalPages = Math.ceil(friendsList.value.length / friendItemsPerPage)
 
@@ -114,6 +118,7 @@ const changeUserPage = (page) => {
 onMounted(() => {
   fetchTryProblemCount();
   fetchUserList();
+  fetchFriendList();
 });
 </script>
 
@@ -204,7 +209,7 @@ onMounted(() => {
         <div class="friends-list">
           <div v-for="friend in paginatedFriends" :key="friend.id" class="friend-item">
             <div class="friend-avatar"></div>
-            <span class="friend-name">{{ friend.username }}</span>
+            <span class="friend-name">{{ friend.nickname }}</span>
           </div>
         </div>
 
