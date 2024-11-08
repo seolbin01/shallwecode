@@ -66,10 +66,14 @@ dependencies {
     annotationProcessor "jakarta.annotation:jakarta.annotation-api"
     annotationProcessor "jakarta.persistence:jakarta.persistence-api"
 
-    // webSocket 추가
+    // OAuth2
+    implementation 'org.springframework.boot:spring-boot-starter-oauth2-client'
+    implementation 'com.auth0:java-jwt:4.2.1'
+
+    // webSocket
     implementation 'org.springframework.boot:spring-boot-starter-websocket'
 
-    // json 추가
+    // json
     implementation 'org.json:json:20240303'
 
 }
