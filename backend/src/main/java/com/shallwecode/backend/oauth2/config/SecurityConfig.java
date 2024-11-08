@@ -28,7 +28,6 @@ import org.springframework.web.filter.CorsFilter;
 public class SecurityConfig {
 
     private final JwtService jwtService;
-    private final UserRepository userRepository;
     private final OAuth2LoginSuccessHandler oAuth2LoginSuccessHandler;
     private final OAuth2LoginFailureHandler oAuth2LoginFailureHandler;
     private final CustomOAuth2UserService customOAuth2UserService;
@@ -42,7 +41,10 @@ public class SecurityConfig {
                     auths.requestMatchers(
 //                            new AntPathRequestMatcher("/user/api/v1/**"),
 //                            new AntPathRequestMatcher("/**"),
+                            new AntPathRequestMatcher("/"),
                             new AntPathRequestMatcher("/login/**"),
+                            new AntPathRequestMatcher("/api/v1/problem/list", "GET"),
+                            new AntPathRequestMatcher("/api/v1/user", "PUT"),
                             new AntPathRequestMatcher("/swagger-ui/index.html"),
                             new AntPathRequestMatcher("/swagger-ui/**"),
                             new AntPathRequestMatcher("/webjars/swagger-ui/**"),
@@ -85,7 +87,7 @@ public class SecurityConfig {
     // 로그인 이후에 jwt토큰을 관리하는 필터
     @Bean
     public JwtAuthenticationProcessingFilter jwtAuthenticationProcessingFilter() {
-        JwtAuthenticationProcessingFilter jwtAuthenticationFilter = new JwtAuthenticationProcessingFilter(jwtService, userRepository);
+        JwtAuthenticationProcessingFilter jwtAuthenticationFilter = new JwtAuthenticationProcessingFilter(jwtService);
 
         return jwtAuthenticationFilter;
     }

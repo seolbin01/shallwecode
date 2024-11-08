@@ -1,7 +1,6 @@
 package com.shallwecode.backend.oauth2.jwt.filter;
 
 import com.shallwecode.backend.oauth2.jwt.service.JwtService;
-import com.shallwecode.backend.user.domain.aggregate.UserInfo;
 import com.shallwecode.backend.user.domain.repository.UserRepository;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
@@ -19,72 +18,75 @@ import java.util.Optional;
 @Slf4j
 public class JwtAuthenticationProcessingFilter extends OncePerRequestFilter {
 
-    private static final String NO_CHECK_URL = "/login"; // "/login"으로 들어오는 요청은 Filter 작동 X
-    private static final String[] SWAGGER_URLS = {
-            "/",
-            "/swagger-ui/**",
-            "/v3/api-docs/**",
-            "/swagger-resources/**"
+    private static final AntPathRequestMatcher[] SWAGGER_URLS = {
+            new AntPathRequestMatcher("/"),
+            new AntPathRequestMatcher("/login"),
+            new AntPathRequestMatcher("/swagger-ui/**"),
+            new AntPathRequestMatcher("/v3/api-docs/**"),
+            new AntPathRequestMatcher("/swagger-resources/**"),
+            new AntPathRequestMatcher("/login/oauth2/code/kakao", "GET"),
+            new AntPathRequestMatcher("/api/v1/problem/list", "GET"),
+            new AntPathRequestMatcher("/api/v1/user", "PUT")
     };
     private final JwtService jwtService;
-    private final UserRepository userRepository;
 
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
         System.out.println("doFilterInternal");
 
-        if (request.getRequestURI().contains(NO_CHECK_URL)) {
+        for (AntPathRequestMatcher url : SWAGGER_URLS) {
+            if (url.matches(request)) {
+                filterChain.doFilter(request, response);
+                return;
+            }
+        }
+
+        Optional<String> refreshToken = jwtService.extractToken(request, "refresh");
+
+        if (refreshToken.isPresent() && jwtService.isTokenValid(refreshToken.get())) {
+            String newAccessToken = jwtService.reIssueAccessToken(refreshToken.get());
+            Long userId = jwtService.extractUserId(newAccessToken);
+            String newRefreshToken = jwtService.createRefreshToken(userId);
+
+            response.setHeader("accessToken", newAccessToken);
+            response.setHeader("refreshToken", newRefreshToken);
+
+            log.info("accessToken {} ", newAccessToken);
+            log.info("refreshToken {} ", newRefreshToken);
+
+            jwtService.updateRefreshToken(userId, newRefreshToken);
+
+            jwtService.saveAuthentication(jwtService.extractUserId(newAccessToken));
+
             filterChain.doFilter(request, response);
-            return;
         }
 
 
-//        checkAccessTokenAndAuthentication(request, response, filterChain);
-        Optional<String> accessToken = jwtService.extractAccessToken(request);
+        Optional<String> accessToken = jwtService.extractToken(request, "access");
 
         if (accessToken.isPresent()) {
-            if (jwtService.isTokenValid(accessToken.get())) {
+            if (jwtService.isTokenValid(accessToken.get())){
                 jwtService.saveAuthentication(jwtService.extractUserId(accessToken.get()));
-                filterChain.doFilter(request, response);
-            } else {
-                Optional<String> refreshToken = jwtService.extractRefreshToken(request);
-                if (refreshToken.isPresent() && jwtService.isTokenValid(refreshToken.get())) {
-                    checkRefreshTokenAndReIssueAccessToken(response, refreshToken.get());
-                }
-                filterChain.doFilter(request, response);
+                log.info("accessToken {} ", accessToken.get());
+                filterChain.doFilter(request, response); // 다음 필터로 요청 전달
+                return;
             }
+
         }
 
-
-    }
-
-    @Override
-    protected boolean shouldNotFilter(HttpServletRequest request) {
-        for (String url : SWAGGER_URLS) {
-            if (new AntPathRequestMatcher(url).matches(request)) {
-                return true; // Swagger URL인 경우 필터를 적용하지 않음
-            }
+        // 모든 토큰이 유효하지 않은 경우 401 에러
+        if (!response.isCommitted()) { // 응답이 커밋되지 않았을 때만 에러 전송
+            response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "Invalid tokens");
         }
-        return false; // 나머지 URL에서는 필터를 적용
     }
 
-    public void checkRefreshTokenAndReIssueAccessToken(HttpServletResponse response, String refreshToken) {
-        userRepository.findByRefreshToken(refreshToken)
-                .ifPresent(user -> {
-                    String reIssuedRefreshToken = reIssueRefreshToken(user);
-                    jwtService.sendAccessAndRefreshToken(response, jwtService.createAccessToken(user.getUserId(), user.getAuth()), // user.getEmail() 대신 user.getUserId() 사용
-                            reIssuedRefreshToken);
-                });
-    }
-
-    private String reIssueRefreshToken(UserInfo user) {
-        String reIssuedRefreshToken = jwtService.createRefreshToken();
-        user.updateRefreshToken(reIssuedRefreshToken);
-        userRepository.saveAndFlush(user);
-        return reIssuedRefreshToken;
-    }
-
-
-
-
+//    @Override
+//    protected boolean shouldNotFilter(HttpServletRequest request) {
+//        for (String url : SWAGGER_URLS) {
+//            if (new AntPathRequestMatcher(url).matches(request)) {
+//                return true;
+//            }
+//        }
+//        return false;
+//    }
 }

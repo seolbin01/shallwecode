@@ -1,25 +1,23 @@
 package com.shallwecode.backend.oauth2;
 
-import com.shallwecode.backend.oauth2.loginDTO.*;
+import com.shallwecode.backend.oauth2.loginDTO.GoogleOAuth2UserInfo;
+import com.shallwecode.backend.oauth2.loginDTO.KakaoOAuth2UserInfo;
+import com.shallwecode.backend.oauth2.loginDTO.NaverOAuth2UserInfo;
+import com.shallwecode.backend.oauth2.loginDTO.OAuth2UserInfo;
 import com.shallwecode.backend.user.domain.aggregate.AuthType;
 import com.shallwecode.backend.user.domain.aggregate.SocialType;
 import com.shallwecode.backend.user.domain.aggregate.UserInfo;
 import lombok.Builder;
 import lombok.Getter;
-import org.springframework.security.core.userdetails.User;
 
 import java.util.Map;
 import java.util.UUID;
 
-/**
- * 각 소셜에서 받아오는 데이터가 다르므로
- * 소셜별로 데이터를 받는 데이터를 분기 처리하는 DTO 클래스
- */
 @Getter
 public class OAuthAttributes {
 
-    private String nameAttributeKey;
-    private OAuth2UserInfo oauth2UserInfo;
+    private final String nameAttributeKey;
+    private final OAuth2UserInfo oauth2UserInfo;
 
     @Builder
     private OAuthAttributes(String nameAttributeKey, OAuth2UserInfo oauth2UserInfo) {

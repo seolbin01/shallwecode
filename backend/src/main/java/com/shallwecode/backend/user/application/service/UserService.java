@@ -1,6 +1,7 @@
 package com.shallwecode.backend.user.application.service;
 
 import com.nimbusds.openid.connect.sdk.UserInfoResponse;
+import com.shallwecode.backend.user.application.dto.FindUserDetailDTO;
 import com.shallwecode.backend.user.application.dto.UserSaveDTO;
 import com.shallwecode.backend.user.application.dto.UserUpdateDTO;
 import com.shallwecode.backend.user.domain.aggregate.UserInfo;
@@ -20,7 +21,6 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.List;
 
 import java.util.ArrayList;
-import java.util.List;
 
 @Service
 @RequiredArgsConstructor
@@ -52,19 +52,8 @@ public class UserService implements UserDetailsService {
     }
 
 
-//    private final BCryptPasswordEncoder passwordEncoder;
-
-//    @Transactional
-//    public void createUser(CreateUserReqDTO newUser) {
-//        UserEntity user = modelMapper.map(newUser, UserEntity.class);
-//        user.encryptPassword(passwordEncoder.encode(newUser.getPwd()));
-//        userRepository.save(user);
-//    }
-
-    /* 로그인 요청 시 AuthenticationManager를 통해서 호출 될 메소드 */
     @Override
     public UserDetails loadUserByUsername(String userId) throws UsernameNotFoundException {
-        /* 인증 토큰에 담긴 userId가 메소드로 넘어오므로 해당 값을 기준으로 DB에서 조회 한다. */
         UserInfo loginUser = userRepository.findById(Long.parseLong(userId))
                 .orElseThrow(() -> new UsernameNotFoundException(userId));
 
@@ -84,5 +73,22 @@ public class UserService implements UserDetailsService {
     @Transactional(readOnly = true)
     public List<UserInfo> getAllUsers() {
         return userRepository.findAll();
+    }
+
+    public FindUserDetailDTO findUserDetail(Long loginUserId) {
+
+        Long allProblemCnt = userDomainService.findAllProblemCnt(loginUserId);
+        Long doingProblemCnt = userDomainService.findDoingProblemCnt(loginUserId);
+        Long finishedProblemCnt = userDomainService.findFinishedProblemCnt(loginUserId);
+
+        Long notFinishedProblemCnt = allProblemCnt - doingProblemCnt;
+
+        FindUserDetailDTO findUserDetailDTO = userDomainService.findSimpleInfoById(loginUserId);
+
+        findUserDetailDTO.setDoingProblemCnt(doingProblemCnt);
+        findUserDetailDTO.setFinishedProblemCnt(finishedProblemCnt);
+        findUserDetailDTO.setNotFinishedProblemCnt(notFinishedProblemCnt);
+
+        return findUserDetailDTO;
     }
 }

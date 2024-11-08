@@ -1,7 +1,8 @@
 <script setup>
-import { computed, onMounted, ref } from 'vue';
+import {computed, onMounted, ref} from 'vue';
 import axios from "axios";
 import {useAuthStore} from "@/stores/auth.js";
+import {getFetch, putFetch, delFetch, postFetch} from "@/stores/apiClient.js";
 
 const currentPage = ref(1);
 const currentProblemPage = ref(1); // 문제 페이징을 위한 변수
@@ -27,21 +28,21 @@ const userProfile = ref({
 
 const fetchTryProblemCount = async () => {
   try {
-    const noTryResponse = await axios.get('http://localhost:8080/api/v1/problem/mylist/notry');
+    const noTryResponse = await getFetch('http://localhost:8080/api/v1/problem/mylist/notry');
     noTryCount.value = noTryResponse.data;
   } catch (error) {
     console.error('미시도 문제 목록 개수를 불러오는데 에러가 발생했습니다.', error.response ? error.response.data : error.message);
   }
 
   try {
-    const unSolvedResponse = await axios.get('http://localhost:8080/api/v1/problem/mylist/unsolved');
+    const unSolvedResponse = await getFetch('http://localhost:8080/api/v1/problem/mylist/unsolved');
     unSolvedCount.value = unSolvedResponse.data;
   } catch (error) {
     console.error('미해결 문제 목록 개수를 불러오는데 에러가 발생했습니다.', error.response ? error.response.data : error.message);
   }
 
   try {
-    const solvedResponse = await axios.get('http://localhost:8080/api/v1/problem/mylist/solved');
+    const solvedResponse = await getFetch('http://localhost:8080/api/v1/problem/mylist/solved');
     SolvedCount.value = solvedResponse.data;
   } catch (error) {
     console.error('해결된 문제 목록 개수를 불러오는데 에러가 발생했습니다.', error.response ? error.response.data : error.message);
@@ -52,7 +53,7 @@ const friendsList = ref([]);
 
 const fetchFriendList = async () => {
   try {
-    const response = await axios.get('http://localhost:8080/api/v1/friend');
+    const response = await getFetch('http://localhost:8080/api/v1/friend');
     friendsList.value = response.data;
   } catch (error) {
     console.error('친구 목록을 가져오는 중 오류가 발생했습니다:', error);
@@ -136,24 +137,23 @@ function getCookie(name) {
 }
 
 onMounted(() => {
-  fetchTryProblemCount();
-  fetchProblemList();
-  fetchFriendList();
-  console.log(store.accessToken);
-  console.log(store.refreshToken);
+
   if (!store.accessToken) {
-    console.log("dsfjasklfj;sdjfkadlfs");
     const token = getCookie('accessToken');  // 쿠키에서 'token' 값 가져오기
     const token2 = getCookie('refreshToken');
     if (token) {
-      console.log('쿠키에서 토큰을 가져왔습니다:', token);
-      console.log('리프레시 토큰 : ', token2);
       store.login(token, token2);  // 로그인설정
-
     } else {
       console.log('쿠키에 토큰이 없습니다.');
     }
   }
+
+  if (store.accessToken) {
+    fetchTryProblemCount();
+    fetchFriendList();
+  }
+  fetchProblemList();
+
 });
 </script>
 
