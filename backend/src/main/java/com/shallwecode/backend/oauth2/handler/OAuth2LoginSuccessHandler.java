@@ -4,7 +4,6 @@ import com.shallwecode.backend.oauth2.CustomOAuth2User;
 import com.shallwecode.backend.oauth2.jwt.service.JwtService;
 import com.shallwecode.backend.user.domain.aggregate.AuthType;
 import jakarta.servlet.ServletException;
-import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
@@ -28,17 +27,10 @@ public class OAuth2LoginSuccessHandler implements AuthenticationSuccessHandler {
             CustomOAuth2User oAuth2User = (CustomOAuth2User) authentication.getPrincipal();
 
             if (oAuth2User.getAuth() == AuthType.GUEST) {
-
-                String accessToken = jwtService.createAccessToken(oAuth2User.getUserId(), AuthType.GUEST);
-
-                Cookie tokenCookie = jwtService.makeAccessTokenCookie(accessToken);
-
-                response.addCookie(tokenCookie);
-                loginSuccess(response, oAuth2User, oAuth2User.getUserId());
-                response.sendRedirect("http://localhost:5173/sign-up");
+                response.sendRedirect("http://localhost:5173/sign-up"); // 회원가입 창에는 토큰 없이 보냄
             } else {
                 loginSuccess(response, oAuth2User, oAuth2User.getUserId());
-                response.sendRedirect("http://localhost:5173");
+                response.sendRedirect("http://localhost:5173"); // 완전 로그인 성공 시 토큰을 발급함
             }
         } catch (Exception e) {
             log.error("Authentication success handling failed", e);
@@ -48,9 +40,9 @@ public class OAuth2LoginSuccessHandler implements AuthenticationSuccessHandler {
 
     private void loginSuccess(HttpServletResponse response, CustomOAuth2User oAuth2User, Long userId) throws IOException {
         String accessToken = jwtService.createAccessToken(userId, oAuth2User.getAuth());
-        String refreshToken = jwtService.createRefreshToken();
+        String refreshToken = jwtService.createRefreshToken(userId);
 
-        jwtService.sendAccessAndRefreshToken(response, accessToken, refreshToken);
+        jwtService.sendAccessAndRefreshTokenByCookie(response, accessToken, refreshToken);
         jwtService.updateRefreshToken(oAuth2User.getUserId(), refreshToken);
     }
 }
