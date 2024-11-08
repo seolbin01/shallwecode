@@ -1,5 +1,6 @@
 package com.shallwecode.backend.problem.application.controller;
 
+import com.shallwecode.backend.common.util.CustomUserUtils;
 import com.shallwecode.backend.problem.application.dto.*;
 import com.shallwecode.backend.problem.application.service.ProblemService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -79,8 +80,8 @@ public class ProblemController {
     @Operation(summary = "내 문제 목록 전체 조회", description = "내 문제 목록을 전체 조회 한다.")
     public ResponseEntity<List<FindMyProblemResDTO>> findAllMyProblem() {
 
-        Long userId = 1L;   // 추후 로그인된 회원의 userId를 가져오도록 수정
-        List<FindMyProblemResDTO> myProblemList = problemService.findAllMyProblem(userId);
+        Long loginUserId = CustomUserUtils.getCurrentUserSeq();
+        List<FindMyProblemResDTO> myProblemList = problemService.findAllMyProblem(loginUserId);
 
         return new ResponseEntity<>(myProblemList, HttpStatus.OK);
     }
