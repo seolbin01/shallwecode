@@ -9,12 +9,7 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.authority.mapping.GrantedAuthoritiesMapper;
-import org.springframework.security.core.authority.mapping.NullAuthoritiesMapper;
-import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.io.IOException;
@@ -25,11 +20,14 @@ import java.util.Optional;
 public class JwtAuthenticationProcessingFilter extends OncePerRequestFilter {
 
     private static final String NO_CHECK_URL = "/login"; // "/login"으로 들어오는 요청은 Filter 작동 X
-
+    private static final String[] SWAGGER_URLS = {
+            "/",
+            "/swagger-ui/**",
+            "/v3/api-docs/**",
+            "/swagger-resources/**"
+    };
     private final JwtService jwtService;
     private final UserRepository userRepository;
-
-    private GrantedAuthoritiesMapper authoritiesMapper = new NullAuthoritiesMapper();
 
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
@@ -58,6 +56,16 @@ public class JwtAuthenticationProcessingFilter extends OncePerRequestFilter {
         }
 
 
+    }
+
+    @Override
+    protected boolean shouldNotFilter(HttpServletRequest request) {
+        for (String url : SWAGGER_URLS) {
+            if (new AntPathRequestMatcher(url).matches(request)) {
+                return true; // Swagger URL인 경우 필터를 적용하지 않음
+            }
+        }
+        return false; // 나머지 URL에서는 필터를 적용
     }
 
     public void checkRefreshTokenAndReIssueAccessToken(HttpServletResponse response, String refreshToken) {

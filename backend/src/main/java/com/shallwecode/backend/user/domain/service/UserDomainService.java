@@ -1,5 +1,6 @@
 package com.shallwecode.backend.user.domain.service;
 
+import com.shallwecode.backend.common.util.CustomUserUtils;
 import com.shallwecode.backend.user.application.dto.UserSaveDTO;
 import com.shallwecode.backend.common.exception.CustomException;
 import com.shallwecode.backend.common.exception.ErrorCode;
@@ -43,7 +44,8 @@ public class UserDomainService {
     }
 
     public void save(UserSaveDTO saveUserDTO) {
-        UserInfo saveUser = userRepository.findById(saveUserDTO.getUserId())
+        Long loginUserId = CustomUserUtils.getCurrentUserSeq();
+        UserInfo saveUser = userRepository.findById(loginUserId)
                 .orElseThrow(() -> new CustomException(ErrorCode.NOT_FOUND_USER));
 
         modelMapper.map(saveUserDTO, saveUser);
