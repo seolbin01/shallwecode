@@ -65,8 +65,15 @@ const handleLogoutClick = () => {
 }
 
 onMounted(() => {
-  fetchMyNotReadNotiList();
-  document.addEventListener('click', closeNotis)
+
+  if(store.accessToken != null) {
+    isLogin.value = true;
+  }
+
+  if(isLogin) {
+    fetchMyNotReadNotiList();
+    document.addEventListener('click', closeNotis)
+  }
 })
 
 onUnmounted(() => {
@@ -98,6 +105,9 @@ onUnmounted(() => {
           </div>
         </div>
       </div>
+    </div>
+    <div v-else class="menu">
+      <router-link to="/login" class="menu-item">로그인</router-link>
     </div>
   </header>
 </template>
