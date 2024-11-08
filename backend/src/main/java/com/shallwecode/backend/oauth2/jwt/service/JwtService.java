@@ -1,8 +1,12 @@
 package com.shallwecode.backend.oauth2.jwt.service;
 
+import com.shallwecode.backend.common.exception.CustomException;
+import com.shallwecode.backend.common.exception.ErrorCode;
 import com.shallwecode.backend.user.application.service.UserService;
 import com.shallwecode.backend.user.domain.aggregate.AuthType;
+import com.shallwecode.backend.user.domain.aggregate.UserInfo;
 import com.shallwecode.backend.user.domain.repository.UserRepository;
+import com.shallwecode.backend.user.domain.service.UserDomainService;
 import io.jsonwebtoken.*;
 import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.security.Keys;
@@ -22,7 +26,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.security.Key;
-import java.util.*;
+import java.util.Date;
+import java.util.Optional;
 
 @Service
 @Getter
@@ -52,19 +57,24 @@ public class JwtService {
 
     private final UserRepository userRepository;
     private final Key key;
+    private final UserDomainService userDomainService;
 
-    private GrantedAuthoritiesMapper authoritiesMapper = new NullAuthoritiesMapper();
+    private final GrantedAuthoritiesMapper authoritiesMapper = new NullAuthoritiesMapper();
 
     public JwtService(
             @Value("${token.secret}") String secretKey,
             UserRepository userRepository,
-            UserService userService) {
+            UserService userService,
+            UserDomainService userDomainService) {
         byte[] keyBytes = Decoders.BASE64.decode(secretKey);
         this.key = Keys.hmacShaKeyFor(keyBytes);
         this.userRepository = userRepository;
         this.userService = userService;
+        this.userDomainService = userDomainService;
     }
 
+    // 엑세스 토큰 생성
+    // userId, auth를 넣는다.
     public String createAccessToken(Long userId, AuthType auth) {
         Claims claims = Jwts.claims().setSubject(ACCESS_TOKEN_SUBJECT);
         claims.put(USER_ID_CLAIM, userId);
@@ -77,8 +87,11 @@ public class JwtService {
                 .compact();
     }
 
-    public String createRefreshToken() {
+    // 리프레시 토큰 생성
+    // userId만 넣는다.
+    public String createRefreshToken(Long userId) {
         Claims claims = Jwts.claims().setSubject(REFRESH_TOKEN_SUBJECT);
+        claims.put(USER_ID_CLAIM, userId);
 
         return Jwts.builder()
                 .setClaims(claims)
@@ -87,36 +100,32 @@ public class JwtService {
                 .compact();
     }
 
-    public Long extractUserId(String accessToken) {
-        Object userIdClaim = parseClaims(accessToken).get(USER_ID_CLAIM);
+    // 토큰에서 userId를 추출
+    public Long extractUserId(String token) {
+        return Long.valueOf(parseClaims(token).get(USER_ID_CLAIM).toString());
+    }
 
-        Long userId;
-        if (userIdClaim instanceof Integer) {
-            userId = ((Integer) userIdClaim).longValue();
-        } else if (userIdClaim instanceof Long) {
-            userId = (Long) userIdClaim;
-        } else {
-            throw new IllegalArgumentException("User ID claim is not of expected type.");
+    // request 에서 리프레시 토큰을 추출
+    public Optional<String> extractToken(HttpServletRequest request, String tokenType) {
+
+        String authorizationHeader;
+        if (tokenType.equals("refresh")) authorizationHeader = request.getHeader(refreshHeader);
+        else authorizationHeader = request.getHeader(accessHeader);
+
+        if (authorizationHeader != null && authorizationHeader.startsWith("Bearer ")) {
+            return Optional.of(authorizationHeader.substring(7));
         }
 
-        return userId;
+        return Optional.empty();
     }
 
-    public Optional<String> extractRefreshToken(HttpServletRequest request) {
-        return Optional.ofNullable(request.getHeader(refreshHeader))
-                .filter(refreshToken -> refreshToken.startsWith(BEARER))
-                .map(refreshToken -> refreshToken.replace(BEARER, ""));
-    }
-
+    // refreshToken을 다시 저장하는 메서드
     public void updateRefreshToken(Long userId, String refreshToken) { // 매개변수 변경
-        userRepository.findById(userId)
-                .ifPresentOrElse(
-                        user -> user.updateRefreshToken(refreshToken),
-                        () -> new Exception("일치하는 회원이 없습니다.")
-                );
+        userDomainService.updateRefreshToken(userId, refreshToken);
     }
 
-    public void sendAccessAndRefreshToken(HttpServletResponse response, String accessToken, String refreshToken) {
+    // 로그인 성공시 쿠키로 토큰 보내는 메서드
+    public void sendAccessAndRefreshTokenByCookie(HttpServletResponse response, String accessToken, String refreshToken) {
         response.setStatus(HttpServletResponse.SC_OK);
         Cookie accessTokenCookie = new Cookie("accessToken", accessToken);
         accessTokenCookie.setHttpOnly(false);
@@ -131,13 +140,6 @@ public class JwtService {
         refreshTokenCookie.setPath("/");
         refreshTokenCookie.setMaxAge(refreshTokenExpirationPeriod);
         response.addCookie(refreshTokenCookie);
-    }
-
-    public Optional<String> extractAccessToken(HttpServletRequest request) {
-
-        return Optional.ofNullable(request.getHeader(accessHeader))
-                .filter(accessToken -> accessToken.startsWith(BEARER))
-                .map(accessToken -> accessToken.replace(BEARER, ""));
     }
 
     public boolean isTokenValid(String token) {
@@ -157,6 +159,7 @@ public class JwtService {
         return false;
     }
 
+    // authentication 저장
     public void saveAuthentication(Long userId) {
         System.out.println("UserId: " + userId);
         UserDetails userDetails = userService.loadUserByUsername(String.valueOf(userId));
@@ -178,5 +181,15 @@ public class JwtService {
         tokenCookie.setPath("/");
         tokenCookie.setMaxAge(accessTokenExpirationPeriod);
         return tokenCookie;
+    }
+
+    // 엑세스 토큰 재발급
+    public String reIssueAccessToken(String refreshToken) {
+        // 리프레시 토큰에서 사용자 ID 추출
+        Long userId = extractUserId(refreshToken);
+        UserInfo findUser = userRepository.findById(userId)
+                .orElseThrow(() -> new CustomException(ErrorCode.NOT_FOUND_USER));
+        // 새로운 액세스 토큰 생성
+        return createAccessToken(userId, findUser.getAuth());
     }
 }
