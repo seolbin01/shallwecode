@@ -51,8 +51,7 @@ public class UserDomainService {
     }
 
     public void save(UserSaveDTO saveUserDTO) {
-        Long loginUserId = CustomUserUtils.getCurrentUserSeq();
-        UserInfo saveUser = userRepository.findById(loginUserId)
+        UserInfo saveUser = userRepository.findById(saveUserDTO.getUserId())
                 .orElseThrow(() -> new CustomException(ErrorCode.NOT_FOUND_USER));
 
         modelMapper.map(saveUserDTO, saveUser);
