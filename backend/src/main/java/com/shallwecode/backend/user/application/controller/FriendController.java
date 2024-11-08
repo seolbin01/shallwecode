@@ -1,5 +1,6 @@
 package com.shallwecode.backend.user.application.controller;
 
+import com.shallwecode.backend.common.util.CustomUserUtils;
 import com.shallwecode.backend.user.application.dto.FriendResListDTO;
 import com.shallwecode.backend.user.application.dto.SaveFriendReqDTO;
 import com.shallwecode.backend.user.application.dto.UpdateFriendReqDTO;
@@ -46,7 +47,8 @@ public class FriendController {
     @GetMapping
     public ResponseEntity<List<FriendResListDTO>> findAllFriend() {
 
-        Long loginUserId = 1L;
+        Long loginUserId = CustomUserUtils.getCurrentUserSeq();
+
         List<FriendResListDTO> friendList = friendService.findAllFriend(loginUserId);
         return ResponseEntity.ok(friendList);
     }
@@ -55,7 +57,8 @@ public class FriendController {
     @GetMapping("/request")
     public ResponseEntity<List<FriendResListDTO>> findAllFriendReq() {
 
-        Long loginUserId = 1L;
+        Long loginUserId = CustomUserUtils.getCurrentUserSeq();
+
         List<FriendResListDTO> friendReqList = friendService.findAllFriendReq(loginUserId);
         return ResponseEntity.ok(friendReqList);
     }
@@ -64,7 +67,7 @@ public class FriendController {
     @DeleteMapping
     public ResponseEntity<Void> deleteFriend(@RequestParam Long userId) {
 
-        Long loginUserId = 1L;
+        Long loginUserId = CustomUserUtils.getCurrentUserSeq();
 
         friendService.deleteFriend(userId, loginUserId);
         return ResponseEntity.ok().build();

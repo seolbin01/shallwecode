@@ -4,6 +4,7 @@ import com.querydsl.core.types.Projections;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import com.shallwecode.backend.common.exception.CustomException;
 import com.shallwecode.backend.common.exception.ErrorCode;
+import com.shallwecode.backend.common.util.CustomUserUtils;
 import com.shallwecode.backend.user.application.dto.*;
 import com.shallwecode.backend.user.domain.aggregate.Friend;
 import com.shallwecode.backend.user.domain.aggregate.FriendStatus;
@@ -27,7 +28,8 @@ public class FriendDomainService {
 
     public SaveFriendDTO save(SaveFriendReqDTO saveFriendReqDTO) {
 
-        Long loginUserId = 3L;
+        Long loginUserId = CustomUserUtils.getCurrentUserSeq();
+
         FindUserDTO fromUserDTO = userDomainService.findById(loginUserId);
 
         FindUserDTO toUserDTO = userDomainService.findById(saveFriendReqDTO.getToUserId());
@@ -60,7 +62,8 @@ public class FriendDomainService {
 
     public FindFriendDTO findMyFriend(UpdateFriendReqDTO updateFriendReqDTO) {
 
-        Long loginUserId = 3L;
+        Long loginUserId = CustomUserUtils.getCurrentUserSeq();
+
         Friend findfriend = friendRepository.findByFromUser_UserIdAndToUser_UserId(updateFriendReqDTO.getFromUserId(), loginUserId)
                 .orElseThrow(() -> new CustomException(ErrorCode.NOT_FOUND_FRIEND));
 
