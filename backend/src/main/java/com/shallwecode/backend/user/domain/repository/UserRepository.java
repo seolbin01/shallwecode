@@ -1,5 +1,6 @@
 package com.shallwecode.backend.user.domain.repository;
 
+import com.shallwecode.backend.user.domain.aggregate.SocialType;
 import com.shallwecode.backend.user.domain.aggregate.UserInfo;
 import org.springframework.data.jpa.repository.JpaRepository;
 
@@ -11,4 +12,8 @@ public interface UserRepository extends JpaRepository<UserInfo, Long> {
 
     // 특정 유저 찾기
     Optional<UserInfo> findByEmail(String email);
+
+    Optional<UserInfo> findByProviderAndSocialId(SocialType provider, String socialId);
+
+    Optional<UserInfo> findByRefreshToken(String refreshToken);
 }

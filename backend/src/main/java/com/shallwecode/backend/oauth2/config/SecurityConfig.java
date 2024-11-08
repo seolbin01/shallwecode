@@ -1,28 +1,22 @@
-package com.shallwecode.backend.security.config;
+package com.shallwecode.backend.oauth2.config;
 
-import com.shallwecode.backend.security.filter.CustomAuthenticationFilter;
-import com.shallwecode.backend.security.filter.JwtFilter;
-import com.shallwecode.backend.security.handler.JwtAccessDeniedHandler;
-import com.shallwecode.backend.security.handler.JwtAuthenticationEntryPoint;
-import com.shallwecode.backend.security.handler.LoginFailureHandler;
-import com.shallwecode.backend.security.handler.LoginSuccessHandler;
-import com.shallwecode.backend.security.util.JwtUtil;
-import com.shallwecode.backend.user.application.service.UserService;
-import jakarta.servlet.Filter;
+import com.shallwecode.backend.oauth2.handler.JwtAccessDeniedHandler;
+import com.shallwecode.backend.oauth2.handler.JwtAuthenticationEntryPoint;
+import com.shallwecode.backend.oauth2.handler.OAuth2LoginFailureHandler;
+import com.shallwecode.backend.oauth2.handler.OAuth2LoginSuccessHandler;
+import com.shallwecode.backend.oauth2.jwt.filter.JwtAuthenticationProcessingFilter;
+import com.shallwecode.backend.oauth2.jwt.service.JwtService;
+import com.shallwecode.backend.oauth2.service.CustomOAuth2UserService;
+import com.shallwecode.backend.user.domain.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.core.env.Environment;
-import org.springframework.security.authentication.AuthenticationManager;
-import org.springframework.security.authentication.ProviderManager;
-import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.config.http.SessionCreationPolicy;
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.oauth2.client.web.OAuth2LoginAuthenticationFilter;
 import org.springframework.security.web.SecurityFilterChain;
-import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
@@ -33,19 +27,22 @@ import org.springframework.web.filter.CorsFilter;
 @RequiredArgsConstructor
 public class SecurityConfig {
 
-    private final BCryptPasswordEncoder passwordEncoder;
-    private final UserService userService;
-    private final Environment env;
-    private final JwtUtil jwtUtil;
+    private final JwtService jwtService;
+    private final UserRepository userRepository;
+    private final OAuth2LoginSuccessHandler oAuth2LoginSuccessHandler;
+    private final OAuth2LoginFailureHandler oAuth2LoginFailureHandler;
+    private final CustomOAuth2UserService customOAuth2UserService;
 
     @Bean
-    protected SecurityFilterChain configure(HttpSecurity http) throws Exception {
-
-        http.csrf(AbstractHttpConfigurer::disable)
+    public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
+        http
+                .csrf(AbstractHttpConfigurer::disable)
+                .httpBasic(AbstractHttpConfigurer::disable) // httpBasic 사용 X
                 .authorizeHttpRequests(auths -> {
                     auths.requestMatchers(
-                            new AntPathRequestMatcher("/api/v1/**"),
-                            new AntPathRequestMatcher("/**"),
+//                            new AntPathRequestMatcher("/user/api/v1/**"),
+//                            new AntPathRequestMatcher("/**"),
+                            new AntPathRequestMatcher("/login/**"),
                             new AntPathRequestMatcher("/swagger-ui/index.html"),
                             new AntPathRequestMatcher("/swagger-ui/**"),
                             new AntPathRequestMatcher("/webjars/swagger-ui/**"),
@@ -55,25 +52,27 @@ public class SecurityConfig {
 
                     auths.anyRequest().authenticated();
                 })
-
                 .sessionManagement(
                         session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS)
+                )
+                .oauth2Login(oauth2 -> oauth2
+                        .successHandler(oAuth2LoginSuccessHandler) // 동의하고 계속하기를 눌렀을 때 Handler 설정
+                        .failureHandler(oAuth2LoginFailureHandler) // 소셜 로그인 실패 시 핸들러 설정
+                        .userInfoEndpoint(userInfo ->
+                                userInfo.userService(customOAuth2UserService) // customUserService 설정
+                        )
                 );
 
-
-        /* 커스텀 로그인 필터 이전에 JWT 토큰 확인 필터를 설정 */
-        http.addFilterBefore(new JwtFilter(jwtUtil), UsernamePasswordAuthenticationFilter.class);
-
-        /* 커스텀 로그인 필터 추가 */
-        http.addFilterBefore(getAuthenticationFilter(), UsernamePasswordAuthenticationFilter.class);
-
-        /* 인증, 인가 실패 핸들러 설정 */
         http.exceptionHandling(
                 exceptionHandling -> {
                     exceptionHandling.accessDeniedHandler(new JwtAccessDeniedHandler());
                     exceptionHandling.authenticationEntryPoint(new JwtAuthenticationEntryPoint());
                 }
         );
+
+
+        // JWT 필터를 추가하여 토큰 관리
+        http.addFilterBefore(jwtAuthenticationProcessingFilter(), OAuth2LoginAuthenticationFilter.class);
 
         /* CORS 설정 */
         http.cors(cors -> cors
@@ -82,19 +81,13 @@ public class SecurityConfig {
         return http.build();
     }
 
-    private Filter getAuthenticationFilter() {
-        CustomAuthenticationFilter customAuthenticationFilter = new CustomAuthenticationFilter();
-        customAuthenticationFilter.setAuthenticationManager(getAuthenticationManager());
-        customAuthenticationFilter.setAuthenticationSuccessHandler(new LoginSuccessHandler(env));
-        customAuthenticationFilter.setAuthenticationFailureHandler(new LoginFailureHandler());
-        return customAuthenticationFilter;
-    }
 
-    private AuthenticationManager getAuthenticationManager() {
-        DaoAuthenticationProvider provider = new DaoAuthenticationProvider();
-        provider.setPasswordEncoder(passwordEncoder);
-        provider.setUserDetailsService(userService);
-        return new ProviderManager(provider);
+    // 로그인 이후에 jwt토큰을 관리하는 필터
+    @Bean
+    public JwtAuthenticationProcessingFilter jwtAuthenticationProcessingFilter() {
+        JwtAuthenticationProcessingFilter jwtAuthenticationFilter = new JwtAuthenticationProcessingFilter(jwtService, userRepository);
+
+        return jwtAuthenticationFilter;
     }
 
     @Bean
@@ -109,7 +102,9 @@ public class SecurityConfig {
         config.addAllowedOrigin("http://localhost:5173"); // 허용할 도메인
         config.addAllowedHeader("*"); // 모든 헤더 허용
         config.addAllowedMethod("*"); // 모든 HTTP 메소드 허용
-        config.addExposedHeader("token"); // 서버측에서 보내는 헤더에 대한 허용 설정
+        config.addExposedHeader("accessToken"); // 서버측에서 보내는 헤더에 대한 허용 설정
+        config.addExposedHeader("refreshToken");
+        config.addExposedHeader("token");
 
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
         source.registerCorsConfiguration("/**", config);

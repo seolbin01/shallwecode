@@ -1,7 +1,8 @@
-package com.shallwecode.backend.security.handler;
+package com.shallwecode.backend.oauth2.handler;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.shallwecode.backend.security.dto.ExceptionResponse;
+import com.shallwecode.backend.common.exception.CustomException;
+import com.shallwecode.backend.common.exception.ErrorCode;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -11,7 +12,6 @@ import org.springframework.security.web.access.AccessDeniedHandler;
 import java.io.IOException;
 
 
-/* 인가 실패 시 응답 설정 */
 public class JwtAccessDeniedHandler implements AccessDeniedHandler {
 
     @Override
@@ -19,6 +19,6 @@ public class JwtAccessDeniedHandler implements AccessDeniedHandler {
 
         response.setStatus(HttpServletResponse.SC_FORBIDDEN);
         response.setContentType("application/json;charset=UTF-8");
-        response.getWriter().write(new ObjectMapper().writeValueAsString(new ExceptionResponse(403, "인가 실패")));
+        response.getWriter().write(new ObjectMapper().writeValueAsString(new CustomException(ErrorCode.FORBIDDEN)));
     }
 }

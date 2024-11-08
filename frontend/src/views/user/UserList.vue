@@ -45,12 +45,16 @@ const fetchTryProblemCount = async () => {
   }
 };
 
-const friendsList = ref([
-  {id: 1, username: 'user02'},
-  {id: 2, username: 'user03'},
-  {id: 3, username: 'user04'},
-  {id: 4, username: 'user05'}
-])
+const friendsList = ref([]);
+
+const fetchFriendList = async () => {
+  try {
+    const response = await axios.get('http://localhost:8080/api/v1/friend');
+    friendsList.value = response.data;
+  } catch (error) {
+    console.error('친구 목록을 가져오는 중 오류가 발생했습니다:', error);
+  }
+};
 
 const totalPages = Math.ceil(friendsList.value.length / friendItemsPerPage)
 
@@ -114,6 +118,7 @@ const changeUserPage = (page) => {
 onMounted(() => {
   fetchTryProblemCount();
   fetchUserList();
+  fetchFriendList();
 });
 </script>
 
@@ -136,25 +141,22 @@ onMounted(() => {
           <thead>
           <tr>
             <th>번호</th>
+            <th>이메일</th>
             <th>닉네임</th>
-            <th></th>
+            <th></th> <!-- 삭제 버튼을 위한 열 -->
           </tr>
           </thead>
           <tbody>
-          <tr
-              v-for="(user, index) in displayedUsers"
-          >
-            <td>{{ (currentUserPage - 1) * ROWS_PER_PAGE + index + 1 }}</td>
-            <td>{{ user.title }}</td>
-            <td><span class="level-badge">Lv. {{ user.level }}</span></td>
-          </tr>
-          <tr v-for="i in emptyRowsCount" :key="`empty-${i}`" class="empty-row">
-            <td>-</td>
-            <td>-</td>
-            <td>-</td>
+          <tr v-for="(user, index) in displayedUsers" :key="user.userId">
+            <td>{{ (currentUserPage - 1) * ROWS_PER_PAGE + index + 1 }}</td> <!-- 순번 -->
+            <td>{{ user.email }}</td> <!-- 이메일 -->
+            <td>{{ user.nickname }}</td> <!-- 닉네임 -->
+            <td><button @click="deleteUser(user.userId)">친구 신청</button></td> <!-- 삭제 버튼 -->
           </tr>
           </tbody>
         </table>
+
+
 
         <div class="pagination">
           <button
@@ -207,7 +209,7 @@ onMounted(() => {
         <div class="friends-list">
           <div v-for="friend in paginatedFriends" :key="friend.id" class="friend-item">
             <div class="friend-avatar"></div>
-            <span class="friend-name">{{ friend.username }}</span>
+            <span class="friend-name">{{ friend.nickname }}</span>
           </div>
         </div>
 
@@ -312,13 +314,6 @@ button {
   cursor: pointer;
   margin-left: 4px;
   margin-right: 4px;
-}
-
-.level-badge {
-  background: #f0f0f0;
-  padding: 4px 8px;
-  border-radius: 4px;
-  font-size: 12px;
 }
 
 .pagination {

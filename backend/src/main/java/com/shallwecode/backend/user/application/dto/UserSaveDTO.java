@@ -9,11 +9,7 @@ import java.util.Date;
 @Getter
 @Setter
 public class UserSaveDTO {
-    private Long userId;
-    private String provider;
-    private String ProviderId;
+//    private Long userId;
     private String email;
     private String nickname;
-    private String auth;
-    private Date createdAt;
 }

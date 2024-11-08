@@ -5,7 +5,6 @@ import com.shallwecode.backend.user.application.dto.UserUpdateDTO;
 import com.shallwecode.backend.user.application.service.UserService;
 import com.shallwecode.backend.user.domain.aggregate.UserInfo;
 import io.swagger.v3.oas.annotations.Operation;
-import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -18,13 +17,12 @@ import java.util.List;
 @Slf4j
 @RestController
 @RequestMapping("/api/v1/user")
-@Tag(name = "User", description = "회원 관련 API")
 public class UserController {
 
     private final UserService userService;
 
     // 회원가입
-    @PostMapping("/api/v1/user")
+    @PutMapping
     @Operation(summary = "회원 가입", description = "회원 가입을 시도한다.")
     public ResponseEntity<String> saveUser(@Valid @RequestBody UserSaveDTO userSaveDTO) {
         userService.saveUser(userSaveDTO);
@@ -32,7 +30,7 @@ public class UserController {
     }
 
     // 회원 닉네임 수정
-    @PutMapping("/api/v1/user/nickname")
+    @PutMapping("nickname")
     @Operation(summary = "회원 닉네임 수정", description = "회원 닉네임을 수정한다.")
     public ResponseEntity<UserInfo> updateUser(@Valid @RequestBody UserUpdateDTO userUpdateDTO) {
         userService.updateUser(userUpdateDTO);
@@ -48,7 +46,7 @@ public class UserController {
     }
 
     // 회원 조회
-    @PostMapping
+    @GetMapping
     @Operation(summary = "회원 전체 조회", description = "전체 회원을 조회한다.")
     public ResponseEntity<List<UserInfo>> getAllUser() {
         List<UserInfo> userList = userService.getAllUsers();

@@ -53,35 +53,8 @@ public class ChatHandler extends TextWebSocketHandler {
          * userNickname : 유저닉네임
          * chatContent : 채팅 메시지
          * */
-        if(type.equals("chat")) {
-            /* sendChatDTO 객체로 변환 */
-            SendChatDTO sendChatDTO = objectMapper.readValue(payload, SendChatDTO.class);
-
-            /* 보낸 시간 기록 */
-            sendChatDTO.setSendTime(LocalDateTime.now());
-
-            /* JSON 으로 직렬화하여 클라이언트에 전송할 채팅 준비 */
-            String responsePayload = objectMapper.writeValueAsString(sendChatDTO);
-
-            /* 해당 방 모든 세션에 채팅 전송 */
-            sendMessageAllSession(sessionsInRoom, new TextMessage(responsePayload));
-        } else if(type.equals("code")){
-            /* 아니라면 코드이므로 코딩방에 협업 코드를 실시간으로 통신하고 DB에 갱신해야 함. */
-            /* 프론트에서 요청되어 수신되는 예상 데이터 (채팅)
-             * type : 타입여부
-             * problemId : 문제번호
-             * codingRoomId : 코딩방 번호
-             * tryLanguage : 시도한 언어
-             * codeContent : 작성된 코드
-             * */
-            /* 먼저 데이터를 송신한다. */
-            sendMessageAllSession(sessionsInRoom, message);
-
-            /* JSON 데이터를 sendCodeDTO 객체로 변환 */
-            SendCodeDTO sendCodeDTO = objectMapper.readValue(payload, SendCodeDTO.class);
-
-            /* 코드 DB에 저장 */
-            codingRoomDomainService.updateCode(sendCodeDTO);
+        switch (type) {
+            case "statusCheck", "chat" -> sendMessageAllSession(sessionsInRoom, message);
         }
     }
 

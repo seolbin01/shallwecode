@@ -1,10 +1,10 @@
 <script setup>
-import {computed, onMounted, ref} from 'vue'
+import { computed, onMounted, ref } from 'vue';
 import axios from "axios";
 
 const currentPage = ref(1);
-const currentProblemPage = ref(1);
-const friendItemsPerPage = 2
+const currentProblemPage = ref(1); // 문제 페이징을 위한 변수
+const friendItemsPerPage = 2;
 const ROWS_PER_PAGE = 7;
 const searchQuery = ref('');
 
@@ -21,7 +21,6 @@ const userProfile = ref({
     resolvedIssues: computed(() => SolvedCount.value)
   }
 });
-
 
 const fetchTryProblemCount = async () => {
   try {
@@ -46,37 +45,42 @@ const fetchTryProblemCount = async () => {
   }
 };
 
+const friendsList = ref([]);
 
-const friendsList = ref([
-  {id: 1, username: 'user02'},
-  {id: 2, username: 'user03'},
-  {id: 3, username: 'user04'},
-  {id: 4, username: 'user05'}
-])
+const fetchFriendList = async () => {
+  try {
+    const response = await axios.get('http://localhost:8080/api/v1/friend');
+    friendsList.value = response.data;
+  } catch (error) {
+    console.error('친구 목록을 가져오는 중 오류가 발생했습니다:', error);
+  }
+};
 
-const totalPages = Math.ceil(friendsList.value.length / friendItemsPerPage)
+const totalPages = computed(() =>
+    Math.ceil(friendsList.value.length / friendItemsPerPage)
+);
 
 const paginatedFriends = computed(() => {
-  const start = (currentPage.value - 1) * friendItemsPerPage
-  const end = start + friendItemsPerPage
-  return friendsList.value.slice(start, end)
-})
+  const start = (currentPage.value - 1) * friendItemsPerPage;
+  const end = start + friendItemsPerPage;
+  return friendsList.value.slice(start, end);
+});
 
 const nextPage = () => {
-  if (currentPage.value < totalPages) {
-    currentPage.value++
+  if (currentPage.value < totalPages.value) {
+    currentPage.value++;
   }
-}
+};
 
 const prevPage = () => {
   if (currentPage.value > 1) {
-    currentPage.value--
+    currentPage.value--;
   }
-}
+};
 
 const goToPage = (page) => {
-  currentPage.value = page
-}
+  currentPage.value = page;
+};
 
 const problems = ref([]);
 
@@ -91,11 +95,11 @@ const fetchProblemList = async () => {
 
 const handleProblemClick = async (problem) => {
   try {
-    console.log( problem.problemId )
+    console.log(problem.problemId);
   } catch (error) {
     console.error('코딩방 생성 중 에러가 발생했습니다.', error.response ? error.response.data : error.message);
   }
-}
+};
 
 const displayedProblems = computed(() => {
   const startIdx = (currentProblemPage.value - 1) * ROWS_PER_PAGE;
@@ -112,20 +116,22 @@ const totalProblemPages = computed(() =>
 );
 
 const changeProblemPage = (page) => {
-  if (page === 'prev' && currentPage.value > 1) {
-    currentPage.value--;
-  } else if (page === 'next' && currentPage.value < totalPages.value) {
-    currentPage.value++;
+  if (page === 'prev' && currentProblemPage.value > 1) {
+    currentProblemPage.value--; // 문제 페이징 변수 사용
+  } else if (page === 'next' && currentProblemPage.value < totalProblemPages.value) {
+    currentProblemPage.value++; // 문제 페이징 변수 사용
   } else if (typeof page === 'number') {
-    currentPage.value = page;
+    currentProblemPage.value = page; // 문제 페이징 변수 사용
   }
 };
 
 onMounted(() => {
   fetchTryProblemCount();
   fetchProblemList();
+  fetchFriendList();
 });
 </script>
+
 
 <template>
   <div class="main-container">
@@ -165,11 +171,6 @@ onMounted(() => {
             <td>{{ problem.title }}</td>
             <td><span class="level-badge">Lv. {{ problem.level }}</span></td>
           </tr>
-          <tr v-for="i in emptyRowsCount" :key="`empty-${i}`" class="empty-row">
-            <td>-</td>
-            <td>-</td>
-            <td>-</td>
-          </tr>
           </tbody>
         </table>
 
@@ -204,11 +205,11 @@ onMounted(() => {
 
         <div class="stats-container">
           <div class="stat-item">
-            <p class="stat-label">도전한 문제</p>
+            <p class="stat-label">미도전 문제</p>
             <p class="stat-value">{{ userProfile.stats.pendingIssues }}개</p>
           </div>
           <div class="stat-item">
-            <p class="stat-label">미해결 문제</p>
+            <p class="stat-label">도전한 문제</p>
             <p class="stat-value">{{ userProfile.stats.unresolvedIssues }}개</p>
           </div>
           <div class="stat-item">
@@ -224,7 +225,7 @@ onMounted(() => {
         <div class="friends-list">
           <div v-for="friend in paginatedFriends" :key="friend.id" class="friend-item">
             <div class="friend-avatar"></div>
-            <span class="friend-name">{{ friend.username }}</span>
+            <span class="friend-name">{{ friend.nickname }}</span>
           </div>
         </div>
 
