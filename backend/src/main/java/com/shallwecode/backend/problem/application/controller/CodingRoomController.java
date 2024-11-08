@@ -1,5 +1,6 @@
 package com.shallwecode.backend.problem.application.controller;
 
+import com.shallwecode.backend.common.util.CustomUserUtils;
 import com.shallwecode.backend.problem.application.dto.CodingRoomReqDTO;
 import com.shallwecode.backend.problem.application.dto.FindMyCodingRoomResDTO;
 import com.shallwecode.backend.problem.application.service.CodingRoomService;
@@ -50,8 +51,8 @@ public class CodingRoomController {
     @Operation(summary = "내 코딩방 조회", description = "내 코딩방을 조회 한다.")
     public ResponseEntity<List<FindMyCodingRoomResDTO>> findMyCodingRoom() {
 
-        Long userId = 1L;   // 추후 로그인 회원의 아이디로 수정
-        List<FindMyCodingRoomResDTO> codingRoomList = codingRoomService.findMyCodingRoom(userId);
+        Long loginUserId = CustomUserUtils.getCurrentUserSeq();
+        List<FindMyCodingRoomResDTO> codingRoomList = codingRoomService.findMyCodingRoom(loginUserId);
 
         return new ResponseEntity<>(codingRoomList, HttpStatus.OK);
     }

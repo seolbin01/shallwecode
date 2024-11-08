@@ -1,6 +1,9 @@
 <script setup>
 import axios from "axios";
 import {computed, onMounted, ref} from "vue";
+import {useAuthStore} from "@/stores/auth.js";
+
+const authStore = useAuthStore();
 
 const ROWS_PER_PAGE = 7;
 const currentPage = ref(1);
@@ -8,7 +11,12 @@ const codingRooms = ref([]);
 
 const fetchMyCodingRoomList = async () => {
   try {
-    const response = await axios.get('http://localhost:8080/api/v1/codingroom');
+    const response = await axios.get('http://localhost:8080/api/v1/codingroom', {
+      headers: {
+        Authorization: `Bearer ${authStore.accessToken}`,
+        'Authorization-refresh': `Bearer ${authStore.refreshToken}`
+      }
+    });
     codingRooms.value = response.data;
   } catch (error) {
     console.error('참여중인 코딩방 목록을 불러오는 중 에러가 발생했습니다.', error.response ? error.response.data : error.message);

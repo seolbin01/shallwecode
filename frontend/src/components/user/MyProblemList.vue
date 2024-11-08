@@ -57,7 +57,6 @@ const handleTryClick = async (tryId) => {
     );
 
     curTry.value = response.data;
-    console.log(curTry.value)
     isModalOpen.value = true;
 
   } catch (error) {
