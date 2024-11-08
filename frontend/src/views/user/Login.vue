@@ -1,17 +1,3 @@
-<script setup>
-const handleKakaoLogin = () => {
-
-}
-
-const handleNaverLogin = () => {
-
-}
-
-const handleGoogleLogin = () => {
-
-}
-</script>
-
 <template>
   <div class="container">
     <div class="login-container">
@@ -19,7 +5,7 @@ const handleGoogleLogin = () => {
 
       <button
           class="login-button kakao-button"
-          @click="handleKakaoLogin"
+          @click="redirectToSocial('kakao')"
       >
         <span class="button-icon">K</span>
         카카오 로그인
@@ -27,7 +13,7 @@ const handleGoogleLogin = () => {
 
       <button
           class="login-button naver-button"
-          @click="handleNaverLogin"
+          @click="redirectToSocial('naver')"
       >
         <span class="button-icon">N</span>
         네이버 로그인
@@ -35,7 +21,7 @@ const handleGoogleLogin = () => {
 
       <button
           class="login-button google-button"
-          @click="handleGoogleLogin"
+          @click="redirectToSocial('google')"
       >
         <span class="button-icon">G</span>
         Continue with Google
@@ -43,6 +29,57 @@ const handleGoogleLogin = () => {
     </div>
   </div>
 </template>
+
+<script setup>
+import { ref, onMounted } from 'vue';
+import { useRouter } from 'vue-router';
+import axios from 'axios';
+import { useAuthStore } from "@/stores/auth.js";
+
+const router = useRouter();
+const store = useAuthStore();
+
+const authStore = useAuthStore();
+// 소셜 로그인 리디렉션 URL
+const redirectToSocial = (platform) => {
+  let url = '';
+
+  // 각 소셜 로그인 플랫폼에 맞는 URL로 리디렉션
+  switch (platform) {
+    case 'kakao':
+      url = 'http://localhost:8080/oauth2/authorization/kakao';
+      break;
+    case 'naver':
+      url = 'http://localhost:8080/oauth2/authorization/naver';
+      break;
+    case 'google':
+      url = 'http://localhost:8080/oauth2/authorization/google';
+      break;
+    default:
+      break;
+  }
+  // 외부 소셜 로그인 페이지로 리디렉션
+  window.location.href = url;
+}
+// 콜백 URL에서 JWT 토큰 처리
+const handleCallback = async () => {
+  const urlParams = new URLSearchParams(window.location.search);
+  const token = urlParams.get('accessToken'); // 서버에서 반환한 JWT 토큰을 쿼리 파라미터에서 가져옴
+
+  if (token) {
+    store.login(token);
+    localStorage.setItem('accessToken', token); // 로컬 스토리지에 토큰 저장
+    router.push('/'); // 메인 페이지로 리디렉션
+  }
+};
+
+// 페이지가 로드될 때 콜백 처리
+onMounted(() => {
+  if (window.location.pathname === '/sign-up') {
+    handleCallback();
+  }
+});
+</script>
 
 <style scoped>
 .container {

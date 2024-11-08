@@ -19,8 +19,8 @@ public class UserDomainService {
     private final ModelMapper modelMapper;
 
     // 회원 가입 시 유효성 검사
-    public void validateNewUser(UserInfo userInfo) {
-        if (userRepository.existsByEmail(userInfo.getEmail())) {
+    public void validateNewUser(UserSaveDTO saveUserDTO) {
+        if (userRepository.existsByEmail(saveUserDTO.getEmail())) {
             throw new IllegalArgumentException("이미 존재하는 사용자 email 입니다.");
         }
     }
@@ -40,5 +40,13 @@ public class UserDomainService {
         UserInfo foundUser = userRepository.findById(userId)
                 .orElseThrow(() -> new CustomException(ErrorCode.NOT_FOUND_USER));
         return modelMapper.map(foundUser, FindUserDTO.class);
+    }
+
+    public void save(UserSaveDTO saveUserDTO) {
+        UserInfo saveUser = userRepository.findById(saveUserDTO.getUserId())
+                .orElseThrow(() -> new CustomException(ErrorCode.NOT_FOUND_USER));
+
+        modelMapper.map(saveUserDTO, saveUser);
+        saveUser.updateAuth();
     }
 }

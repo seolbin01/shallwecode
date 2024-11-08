@@ -1,10 +1,12 @@
 <script setup>
 import {inject, onMounted, onUnmounted, ref} from 'vue'
 import axios from "axios";
+import {useAuthStore} from "@/stores/auth.js";
 
 const showNotis = ref(false);
 const notis = ref([]);
 const refreshNotiList = inject('refreshNotiList');
+const store = useAuthStore();
 
 const fetchMyNotReadNotiList = async () => {
   try {
@@ -56,6 +58,10 @@ const formatDate = (dateString) => {
   });
 };
 
+const handleLogoutClick = () => {
+  store.logout();
+}
+
 onMounted(() => {
   fetchMyNotReadNotiList();
   document.addEventListener('click', closeNotis)
@@ -71,7 +77,7 @@ onUnmounted(() => {
     <router-link to="/" class="logo">ShallWeCode</router-link>
     <div class="menu">
       <router-link to="/user-list" class="menu-item">회원 목록</router-link>
-      <router-link to="/logout" class="menu-item">로그아웃</router-link>
+      <button @click="handleLogoutClick">로그아웃</button>
       <div class="notification-container">
         <button @click="toggleNotis" class="menu-item notification-btn">
           알림
