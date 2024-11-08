@@ -63,22 +63,15 @@ const redirectToSocial = (platform) => {
 }
 // 콜백 URL에서 JWT 토큰 처리
 const handleCallback = async () => {
-  const urlParams = new URLSearchParams(window.location.search);
-  const token = urlParams.get('accessToken'); // 서버에서 반환한 JWT 토큰을 쿼리 파라미터에서 가져옴
 
-  if (token) {
-    store.login(token);
-    localStorage.setItem('accessToken', token); // 로컬 스토리지에 토큰 저장
-    router.push('/'); // 메인 페이지로 리디렉션
-  }
 };
 
 // 페이지가 로드될 때 콜백 처리
-onMounted(() => {
-  if (window.location.pathname === '/sign-up') {
-    handleCallback();
-  }
-});
+// onMounted(() => {
+//   if (window.location.pathname === '/sign-up') {
+//     handleCallback();
+//   }
+// });
 </script>
 
 <style scoped>

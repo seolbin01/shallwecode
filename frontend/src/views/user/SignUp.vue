@@ -61,10 +61,14 @@ function getCookie(name) {
 
 onMounted(() => {
   if (!store.accessToken){
+    console.log("dsfjasklfj;sdjfkadlfs");
     const token = getCookie('accessToken');  // 쿠키에서 'token' 값 가져오기
+    const token2 = getCookie('refreshToken');
     if (token) {
       console.log('쿠키에서 토큰을 가져왔습니다:', token);
-      store.login(token);  // 로그인설정
+      console.log('리프레시 토큰 : ', token2);
+      store.login(token, token2);  // 로그인설정
+
     } else {
       console.log('쿠키에 토큰이 없습니다.');
     }

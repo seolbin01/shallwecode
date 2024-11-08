@@ -17,15 +17,22 @@ export const useAuthStore = defineStore('auth', () => {
             userId.value = payload.userId;
             userRole.value = payload.auth;
         }
+        console.log(getCookie('accessToken'))
         console.log(accessToken.value);
         console.log(refreshToken.value);
     });
 
-    function login(accessToken, refreshToken) {
-        accessToken.value = accessToken;
-        refreshToken.value = refreshToken;
-        localStorage.setItem('accessToken', accessToken);
-        localStorage.setItem('refreshToken', refreshToken);
+    function login(accssToken, refreToken) {
+        // const token1 = getCookie('accessToken');  // 쿠키에서 'token' 값 가져오기
+        // const token2 = getCookie('refreshToken');
+        accessToken.value = accssToken
+        refreshToken.value = refreToken;
+        localStorage.setItem('accessToken', accssToken);
+        localStorage.setItem('refreshToken', refreToken);
+        console.log("accessToken : " + accessToken.value);
+        console.log("refreshToken : " + refreshToken.value);
+        console.log("localStorage.getItem(accessToken)", localStorage.getItem('accessToken'));
+        console.log("localStorage.getItem(refreshToken)", localStorage.getItem('refreshToken'));
         const payload = JSON.parse(atob(accessToken.split('.')[1]));
         userId.value = payload.userId;
         userRole.value = payload.auth;
@@ -45,5 +52,12 @@ export const useAuthStore = defineStore('auth', () => {
         return userRole.value.includes(requiredRole);
     }
 
-    return { accessToken, userRole, userId, login, logout, isAuthorized };
+    return { accessToken, refreshToken, userRole, userId, login, logout, isAuthorized };
 });
+
+function getCookie(name) {
+    const value = `; ${document.cookie}`;
+    const parts = value.split(`; ${name}=`);
+    if (parts.length === 2) return parts.pop().split(';').shift();
+    return null;
+}

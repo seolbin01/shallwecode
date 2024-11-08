@@ -1,6 +1,7 @@
 <script setup>
 import { computed, onMounted, ref } from 'vue';
 import axios from "axios";
+import {useAuthStore} from "@/stores/auth.js";
 
 const currentPage = ref(1);
 const currentProblemPage = ref(1); // 문제 페이징을 위한 변수
@@ -11,6 +12,8 @@ const searchQuery = ref('');
 const noTryCount = ref(0);
 const unSolvedCount = ref(0);
 const SolvedCount = ref(0);
+
+const store = useAuthStore();
 
 const userProfile = ref({
   userId: 'USER01',
@@ -125,10 +128,32 @@ const changeProblemPage = (page) => {
   }
 };
 
+function getCookie(name) {
+  const value = `; ${document.cookie}`;
+  const parts = value.split(`; ${name}=`);
+  if (parts.length === 2) return parts.pop().split(';').shift();
+  return null;
+}
+
 onMounted(() => {
   fetchTryProblemCount();
   fetchProblemList();
   fetchFriendList();
+  console.log(store.accessToken);
+  console.log(store.refreshToken);
+  if (!store.accessToken) {
+    console.log("dsfjasklfj;sdjfkadlfs");
+    const token = getCookie('accessToken');  // 쿠키에서 'token' 값 가져오기
+    const token2 = getCookie('refreshToken');
+    if (token) {
+      console.log('쿠키에서 토큰을 가져왔습니다:', token);
+      console.log('리프레시 토큰 : ', token2);
+      store.login(token, token2);  // 로그인설정
+
+    } else {
+      console.log('쿠키에 토큰이 없습니다.');
+    }
+  }
 });
 </script>
 
