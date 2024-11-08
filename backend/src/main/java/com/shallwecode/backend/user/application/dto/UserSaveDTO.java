@@ -10,10 +10,6 @@ import java.util.Date;
 @Setter
 public class UserSaveDTO {
     private Long userId;
-    private String provider;
-    private String ProviderId;
     private String email;
     private String nickname;
-    private String auth;
-    private Date createdAt;
 }
