@@ -100,11 +100,11 @@ onMounted(() => {
 
       <div class="stats-container">
         <div class="stat-item">
-          <span class="stat-label">도전한 문제</span>
+          <span class="stat-label">미도전 문제</span>
           <span class="stat-value">{{ stats.challenge }}개</span>
         </div>
         <div class="stat-item">
-          <span class="stat-label">미해결 문제</span>
+          <span class="stat-label">도전한 문제</span>
           <span class="stat-value">{{ stats.unSolved }}개</span>
         </div>
         <div class="stat-item">
