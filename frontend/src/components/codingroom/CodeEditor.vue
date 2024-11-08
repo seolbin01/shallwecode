@@ -4,6 +4,7 @@ import * as Y from 'yjs';
 import {WebsocketProvider} from "y-websocket";
 import {MonacoBinding} from "y-monaco";
 import * as monaco from 'monaco-editor';
+import axios from "axios";
 
 const MONACO_EDITOR_OPTIONS = {
   automaticLayout: true,
@@ -74,11 +75,20 @@ const selectLanguage = (language) => {
 const runCode = async () => {
   isRunning.value = true;
   try {
-    // 여기에 코드 실행 로직 추가
-    await new Promise(resolve => setTimeout(resolve, 1000));
-    console.log('Code executed:', code.value);
+
+    if (editorInstance.value) {
+      code.value = editorInstance.value.getValue();
+    }
+
+    const response = await axios.post('http://localhost:8080/api/v1/compile/run', {
+      code: code.value,
+      language: selectedLanguage.value.id.toLowerCase()
+    });
+
+    console.log(response.data);
+
   } catch (error) {
-    console.error('Execution error:', error);
+    console.error('코드 실행 중 에러가 발생했습니다. ', error);
   } finally {
     isRunning.value = false;
   }
