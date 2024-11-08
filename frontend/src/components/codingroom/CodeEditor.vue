@@ -25,6 +25,12 @@ const selectedLanguage = ref(languages[0]);
 const isRunning = ref(false);
 const monacoEl = ref(null);
 
+// 실행 결과를 저장할 refs
+const output = ref('');
+const compileError = ref('');
+const runtimeError = ref('');
+const systemError = ref('');
+
 onMounted(() => {
   const ydocument = new Y.Doc();
   const provider = new WebsocketProvider('ws://localhost:1234', 'monaco', ydocument);
@@ -74,14 +80,20 @@ const selectLanguage = (language) => {
 
     editorInstance.value.setValue(defaultCode);
   }
+};
 
-  showDropdown.value = true;
+const clearOutputs = () => {
+  output.value = '';
+  compileError.value = '';
+  runtimeError.value = '';
+  systemError.value = '';
 };
 
 const runCode = async () => {
   isRunning.value = true;
-  try {
+  clearOutputs();
 
+  try {
     if (editorInstance.value) {
       code.value = editorInstance.value.getValue();
     }
@@ -91,10 +103,15 @@ const runCode = async () => {
       language: selectedLanguage.value.id.toLowerCase()
     });
 
-    console.log(response.data);
+    // 각각의 응답 처리
+    output.value = response.data.output || '';
+    compileError.value = response.data.compileError || '';
+    runtimeError.value = response.data.runtimeError || '';
+    systemError.value = response.data.systemError || '';
 
   } catch (error) {
     console.error('코드 실행 중 에러가 발생했습니다. ', error);
+    systemError.value = '서버 연결 중 오류가 발생했습니다.';
   } finally {
     isRunning.value = false;
   }
@@ -131,17 +148,53 @@ const runCode = async () => {
       </button>
     </div>
     <div ref="monacoEl" class="editor-container"></div>
+    <!-- 실행 결과 출력 영역 -->
+    <div class="output-container">
+      <div class="output-header">
+        <span>실행 결과</span>
+        <button
+            v-if="output || compileError || runtimeError || systemError"
+            class="clear-button"
+            @click="clearOutputs"
+        >
+          Clear
+        </button>
+      </div>
+      <div class="output-content">
+        <!-- 정상 출력 -->
+        <div v-if="output" class="output-section">
+          <div class="section-header">실행 결과:</div>
+          <pre class="section-content">{{ output }}</pre>
+        </div>
+
+        <!-- 컴파일 에러 -->
+        <div v-if="compileError" class="output-section error">
+          <div class="section-header">컴파일 에러:</div>
+          <pre class="section-content">{{ compileError }}</pre>
+        </div>
+
+        <!-- 런타임 에러 -->
+        <div v-if="runtimeError" class="output-section error">
+          <div class="section-header">런타임 에러:</div>
+          <pre class="section-content">{{ runtimeError }}</pre>
+        </div>
+
+        <!-- 시스템 에러 -->
+        <div v-if="systemError" class="output-section error">
+          <div class="section-header">시스템 에러:</div>
+          <pre class="section-content">{{ systemError }}</pre>
+        </div>
+
+        <!-- 결과가 없을 때 -->
+        <div v-if="!output && !compileError && !runtimeError && !systemError" class="empty-message">
+          코드를 실행하면 여기에 결과가 표시됩니다.
+        </div>
+      </div>
+    </div>
   </div>
 </template>
 
 <style scoped>
-.code-container {
-  flex: 1;
-  width: 50%;
-  min-width: 600px;
-  height: 640px;
-}
-
 .setting {
   background-color: var(--editor-color);
   color: var(--background-color);
@@ -154,7 +207,86 @@ const runCode = async () => {
 }
 
 .editor-container {
-  height: 600px;
+  height: 400px;
+}
+
+.output-container {
+  background-color: var(--editor-color);
+  color: var(--background-color);
+  border-top: 1px solid var(--background-color);
+  height: 300px;
+  overflow-y: auto;
+}
+
+.output-header {
+  padding: 8px 16px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-weight: 500;
+  position: sticky;
+  top: 0;
+  background-color: var(--editor-color);
+  z-index: 1;
+}
+
+.output-content {
+  padding: 16px;
+}
+
+.output-section {
+  margin-bottom: 16px;
+}
+
+.output-section:last-child {
+  margin-bottom: 0;
+}
+
+.section-header {
+  font-weight: 500;
+  margin-bottom: 8px;
+  color: #a0a0a0;
+}
+
+.section-content {
+  margin: 0;
+  padding: 8px;
+  background-color: rgba(0, 0, 0, 0.2);
+  border-radius: 4px;
+  font-family: monospace;
+  white-space: pre-wrap;
+  word-wrap: break-word;
+}
+
+.error .section-header {
+  color: #ff6b6b;
+}
+
+.error .section-content {
+  color: #ff6b6b;
+  background-color: rgba(255, 107, 107, 0.1);
+}
+
+.empty-message {
+  color: #a0a0a0;
+  text-align: center;
+  padding: 20px;
+}
+
+.clear-button {
+  background: transparent;
+  border: 1px solid var(--background-color);
+  color: var(--background-color);
+  padding: 2px 8px;
+  border-radius: 4px;
+  font-size: 0.8em;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.clear-button:hover {
+  background-color: rgba(255, 255, 255, 0.1);
 }
 
 .language-selector {

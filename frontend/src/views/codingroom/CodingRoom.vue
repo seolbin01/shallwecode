@@ -12,7 +12,12 @@ import Chat from "@/components/codingroom/ChatArea.vue";
         <Chat/>
       </div>
     </div>
-    <CodeEditor/>
+    <div class="problem-container">
+      <div class="content-wrapper">
+        <CodeEditor/>
+        <CodeResult/>
+      </div>
+    </div>
   </div>
 </template>
 
