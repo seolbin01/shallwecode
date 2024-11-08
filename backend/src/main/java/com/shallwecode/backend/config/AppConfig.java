@@ -7,19 +7,11 @@ import io.swagger.v3.oas.models.security.SecurityRequirement;
 import io.swagger.v3.oas.models.security.SecurityScheme;
 import org.modelmapper.ModelMapper;
 import org.modelmapper.convention.MatchingStrategies;
-import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 
 @Configuration
 public class AppConfig {
-
-    private final ApplicationContext applicationContext;
-
-    public AppConfig(ApplicationContext applicationContext) {
-        this.applicationContext = applicationContext;
-    }
 
     @Bean
     public OpenAPI openAPI() {
@@ -41,38 +33,6 @@ public class AppConfig {
                 .version("1.0.0");
     }
 
-//    @Bean
-//    OpenApiCustomizer springSecurityLoginEndpointCustomizer() {
-//        FilterChainProxy filterChainProxy = applicationContext.getBean(AbstractSecurityWebApplicationInitializer.DEFAULT_FILTER_NAME, FilterChainProxy.class);
-//        return openAPI -> {
-//            for (SecurityFilterChain filterChain : filterChainProxy.getFilterChains()) {
-//                Optional<CustomAuthenticationFilter> optionalFilter =
-//                        filterChain.getFilters().stream()
-//                                .filter(CustomAuthenticationFilter.class::isInstance)
-//                                .map(CustomAuthenticationFilter.class::cast)
-//                                .findAny();
-//                if (optionalFilter.isPresent()) {
-//                    CustomAuthenticationFilter customAuthenticationFilter = optionalFilter.get();
-//                    Operation operation = new Operation();
-//                    Schema<?> schema = new ObjectSchema()
-//                            .addProperties("userEmail", new StringSchema())
-//                            .addProperties("userPassword", new StringSchema());
-//                    RequestBody requestBody = new RequestBody().content(new Content().addMediaType(org.springframework.http.MediaType.APPLICATION_JSON_VALUE, new MediaType().schema(schema)));
-//                    operation.requestBody(requestBody);
-//                    ApiResponses apiResponses = new ApiResponses();
-//                    apiResponses.addApiResponse(String.valueOf(HttpStatus.OK.value()), new ApiResponse().description(HttpStatus.OK.getReasonPhrase()));
-//                    apiResponses.addApiResponse(String.valueOf(HttpStatus.FORBIDDEN.value()), new ApiResponse().description(HttpStatus.FORBIDDEN.getReasonPhrase()));
-//                    operation.responses(apiResponses);
-//                    operation.addTagsItem("Login");
-//                    operation.setSummary("로그인");
-//                    operation.setDescription("로그인 기능");
-//                    PathItem pathItem = new PathItem().post(operation);
-//                    openAPI.getPaths().addPathItem("/user/api/v1/auth/login", pathItem);
-//                }
-//            }
-//        };
-//    }
-
     @Bean
     ModelMapper modelMapper() {
         ModelMapper modelMapper = new ModelMapper();
@@ -86,11 +46,5 @@ public class AppConfig {
 
 
         return modelMapper;
-    }
-
-    // 나중 삭제 예정
-    @Bean
-    BCryptPasswordEncoder passwordEncoder() {
-        return new BCryptPasswordEncoder();
     }
 }

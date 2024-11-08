@@ -28,7 +28,8 @@ const store = useAuthStore();
 
 const registerUser = async () => {
   try {
-    const accessToken = store.accessToken; // 로컬 스토리지에서 토큰 가져오기
+    const accessToken = getCookie('accessToken'); // 로컬 스토리지에서 토큰 가져오기
+    const refreshToken = getCookie('refreshToken');
     const userId = store.userId; // 예시: userId도 로컬 스토리지에서 가져오는 경우
     console.log(accessToken);
     console.log(email.value)
@@ -40,11 +41,12 @@ const registerUser = async () => {
         },
         {
           headers: {
-            Authorization: `Bearer ${accessToken}` // Authorization 헤더에 토큰 추가
+            Authorization: `Bearer ${accessToken}`, // Authorization 헤더에 토큰 추가
+            'Authorization-Refresh': refreshToken
           }
         }
     );
-    router.push('/'); // 메인페이지로 리다이렉션
+    await router.push('/'); // 메인페이지로 리다이렉션
   } catch (error) {
     console.error('가입 실패:', error);
   }
