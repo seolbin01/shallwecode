@@ -4,12 +4,14 @@ import com.shallwecode.backend.common.exception.CustomException;
 import com.shallwecode.backend.common.exception.ErrorCode;
 import com.shallwecode.backend.problem.application.dto.CoopDTO;
 import com.shallwecode.backend.problem.application.dto.CoopResDTO;
+import com.shallwecode.backend.problem.application.dto.CoopUserResDTO;
 import com.shallwecode.backend.problem.domain.service.CodingRoomDomainService;
 import com.shallwecode.backend.problem.domain.service.CoopDomainService;
 import com.shallwecode.backend.user.domain.service.FriendDomainService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
 import java.util.Objects;
 
 @Service
@@ -95,4 +97,8 @@ public class CoopService {
         coopDomainService.delete(coopId);
     }
 
+    // 협업 친구 구하기
+    public List<CoopUserResDTO> selectCoopFriend(Long codingRoomId) {
+        return coopDomainService.selectCoopFriend(codingRoomId);
+    }
 }

@@ -1,46 +1,125 @@
 <script setup>
-import {ref} from "vue";
+import {ref, reactive, onMounted, onUnmounted} from "vue";
+import axios from "axios";
 
-const participants = ref([
-  {id: 1, name: 'AI 어시스턴트', status: 'online', type: 'other'},
-  {id: 2, name: '사용자', status: 'online', type: 'user'}
-]);
+// Props 로 로그인한 유저 데이터 내려받음 (받았다고 가정)
+const tempProps = {
+  userId : 1,
+  codingRoomId: 3,
+  userNickname : 'dummy1'
+}
+
+// 필요한 객체 생성
+const coopMember = reactive([]);
+const webSocket = ref({});
+
+// 필요한 정보 조회, 협업 친구 조회
+const communicateCoopInfo = async(codingRoomId) => {
+  try {
+    const response = await axios.get(`http://localhost:8080/api/v1/codingroom/${codingRoomId}`, {
+      headers : {
+        Authorization : 'Bearer eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJjaGF0QGdtYWlsLmNvbSIsImF1dGgiOlsiUk9MRV9VU0VSIl0sImV4cCI6MTczMDI1MTc5N30.aM3knHn_RuZanzSNI9Hd-dsXIEQaaJUTEWD0fEg-9WCUfb7VahwTzza5e4tQ4EnrtzFPH_TnJsKtgKXqXFAWDQ'
+      },
+      withCredentials : true
+    });
+    for(let i = 0; i < response.data.coopList.length; i++) {
+      const tempObject = {
+        codingRoomId: response.data.coopList[i].codingRoomId,
+        userId: response.data.coopList[i].userId,
+        userNickname: response.data.coopList[i].userNickname,
+        status: 'offline'
+      }
+      coopMember.push(tempObject);
+    }
+  } catch (error) {
+    console.error('협업 친구 목록을 조회하는 데 오류가 발생했습니다.', error);
+  }
+}
 
 const messages = ref([]);
 const newMessage = ref('');
 const isTyping = ref(false);
 
-// 보낸 사람 이름 찾기 함수
-const getSenderName = (senderType) => {
-  return participants.value.find(p => p.type === senderType)?.name || '';
-};
-
 // 채팅 메시지 전송 함수
 const sendMessage = () => {
   if (newMessage.value.trim()) {
-    messages.value.push({
+    const sendMess = {
+      type: "chat",
       id: Date.now(),
       text: newMessage.value,
       sender: 'user',
-      senderName: getSenderName('user'),
+      senderName: tempProps.userNickname,
       timestamp: new Date().toLocaleTimeString()
-    });
+    }
+    messages.value.push(sendMess);
+    webSocket.value.send(JSON.stringify(sendMess));
     newMessage.value = '';
+  }
 
-    // 어시스턴트 응답 시뮬레이션
-    isTyping.value = true;
-    setTimeout(() => {
-      messages.value.push({
-        id: Date.now(),
-        text: "코드에 대해 도움이 필요하시다면 말씀해 주세요!",
-        sender: 'other',
-        senderName: getSenderName('other'),
-        timestamp: new Date().toLocaleTimeString()
-      });
-      isTyping.value = false;
-    }, 1000);
+  // 메시지를 수신 했을 때
+  webSocket.value.onmessage = (message) => {
+    const receiveMessage = JSON.parse(message);
+
+    const receiveMess = {
+      type: "chat",
+      id: Date.now(),
+      text: receiveMessage.text,
+      sender: 'other',
+      senderName: receiveMessage.senderName,
+      timestamp: new Date().toLocaleTimeString()
+    }
+
+    messages.value.push(receiveMess);
   }
 };
+
+// 웹 소켓 연결 함수
+const connectWebSocket = () => {
+  webSocket.value = new WebSocket(`ws://localhost:8080/ws/coding-room/${tempProps.codingRoomId}`);
+  // 연결시 온, 오프라인 구별을 위해 정보를 송신
+  webSocket.value.onopen = () => {
+    const statusCheck = {
+      type: "statusCheck",
+      userId : tempProps.userId,
+      status : "online"
+    };
+
+    // statusCheck 를 송신
+    webSocket.value.send(JSON.stringify(statusCheck));
+  };
+
+  // WebSocket 수신
+  webSocket.value.onmessage = (message) => {
+    // 받은 메시지를 변환
+    const receiveMessage = JSON.parse(message.data);
+
+    console.log(receiveMessage);
+
+    // 상태 체크 - 접속시 online 표시
+    if(receiveMessage.type === "statusCheck") {
+      for(let i = 0; i < coopMember.length; i++){
+        if(coopMember[i].userId === receiveMessage.userId)
+          coopMember[i].status = "online";
+        console.log(coopMember[i].status);
+      }
+    }
+  };
+}
+
+// 웹 소켓 연결 해제
+const disConnectWebSocket = () => {
+  webSocket.value.close();
+}
+
+// DOM 로딩 전
+onMounted(async () => {
+  await communicateCoopInfo(3);
+  connectWebSocket();
+})
+
+onUnmounted(async() => {
+  disConnectWebSocket();
+});
 </script>
 
 <template>
@@ -52,14 +131,14 @@ const sendMessage = () => {
       <div class="participants-section">
         <div class="participants-header">참여자</div>
         <div class="participants-list">
-          <div v-for="participant in participants"
-               :key="participant.id"
+          <div v-for="coopMember in coopMember"
+               :key="coopMember.userId"
                class="participant-item">
             <div class="participant-status"
-                 :class="participant.status"></div>
+                 :class="coopMember.status"></div>
             <div class="participant-name"
-                 :class="participant.type">
-              {{ participant.name }}
+                 :class="coopMember.type">
+              {{ coopMember.userNickname }}
             </div>
           </div>
         </div>
