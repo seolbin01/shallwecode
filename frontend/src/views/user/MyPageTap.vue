@@ -6,7 +6,7 @@ import MyNotiList from "@/components/user/MyNotiList.vue";
 import MyProblemList from "@/components/user/MyProblemList.vue";
 import MyCodingRoomList from "@/components/user/MyCodingRoomList.vue";
 
-const selectedMenu = ref('friends');
+const selectedMenu = ref('myinfo');
 
 const selectMenu = (menu) => {
   selectedMenu.value = menu;
