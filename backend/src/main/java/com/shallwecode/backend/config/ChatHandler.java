@@ -55,6 +55,7 @@ public class ChatHandler extends TextWebSocketHandler {
          * */
         switch (type) {
             case "statusCheck", "chat" -> sendMessageAllSession(sessionsInRoom, message);
+
         }
     }
 
