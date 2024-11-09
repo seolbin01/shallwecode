@@ -1,5 +1,6 @@
 package com.shallwecode.backend.user.application.service;
 
+import com.nimbusds.openid.connect.sdk.UserInfoResponse;
 import com.shallwecode.backend.user.application.dto.user.FindUserDTO;
 import com.shallwecode.backend.user.application.dto.user.FindUserDetailDTO;
 import com.shallwecode.backend.user.application.dto.user.UserSaveDTO;
@@ -33,6 +34,7 @@ public class UserService implements UserDetailsService {
     public void saveUser(UserSaveDTO userSaveDTO) {
         userDomainService.validateNewUser(userSaveDTO);
         userDomainService.save(userSaveDTO);
+
     }
 
     // 회원 닉네임 수정
@@ -84,7 +86,6 @@ public class UserService implements UserDetailsService {
     }
 
     public FindUserDetailDTO findUserDetail(Long loginUserId) {
-
         Long allProblemCnt = userDomainService.findAllProblemCnt();
         Long doingProblemCnt = userDomainService.findDoingProblemCnt(loginUserId);
         Long finishedProblemCnt = userDomainService.findFinishedProblemCnt(loginUserId);

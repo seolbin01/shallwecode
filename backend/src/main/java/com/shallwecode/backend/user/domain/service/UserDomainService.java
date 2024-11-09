@@ -2,13 +2,13 @@ package com.shallwecode.backend.user.domain.service;
 
 import com.querydsl.core.types.Projections;
 import com.querydsl.jpa.impl.JPAQueryFactory;
-import com.shallwecode.backend.problem.domain.aggregate.QProblem;
-import com.shallwecode.backend.problem.domain.aggregate.QTry;
-import com.shallwecode.backend.user.application.dto.user.FindUserDetailDTO;
-import com.shallwecode.backend.user.application.dto.user.UserSaveDTO;
 import com.shallwecode.backend.common.exception.CustomException;
 import com.shallwecode.backend.common.exception.ErrorCode;
+import com.shallwecode.backend.problem.domain.aggregate.QProblem;
+import com.shallwecode.backend.problem.domain.aggregate.QTry;
 import com.shallwecode.backend.user.application.dto.user.FindUserDTO;
+import com.shallwecode.backend.user.application.dto.user.FindUserDetailDTO;
+import com.shallwecode.backend.user.application.dto.user.UserSaveDTO;
 import com.shallwecode.backend.user.application.dto.user.UserUpdateDTO;
 import com.shallwecode.backend.user.domain.aggregate.QUserInfo;
 import com.shallwecode.backend.user.domain.aggregate.UserInfo;
@@ -53,7 +53,7 @@ public class UserDomainService {
         return modelMapper.map(foundUser, FindUserDTO.class);
     }
 
-    // 회원 가입
+    // 회원 가입 시 유효성 검사
     public void save(UserSaveDTO saveUserDTO) {
         UserInfo saveUser = userRepository.findById(saveUserDTO.getUserId())
                 .orElseThrow(() -> new CustomException(ErrorCode.NOT_FOUND_USER));
@@ -98,7 +98,9 @@ public class UserDomainService {
                 .fetchOne();
     }
 
+
     public FindUserDetailDTO findSimpleInfoById(Long loginUserId) {
+
         UserInfo userInfo = userRepository.findById(loginUserId)
                 .orElseThrow(() -> new CustomException(ErrorCode.NOT_FOUND_USER));
 
