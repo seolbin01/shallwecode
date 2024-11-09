@@ -34,6 +34,12 @@ public class JwtAuthenticationProcessingFilter extends OncePerRequestFilter {
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
         System.out.println("doFilterInternal");
 
+        // WebSocket 요청 예외 처리: Upgrade 헤더가 websocket인 경우 필터를 우회합니다.
+        if ("websocket".equalsIgnoreCase(request.getHeader("Upgrade"))) {
+            filterChain.doFilter(request, response);
+            return;
+        }
+
         for (AntPathRequestMatcher url : SWAGGER_URLS) {
             if (url.matches(request)) {
                 filterChain.doFilter(request, response);
