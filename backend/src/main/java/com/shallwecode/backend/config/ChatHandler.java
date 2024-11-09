@@ -1,5 +1,6 @@
 package com.shallwecode.backend.config;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.shallwecode.backend.common.exception.CustomException;
 import com.shallwecode.backend.common.exception.ErrorCode;
 import lombok.NonNull;
@@ -18,8 +19,15 @@ import java.util.*;
 @RequiredArgsConstructor
 public class ChatHandler extends TextWebSocketHandler {
 
+    /* JSON -> 객체
+     * 객체 -> JSON 변환해주는 Mapper */
+    private final ObjectMapper objectMapper;
+
     /* 코딩방 별 채팅을 구분하기 위한 Session Map */
     private final Map<Integer, List<WebSocketSession>> codingRoomSessionMap = new HashMap<>();
+
+    /* List 설계 미스... 세션 온오프라인 체크용 리스트 임시로 구축 */
+    private final Map<String, String> sessionList = new HashMap<>();
 
     /* 세션별 채팅 전달 */
     @Override
@@ -37,7 +45,30 @@ public class ChatHandler extends TextWebSocketHandler {
         String type = jsonObject.getString("type");
 
         switch (type) {
-            case "statusCheck", "chat" -> sendMessageAllSession(sessionsInRoom, message);
+            case "statusCheck" : {
+                String userId = String.valueOf(jsonObject.getInt("userId"));
+                String status = jsonObject.getString("status");
+                System.out.println(userId);
+                System.out.println(status);
+
+                sessionList.put(userId, status);
+
+                // "type"과 "sessionList"를 포함한 맵 생성
+                Map<String, Object> responseMap = new HashMap<>();
+                responseMap.put("type", "statusCheck");
+                responseMap.put("sessionList", sessionList); // sessionList 는 리스트 형태로 추가
+
+                // JSON 으로 직렬화하여 클라이언트에 전송할 채팅 준비
+                String responsePayload = objectMapper.writeValueAsString(responseMap);
+
+                System.out.println(responsePayload);
+
+                sendMessageAllSession(sessionsInRoom, new TextMessage(responsePayload));
+            } break;
+
+            case "chat" : {
+                sendMessageAllSession(sessionsInRoom, message);
+            } break;
         }
     }
 

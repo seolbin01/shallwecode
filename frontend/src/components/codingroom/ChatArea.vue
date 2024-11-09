@@ -25,13 +25,23 @@ const communicateCoopInfo = async(codingRoomId) => {
     });
 
     for(let i = 0; i < response.data.coopList.length; i++) {
-      const tempObject = {
-        codingRoomId: response.data.coopList[i].codingRoomId,
-        userId: response.data.coopList[i].userId,
-        userNickname: response.data.coopList[i].userNickname,
-        status: 'offline'
+      if(tempObjectInfo.userId === response.data.coopList[i].userId) {
+        const tempObject = {
+          codingRoomId: response.data.coopList[i].codingRoomId,
+          userId: response.data.coopList[i].userId,
+          userNickname: response.data.coopList[i].userNickname,
+          status: 'online'
+        }
+        coopMember.push(tempObject);
+      } else {
+        const tempObject = {
+          codingRoomId: response.data.coopList[i].codingRoomId,
+          userId: response.data.coopList[i].userId,
+          userNickname: response.data.coopList[i].userNickname,
+          status: 'offline'
+        }
+        coopMember.push(tempObject);
       }
-      coopMember.push(tempObject);
     }
   } catch (error) {
     console.error('협업 친구 목록을 조회하는 데 오류가 발생했습니다.', error);
@@ -71,12 +81,8 @@ const connectWebSocket = (codingRoomId) => {
   webSocket.value = new WebSocket(`ws://localhost:8080/ws/coding-room/${codingRoomId}`);
   // 연결시 온, 오프라인 구별을 위해 정보를 송신
   webSocket.value.onopen = () => {
-    /* coopMember 정보에 자신의 상태를 기록 */
-
-
-
     const statusCheck = {
-      type: "statusCheck",
+      type : "statusCheck",
       userId : tempObjectInfo.userId,
       status : "online"
     };
@@ -90,13 +96,15 @@ const connectWebSocket = (codingRoomId) => {
     // 받은 메시지를 변환
     const receiveMessage = JSON.parse(message.data);
 
-    // 상태 체크 - 접속시 online 표시
+    // 상태 체크 - 접속시 보내온 상태정보 업데이트
     if(receiveMessage.type === "statusCheck") {
-      for(let i = 0; i < coopMember.length; i++){
-        if(coopMember[i].userId === receiveMessage.userId)
-          coopMember[i].status = "online";
-        console.log(coopMember[i].status);
-      }
+      console.log(receiveMessage);
+      console.log(Object.entries(receiveMessage.sessionList));
+      // for(let i = 0; i < coopMember.length; i++) {
+      //   // 온라인 정보만 기록한다.
+      //   if(receiveMessage.coopMember[i].status === "online")
+      //   coopMember[i].status = receiveMessage.coopMember[i].status;
+      // }
     }
 
     // 본인 메시지는 제외
@@ -119,6 +127,23 @@ const connectWebSocket = (codingRoomId) => {
 
 // 웹 소켓 연결 해제
 const disConnectWebSocket = () => {
+  // 해제전 offline 으로 바꾸고 소캣 해제
+  for(let i = 0; i < coopMember.length; i++){
+    if(coopMember[i].userId === tempObjectInfo.userId)
+      coopMember[i].status = "offline";
+  }
+
+  // 보낼 객체 생성
+  const statusCheck = {
+    type : "statusCheck",
+    coopMember : []
+  };
+  statusCheck.coopMember = coopMember;
+
+  // 전송 후
+  webSocket.value.send(JSON.stringify(statusCheck))
+
+  // 웹 소캣 닫음.
   webSocket.value.close();
 }
 
