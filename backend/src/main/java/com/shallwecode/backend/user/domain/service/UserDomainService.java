@@ -122,7 +122,6 @@ public class UserDomainService {
 
     public Long findAllProblemCnt() {
         QProblem qProblem = QProblem.problem;
-        QTry qTry = QTry.try$;
 
         return jpaQueryFactory
                 .select(qProblem.count())

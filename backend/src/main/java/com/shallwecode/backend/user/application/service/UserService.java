@@ -1,5 +1,6 @@
 package com.shallwecode.backend.user.application.service;
 
+import com.shallwecode.backend.user.application.dto.FindUserListDTO;
 import com.shallwecode.backend.user.application.dto.user.FindUserDTO;
 import com.shallwecode.backend.user.application.dto.user.FindUserDetailDTO;
 import com.shallwecode.backend.user.application.dto.user.UserSaveDTO;
@@ -105,5 +106,11 @@ public class UserService implements UserDetailsService {
         findUserDetailDTO.setNotFinishedProblemCnt(notFinishedProblemCnt);
 
         return findUserDetailDTO;
+    }
+
+    @Transactional(readOnly = true)
+    public List<FindUserListDTO> findRequestUser(Long loginUserId) {
+
+        return userDomainService.findRequestUser(loginUserId);
     }
 }
