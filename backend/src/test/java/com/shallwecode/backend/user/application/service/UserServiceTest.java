@@ -1,5 +1,6 @@
 package com.shallwecode.backend.user.application.service;
 
+import com.shallwecode.backend.user.application.dto.FindUserDetailDTO;
 import com.shallwecode.backend.user.application.dto.UserSaveDTO;
 import com.shallwecode.backend.user.application.dto.UserUpdateDTO;
 import com.shallwecode.backend.user.domain.aggregate.UserInfo;
@@ -11,6 +12,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.List;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -33,14 +35,14 @@ class UserServiceTest {
         // given
         UserSaveDTO userSaveDTO = new UserSaveDTO();
         userSaveDTO.setUserId(32L);
-        userSaveDTO.setEmail("sr1094@naver.com");
-        userSaveDTO.setNickname("serom");
+        userSaveDTO.setEmail("test@naver.com");
+        userSaveDTO.setNickname("testNick");
 
         // when
         userService.saveUser(userSaveDTO);
 
         // then
-        Optional<UserInfo> userInfo = userRepository.findByEmail("sr1094@naver.com");
+        Optional<UserInfo> userInfo = userRepository.findByEmail("test@naver.com");
         assertNotNull(userInfo);
     }
 
@@ -51,8 +53,8 @@ class UserServiceTest {
         // given
         UserSaveDTO userSaveDTO = new UserSaveDTO();
         userSaveDTO.setUserId(32L);
-        userSaveDTO.setEmail("sr1094@naver.com");
-        userSaveDTO.setNickname("serom");
+        userSaveDTO.setEmail("test@naver.com");
+        userSaveDTO.setNickname("testNick");
         userService.saveUser(userSaveDTO);
 
         // when
@@ -63,7 +65,7 @@ class UserServiceTest {
         userService.updateUser(userUpdateDTO);
 
         // then
-        Optional<UserInfo> userInfo = userRepository.findByEmail("sr1094@naver.com");
+        Optional<UserInfo> userInfo = userRepository.findByEmail("test@naver.com");
         assertEquals("꺄르륵", userInfo.get().getNickname());
     }
 
@@ -74,14 +76,44 @@ class UserServiceTest {
         // given
         UserSaveDTO userSaveDTO = new UserSaveDTO();
         userSaveDTO.setUserId(32L);
-        userSaveDTO.setEmail("sr1094@naver.com");
-        userSaveDTO.setNickname("serom");
+        userSaveDTO.setEmail("test@naver.com");
+        userSaveDTO.setNickname("testNick");
         userService.saveUser(userSaveDTO);
 
         // when
         userService.deleteUser(32L);
 
         // then
-        assertFalse(userRepository.findByEmail("sr1094@naver.com").isPresent());
+        assertFalse(userRepository.findByEmail("test@naver.com").isPresent());
+    }
+
+    @Test
+    @DisplayName("회원 조회 테스트")
+    void getAllUser(){
+        // 회원 조회
+        // when
+        List<UserInfo> findAllUser = userService.getAllUsers();
+
+        // then
+        assertNotNull(findAllUser);
+    }
+
+    @Test
+    @DisplayName("특정 회원 조회 테스트")
+    void getUserById(){
+        // 특정 회원 조회 위한 회원가입
+        UserSaveDTO userSaveDTO = new UserSaveDTO();
+        userSaveDTO.setUserId(32L);
+        userSaveDTO.setEmail("test@naver.com");
+        userSaveDTO.setNickname("test22");
+        userService.saveUser(userSaveDTO);
+
+        // when
+        FindUserDetailDTO findDetailUser = userService.findUserDetail(32L);
+
+        // then
+        assertNotNull(findDetailUser);
+        assertEquals("test@naver.com", findDetailUser.getEmail());
+        assertEquals("test22", findDetailUser.getNickname());
     }
 }
