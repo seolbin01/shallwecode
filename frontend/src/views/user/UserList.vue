@@ -277,12 +277,15 @@ onMounted(() => {
 .main-container {
   background-color: var(--background-color);
   display: flex;
+  justify-content: center;
   padding: 20px;
   gap: 20px;
+  margin: 0 auto;
+  min-height: calc(100vh - 40px);
 }
 
 .container {
-  width: 1000px;
+  width: 800px;
   background: white;
   border-radius: 16px;
   padding: 24px;
@@ -291,6 +294,7 @@ onMounted(() => {
   display: flex;
   justify-content: center;
   gap: 70px;
+  height: fit-content;
 }
 
 .title {
@@ -374,8 +378,9 @@ button {
 
 .profile-container {
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-  max-width: 400px;
-  margin: 0 auto;
+  width: 400px;
+  min-width: 300px;
+  margin: 0;
 }
 
 .profile-card, .friends-card {
