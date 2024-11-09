@@ -3,9 +3,6 @@ package com.shallwecode.backend.config;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.shallwecode.backend.common.exception.CustomException;
 import com.shallwecode.backend.common.exception.ErrorCode;
-import com.shallwecode.backend.problem.application.dto.SendChatDTO;
-import com.shallwecode.backend.problem.application.dto.SendCodeDTO;
-import com.shallwecode.backend.problem.domain.service.CodingRoomDomainService;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import org.json.JSONObject;
@@ -16,14 +13,11 @@ import org.springframework.web.socket.WebSocketSession;
 import org.springframework.web.socket.handler.TextWebSocketHandler;
 
 import java.io.IOException;
-import java.time.LocalDateTime;
 import java.util.*;
 
 @Component
 @RequiredArgsConstructor
 public class ChatHandler extends TextWebSocketHandler {
-
-    private final CodingRoomDomainService codingRoomDomainService;
 
     /* JSON -> 객체
      * 객체 -> JSON 변환해주는 Mapper */
@@ -31,6 +25,9 @@ public class ChatHandler extends TextWebSocketHandler {
 
     /* 코딩방 별 채팅을 구분하기 위한 Session Map */
     private final Map<Integer, List<WebSocketSession>> codingRoomSessionMap = new HashMap<>();
+
+    /* List 설계 미스... 세션 온오프라인 체크용 리스트 임시로 구축 */
+    private final Map<String, String> sessionList = new HashMap<>();
 
     /* 세션별 채팅 전달 */
     @Override
@@ -47,14 +44,31 @@ public class ChatHandler extends TextWebSocketHandler {
         /* type 추출 */
         String type = jsonObject.getString("type");
 
-        /* 프론트에서 요청되어 수신되는 예상 데이터 (채팅)
-         * type : 타입여부
-         * userId : 유저아이디
-         * userNickname : 유저닉네임
-         * chatContent : 채팅 메시지
-         * */
         switch (type) {
-            case "statusCheck", "chat" -> sendMessageAllSession(sessionsInRoom, message);
+            case "statusCheck" : {
+                String userId = String.valueOf(jsonObject.getInt("userId"));
+                String status = jsonObject.getString("status");
+                System.out.println(userId);
+                System.out.println(status);
+
+                sessionList.put(userId, status);
+
+                // "type"과 "sessionList"를 포함한 맵 생성
+                Map<String, Object> responseMap = new HashMap<>();
+                responseMap.put("type", "statusCheck");
+                responseMap.put("sessionList", sessionList); // sessionList 는 리스트 형태로 추가
+
+                // JSON 으로 직렬화하여 클라이언트에 전송할 채팅 준비
+                String responsePayload = objectMapper.writeValueAsString(responseMap);
+
+                System.out.println(responsePayload);
+
+                sendMessageAllSession(sessionsInRoom, new TextMessage(responsePayload));
+            } break;
+
+            case "chat" : {
+                sendMessageAllSession(sessionsInRoom, message);
+            } break;
         }
     }
 

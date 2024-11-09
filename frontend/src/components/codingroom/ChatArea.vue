@@ -1,12 +1,14 @@
 <script setup>
 import {ref, reactive, onMounted, onUnmounted} from "vue";
+import { useAuthStore } from "@/stores/auth.js";
 import axios from "axios";
 
-// Props 로 로그인한 유저 데이터 내려받음 (받았다고 가정)
-const tempProps = {
-  userId : 1,
-  codingRoomId: 3,
-  userNickname : 'dummy1'
+const useAuth = useAuthStore();
+
+const tempObjectInfo = {
+  userId : useAuth.userId,
+  accessToken : useAuth.accessToken,
+  refreshToken : useAuth.refreshToken
 }
 
 // 필요한 객체 생성
@@ -16,20 +18,30 @@ const webSocket = ref({});
 // 필요한 정보 조회, 협업 친구 조회
 const communicateCoopInfo = async(codingRoomId) => {
   try {
-    const response = await axios.get(`http://localhost:8080/api/v1/codingroom/${codingRoomId}`, {
-      headers : {
-        Authorization : 'Bearer eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJjaGF0QGdtYWlsLmNvbSIsImF1dGgiOlsiUk9MRV9VU0VSIl0sImV4cCI6MTczMDI1MTc5N30.aM3knHn_RuZanzSNI9Hd-dsXIEQaaJUTEWD0fEg-9WCUfb7VahwTzza5e4tQ4EnrtzFPH_TnJsKtgKXqXFAWDQ'
-      },
-      withCredentials : true
-    });
-    for(let i = 0; i < response.data.coopList.length; i++) {
-      const tempObject = {
-        codingRoomId: response.data.coopList[i].codingRoomId,
-        userId: response.data.coopList[i].userId,
-        userNickname: response.data.coopList[i].userNickname,
-        status: 'offline'
+    const response = await axios.get(`http://localhost:8080/api/v1/codingroom/friendList/${codingRoomId}`, {
+      headers: {
+        Authorization: `Bearer ${tempObjectInfo.accessToken}`
       }
-      coopMember.push(tempObject);
+    });
+
+    for(let i = 0; i < response.data.coopList.length; i++) {
+      if(tempObjectInfo.userId === response.data.coopList[i].userId) {
+        const tempObject = {
+          codingRoomId: response.data.coopList[i].codingRoomId,
+          userId: response.data.coopList[i].userId,
+          userNickname: response.data.coopList[i].userNickname,
+          status: 'online'
+        }
+        coopMember.push(tempObject);
+      } else {
+        const tempObject = {
+          codingRoomId: response.data.coopList[i].codingRoomId,
+          userId: response.data.coopList[i].userId,
+          userNickname: response.data.coopList[i].userNickname,
+          status: 'offline'
+        }
+        coopMember.push(tempObject);
+      }
     }
   } catch (error) {
     console.error('협업 친구 목록을 조회하는 데 오류가 발생했습니다.', error);
@@ -43,12 +55,18 @@ const isTyping = ref(false);
 // 채팅 메시지 전송 함수
 const sendMessage = () => {
   if (newMessage.value.trim()) {
+    let userNickName = { };
+    for(let i = 0; i < coopMember.length; i++) {
+      if(tempObjectInfo.userId === coopMember[i].userId)
+        userNickName = coopMember[i].userNickname;
+    }
+
     const sendMess = {
       type: "chat",
-      id: Date.now(),
+      id: tempObjectInfo.userId,
       text: newMessage.value,
       sender: 'user',
-      senderName: tempProps.userNickname,
+      senderName: userNickName,
       timestamp: new Date().toLocaleTimeString()
     }
     messages.value.push(sendMess);
@@ -56,31 +74,16 @@ const sendMessage = () => {
     newMessage.value = '';
   }
 
-  // 메시지를 수신 했을 때
-  webSocket.value.onmessage = (message) => {
-    const receiveMessage = JSON.parse(message);
-
-    const receiveMess = {
-      type: "chat",
-      id: Date.now(),
-      text: receiveMessage.text,
-      sender: 'other',
-      senderName: receiveMessage.senderName,
-      timestamp: new Date().toLocaleTimeString()
-    }
-
-    messages.value.push(receiveMess);
-  }
 };
 
 // 웹 소켓 연결 함수
-const connectWebSocket = () => {
-  webSocket.value = new WebSocket(`ws://localhost:8080/ws/coding-room/${tempProps.codingRoomId}`);
+const connectWebSocket = (codingRoomId) => {
+  webSocket.value = new WebSocket(`ws://localhost:8080/ws/coding-room/${codingRoomId}`);
   // 연결시 온, 오프라인 구별을 위해 정보를 송신
   webSocket.value.onopen = () => {
     const statusCheck = {
-      type: "statusCheck",
-      userId : tempProps.userId,
+      type : "statusCheck",
+      userId : tempObjectInfo.userId,
       status : "online"
     };
 
@@ -88,33 +91,66 @@ const connectWebSocket = () => {
     webSocket.value.send(JSON.stringify(statusCheck));
   };
 
-  // WebSocket 수신
+  // WebSocket 수신 - onmessage 는 단 한번만 설정 됨.
   webSocket.value.onmessage = (message) => {
     // 받은 메시지를 변환
     const receiveMessage = JSON.parse(message.data);
 
-    console.log(receiveMessage);
-
-    // 상태 체크 - 접속시 online 표시
+    // 상태 체크 - 접속시 보내온 상태정보 업데이트
     if(receiveMessage.type === "statusCheck") {
-      for(let i = 0; i < coopMember.length; i++){
-        if(coopMember[i].userId === receiveMessage.userId)
-          coopMember[i].status = "online";
-        console.log(coopMember[i].status);
+      console.log(receiveMessage);
+      console.log(Object.entries(receiveMessage.sessionList));
+      // for(let i = 0; i < coopMember.length; i++) {
+      //   // 온라인 정보만 기록한다.
+      //   if(receiveMessage.coopMember[i].status === "online")
+      //   coopMember[i].status = receiveMessage.coopMember[i].status;
+      // }
+    }
+
+    // 본인 메시지는 제외
+    if(receiveMessage.id === tempObjectInfo.userId) return;
+
+    if(receiveMessage.type === "chat") {
+      const receiveMess = {
+        type: "chat",
+        id: receiveMessage.id,
+        text: receiveMessage.text,
+        sender: 'other',
+        senderName: receiveMessage.senderName,
+        timestamp: new Date().toLocaleTimeString()
       }
+
+      messages.value.push(receiveMess);
     }
   };
 }
 
 // 웹 소켓 연결 해제
 const disConnectWebSocket = () => {
+  // 해제전 offline 으로 바꾸고 소캣 해제
+  for(let i = 0; i < coopMember.length; i++){
+    if(coopMember[i].userId === tempObjectInfo.userId)
+      coopMember[i].status = "offline";
+  }
+
+  // 보낼 객체 생성
+  const statusCheck = {
+    type : "statusCheck",
+    coopMember : []
+  };
+  statusCheck.coopMember = coopMember;
+
+  // 전송 후
+  webSocket.value.send(JSON.stringify(statusCheck))
+
+  // 웹 소캣 닫음.
   webSocket.value.close();
 }
 
 // DOM 로딩 전
 onMounted(async () => {
-  await communicateCoopInfo(3);
-  connectWebSocket();
+  await communicateCoopInfo(10);
+  connectWebSocket(10);
 })
 
 onUnmounted(async() => {
