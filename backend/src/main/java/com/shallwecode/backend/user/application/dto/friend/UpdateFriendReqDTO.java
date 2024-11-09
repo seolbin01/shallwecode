@@ -1,4 +1,4 @@
-package com.shallwecode.backend.user.application.dto;
+package com.shallwecode.backend.user.application.dto.friend;
 
 import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
@@ -8,10 +8,10 @@ import lombok.Setter;
 
 @Getter
 @Setter
-@NoArgsConstructor
 @AllArgsConstructor
-public class SaveFriendReqDTO {
+@NoArgsConstructor
+public class UpdateFriendReqDTO {
 
     @NotNull(message = "Null이면 안됩니다.")
-    private Long toUserId;
+    private Long fromUserId;
 }

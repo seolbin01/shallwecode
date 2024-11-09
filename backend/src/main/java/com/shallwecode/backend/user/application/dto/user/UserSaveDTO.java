@@ -1,10 +1,7 @@
-package com.shallwecode.backend.user.application.dto;
+package com.shallwecode.backend.user.application.dto.user;
 
-import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
-
-import java.util.Date;
 
 @Getter
 @Setter

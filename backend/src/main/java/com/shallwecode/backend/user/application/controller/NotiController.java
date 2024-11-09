@@ -1,8 +1,8 @@
 package com.shallwecode.backend.user.application.controller;
 
 import com.shallwecode.backend.common.util.CustomUserUtils;
-import com.shallwecode.backend.user.application.dto.NotiResListDTO;
-import com.shallwecode.backend.user.application.dto.UpdateNotiReqDTO;
+import com.shallwecode.backend.user.application.dto.noti.NotiResListDTO;
+import com.shallwecode.backend.user.application.dto.noti.UpdateNotiReqDTO;
 import com.shallwecode.backend.user.application.service.NotiService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;

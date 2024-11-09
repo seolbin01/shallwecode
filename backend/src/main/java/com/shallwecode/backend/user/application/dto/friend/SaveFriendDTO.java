@@ -1,5 +1,6 @@
-package com.shallwecode.backend.user.application.dto;
+package com.shallwecode.backend.user.application.dto.friend;
 
+import com.shallwecode.backend.user.application.dto.user.FindUserDTO;
 import com.shallwecode.backend.user.domain.aggregate.FriendStatus;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -10,8 +11,7 @@ import lombok.Setter;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-public class FindFriendDTO {
-
+public class SaveFriendDTO {
     private Long friendId;
     private FindUserDTO fromUser;
     private FindUserDTO toUser;

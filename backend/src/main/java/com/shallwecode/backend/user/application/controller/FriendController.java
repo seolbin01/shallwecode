@@ -1,9 +1,9 @@
 package com.shallwecode.backend.user.application.controller;
 
 import com.shallwecode.backend.common.util.CustomUserUtils;
-import com.shallwecode.backend.user.application.dto.FriendResListDTO;
-import com.shallwecode.backend.user.application.dto.SaveFriendReqDTO;
-import com.shallwecode.backend.user.application.dto.UpdateFriendReqDTO;
+import com.shallwecode.backend.user.application.dto.friend.FriendResListDTO;
+import com.shallwecode.backend.user.application.dto.friend.SaveFriendReqDTO;
+import com.shallwecode.backend.user.application.dto.friend.UpdateFriendReqDTO;
 import com.shallwecode.backend.user.application.service.FriendService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;

@@ -1,5 +1,6 @@
-package com.shallwecode.backend.user.application.dto;
+package com.shallwecode.backend.user.application.dto.user;
 
+import com.shallwecode.backend.user.domain.aggregate.AuthType;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -14,5 +15,5 @@ public class FindUserDTO {
     private Long userId;
     private String email;
     private String nickname;
-    private String auth;
+    private AuthType auth;
 }
