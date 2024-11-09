@@ -1,4 +1,4 @@
-package com.shallwecode.backend.user.application.dto;
+package com.shallwecode.backend.user.application.dto.user;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;

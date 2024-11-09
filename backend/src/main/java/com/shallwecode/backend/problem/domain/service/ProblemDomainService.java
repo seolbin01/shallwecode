@@ -3,7 +3,6 @@ package com.shallwecode.backend.problem.domain.service;
 import com.querydsl.core.BooleanBuilder;
 import com.querydsl.core.types.Projections;
 import com.querydsl.core.types.dsl.Expressions;
-import com.querydsl.jpa.JPAExpressions;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import com.shallwecode.backend.problem.application.dto.*;
 import com.shallwecode.backend.problem.domain.aggregate.*;
@@ -138,13 +137,13 @@ public class ProblemDomainService {
     }
 
     @Transactional(readOnly = true)
-    public List<FindMyProblemResDTO> findAllMyProblem(Long userId) {
+    public List<FindProblemResDTO> findAllMyProblem(Long userId) {
 
         QProblem qProblem = QProblem.problem;
         QTry qTry = QTry.try$;
 
         return queryFactory
-                .select(Projections.constructor(FindMyProblemResDTO.class,
+                .select(Projections.constructor(FindProblemResDTO.class,
                         qProblem.problemId,
                         qProblem.title,
                         qProblem.problemLevel,
@@ -197,7 +196,7 @@ public class ProblemDomainService {
     }
 
     @Transactional(readOnly = true)
-    public List<FindProblemResDTO> findAllProblem() {
+    public List<FindProblemResDTO> findAllProblemByGuest() {
 
         QProblem problem = QProblem.problem;
 
@@ -206,27 +205,58 @@ public class ProblemDomainService {
                         problem.problemId,
                         problem.title,
                         problem.problemLevel,
-                        Expressions.constant(false)))
+                        Expressions.constant(0)))
                 .from(problem)
                 .fetch();
     }
 
-    public List<FindProblemResDTO> findAllProblemByUser(Long loginUserId) {
+    @Transactional(readOnly = true)
+    public List<FindProblemResDTO> findAllProblem(ProblemSearchFilter filter) {
 
-        QProblem problem = QProblem.problem;
+        QProblem qProblem = QProblem.problem;
         QTry qTry = QTry.try$;
+
+        BooleanBuilder whereConditions = new BooleanBuilder();
+
+        if (filter.getProblemLevel() != null) {
+            whereConditions.and(qProblem.problemLevel.eq(filter.getProblemLevel()));
+        }
+
+        if (filter.isGuestSearch()) {
+            return queryFactory
+                    .select(Projections.constructor(FindProblemResDTO.class,
+                            qProblem.problemId,
+                            qProblem.title,
+                            qProblem.problemLevel,
+                            Expressions.constant(0)))
+                    .from(qProblem)
+                    .where(whereConditions)
+                    .orderBy(qProblem.problemId.asc())
+                    .fetch();
+        }
+
+        if (filter.getIsSolved() != null) {
+            whereConditions.and(qTry.isSolved.eq(filter.getIsSolved()));
+        }
 
         return queryFactory
                 .select(Projections.constructor(FindProblemResDTO.class,
-                        problem.problemId,
-                        problem.title,
-                        problem.problemLevel,
-                        qTry.isSolved.coalesce(false)))
-                .from(problem)
+                        qProblem.problemId,
+                        qProblem.title,
+                        qProblem.problemLevel,
+                        QTry.try$.isSolved
+                                .when(true).then(1)
+                                .otherwise(0)
+                                .max().coalesce(0)))
+                .from(qProblem)
                 .leftJoin(qTry)
-                .on(problem.problemId.eq(qTry.problemId)
-                        .and(qTry.userId.eq(loginUserId))
-                        .and(qTry.isSolved.eq(true)))
+                .on(qTry.problemId.eq(qProblem.problemId)
+                        .and(qTry.userId.eq(filter.getUserId())))
+                .where(whereConditions)
+                .groupBy(qProblem.problemId,
+                        qProblem.title,
+                        qProblem.problemLevel)
+                .orderBy(qProblem.problemId.asc())
                 .fetch();
     }
 }
