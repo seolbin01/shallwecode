@@ -45,12 +45,18 @@ const isTyping = ref(false);
 // 채팅 메시지 전송 함수
 const sendMessage = () => {
   if (newMessage.value.trim()) {
+    let userNickName = { };
+    for(let i = 0; i < coopMember.length; i++) {
+      if(tempObjectInfo.userId === coopMember[i].userId)
+        userNickName = coopMember[i].userNickname;
+    }
+
     const sendMess = {
       type: "chat",
       id: tempObjectInfo.userId,
       text: newMessage.value,
       sender: 'user',
-      senderName: coopMember.userNickname,
+      senderName: userNickName,
       timestamp: new Date().toLocaleTimeString()
     }
     messages.value.push(sendMess);
@@ -58,24 +64,6 @@ const sendMessage = () => {
     newMessage.value = '';
   }
 
-  // 메시지를 수신 했을 때
-  webSocket.value.onmessage = (message) => {
-    const receiveMessage = JSON.parse(message.data);
-
-    // 본인 메시지는 제외
-    if(receiveMessage.id === tempObjectInfo.userId) return;
-
-    const receiveMess = {
-      type: "chat",
-      id: receiveMessage.id,
-      text: receiveMessage.text,
-      sender: 'other',
-      senderName: receiveMessage.senderName,
-      timestamp: new Date().toLocaleTimeString()
-    }
-
-    messages.value.push(receiveMess);
-  }
 };
 
 // 웹 소켓 연결 함수
@@ -83,6 +71,10 @@ const connectWebSocket = (codingRoomId) => {
   webSocket.value = new WebSocket(`ws://localhost:8080/ws/coding-room/${codingRoomId}`);
   // 연결시 온, 오프라인 구별을 위해 정보를 송신
   webSocket.value.onopen = () => {
+    /* coopMember 정보에 자신의 상태를 기록 */
+
+
+
     const statusCheck = {
       type: "statusCheck",
       userId : tempObjectInfo.userId,
@@ -93,12 +85,10 @@ const connectWebSocket = (codingRoomId) => {
     webSocket.value.send(JSON.stringify(statusCheck));
   };
 
-  // WebSocket 수신
+  // WebSocket 수신 - onmessage 는 단 한번만 설정 됨.
   webSocket.value.onmessage = (message) => {
     // 받은 메시지를 변환
     const receiveMessage = JSON.parse(message.data);
-
-    console.log(receiveMessage);
 
     // 상태 체크 - 접속시 online 표시
     if(receiveMessage.type === "statusCheck") {
@@ -107,6 +97,22 @@ const connectWebSocket = (codingRoomId) => {
           coopMember[i].status = "online";
         console.log(coopMember[i].status);
       }
+    }
+
+    // 본인 메시지는 제외
+    if(receiveMessage.id === tempObjectInfo.userId) return;
+
+    if(receiveMessage.type === "chat") {
+      const receiveMess = {
+        type: "chat",
+        id: receiveMessage.id,
+        text: receiveMessage.text,
+        sender: 'other',
+        senderName: receiveMessage.senderName,
+        timestamp: new Date().toLocaleTimeString()
+      }
+
+      messages.value.push(receiveMess);
     }
   };
 }
