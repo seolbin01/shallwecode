@@ -62,7 +62,7 @@ class UserServiceTest {
         userUpdateDTO.setUserId(32L);
         userUpdateDTO.setNickName("꺄르륵");
 
-        userService.updateUser(userUpdateDTO);
+        userService.updateUser(userUpdateDTO, loginUserId);
 
         // then
         Optional<UserInfo> userInfo = userRepository.findByEmail("test@naver.com");
