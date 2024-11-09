@@ -26,7 +26,7 @@ export const useAuthStore = defineStore('auth', () => {
         refreshToken.value = refreToken;
         localStorage.setItem('accessToken', accssToken);
         localStorage.setItem('refreshToken', refreToken);
-        const payload = JSON.parse(atob(accessToken.split('.')[1]));
+        const payload = JSON.parse(atob(accssToken.split('.')[1]));
         userId.value = payload.userId;
         userRole.value = payload.auth;
     }
