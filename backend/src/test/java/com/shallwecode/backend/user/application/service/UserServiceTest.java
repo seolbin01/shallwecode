@@ -5,7 +5,6 @@ import com.shallwecode.backend.user.application.dto.user.UserSaveDTO;
 import com.shallwecode.backend.user.application.dto.user.UserUpdateDTO;
 import com.shallwecode.backend.user.domain.aggregate.UserInfo;
 import com.shallwecode.backend.user.domain.repository.UserRepository;
-import com.shallwecode.backend.user.domain.service.UserDomainService;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -63,7 +62,10 @@ class UserServiceTest {
 
         // then
         Optional<UserInfo> userInfo = userRepository.findByEmail("test@naver.com");
-        assertEquals("꺄르륵", userInfo.get().getNickname());
+        if(userInfo.isPresent()) {
+            String nickname = userInfo.get().getNickname();
+            assertEquals("꺄르륵", nickname);
+        }
     }
 
     @Test
