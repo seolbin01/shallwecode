@@ -870,4 +870,9 @@ button {
   width: 20px;
   height: 20px;
 }
+
+.provider-icon {
+  width: 16px;
+  height: 16px;
+}
 </style>

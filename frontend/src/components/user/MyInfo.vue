@@ -1,58 +1,76 @@
 <script setup>
 import {computed, onMounted, ref} from "vue";
 import axios from "axios";
+import {delFetch, getFetch, putFetch} from "@/stores/apiClient.js";
+import kakaoIcon from '@/assets/icons/kakao.svg'
+import naverIcon from '@/assets/icons/naver.svg'
+import googleIcon from '@/assets/icons/google.svg'
 
-const username = ref('반짝이는 성운');
-const email = ref('testuser01@naver.com');
+const providerIcon = computed(() => {
+  if (!profile.value || !profile.value.provider) return '';
 
-const noTryCount = ref(0);
-const unSolvedCount = ref(0);
-const SolvedCount = ref(0);
-const stats = ({
-  challenge: computed(() => noTryCount.value),
-  unSolved: computed(() => unSolvedCount.value),
-  solved: computed(() => SolvedCount.value)
+  switch (profile.value.provider) {
+    case 'KAKAO':
+      return kakaoIcon;
+    case 'NAVER':
+      return naverIcon;
+    case 'GOOGLE':
+      return googleIcon;
+    default:
+      return '';
+  }
 });
 
-const fetchTryProblemCount = async () => {
-  try {
-    const noTryResponse = await axios.get('http://localhost:8080/api/v1/problem/mylist/notry');
-    noTryCount.value = noTryResponse.data;
-  } catch (error) {
-    console.error('미시도 문제 목록 개수를 불러오는데 에러가 발생했습니다.', error.response ? error.response.data : error.message);
-  }
+const profile = ref('');
+const isEditing = ref(false);
+const newName = ref('');
+const tempUsername = ref('');
 
+const fetchProfile = async () => {
   try {
-    const unSolvedResponse = await axios.get('http://localhost:8080/api/v1/problem/mylist/unsolved');
-    unSolvedCount.value = unSolvedResponse.data;
+    const response = await getFetch('http://localhost:8080/api/v1/user/profile');
+    profile.value = response.data;
+    newName.value = profile.value.nickname;
   } catch (error) {
-    console.error('미해결 문제 목록 개수를 불러오는데 에러가 발생했습니다.', error.response ? error.response.data : error.message);
-  }
-
-  try {
-    const solvedResponse = await axios.get('http://localhost:8080/api/v1/problem/mylist/solved');
-    SolvedCount.value = solvedResponse.data;
-  } catch (error) {
-    console.error('해결된 문제 목록 개수를 불러오는데 에러가 발생했습니다.', error.response ? error.response.data : error.message);
+    console.error('프로필을 불러오는데 에러가 발생했습니다.', error.response ? error.response.data : error.message);
   }
 };
 
-const isEditing = ref(false);
-const tempUsername = ref('');
-
 const handleUpdateClick = () => {
   if (isEditing.value) {
-    username.value = tempUsername.value;
-    isEditing.value = false;
+    handleSaveClick();
   } else {
-    tempUsername.value = username.value;
+    tempUsername.value = newName.value;
     isEditing.value = true;
   }
+}
 
+const handleSaveClick = async () => {
+  try {
+    await putFetch('http://localhost:8080/api/v1/user/nickname', {
+      nickName: newName.value
+    })
+    newName.value = tempUsername.value;
+    isEditing.value = false;
+    await fetchProfile();
+  } catch (error) {
+    console.error('닉네임을 수정하는데 에러가 발생했습니다.', error.response ? error.response.data : error.message);
+    alert('닉네임 수정에 실패했습니다.');
+  }
+}
+
+const handleDeleteClick = async () => {
+  try {
+    await delFetch('http://localhost:8080/api/v1/user');
+    alert('계정이 탈퇴되었습니다.');
+  } catch (error) {
+    console.error('계정을 탈퇴하는데 에러가 발생했습니다.', error.response ? error.response.data : error.message);
+    alert('계정 탈퇴에 실패했습니다.');
+  }
 }
 
 onMounted(() => {
-  fetchTryProblemCount();
+  fetchProfile();
 });
 
 </script>
@@ -71,14 +89,14 @@ onMounted(() => {
         <div class="user-details">
           <div class="name-info">
             <div class="username" v-if="!isEditing">
-              {{ username }}
+              {{ profile.nickname }}
             </div>
             <input
                 v-else
                 v-model="tempUsername"
                 class="username-input"
                 type="text"
-                @keyup.enter="handleUpdateClick"
+                @keyup.enter="handleSaveClick"
             />
             <div class="update"
                  v-if="!isEditing"
@@ -92,24 +110,24 @@ onMounted(() => {
             </div>
           </div>
           <div class="email">
-            {{ email }}
-            <span class="naver-badge">N</span>
+            {{ profile.email }}
+            <img v-if="profile.provider" :src="providerIcon" :alt="profile.provider" class="provider-icon"/>
           </div>
         </div>
       </div>
 
       <div class="stats-container">
         <div class="stat-item">
-          <span class="stat-label">미도전 문제</span>
-          <span class="stat-value">{{ stats.challenge }}개</span>
+          <span class="stat-label">도전한 문제</span>
+          <span class="stat-value">{{ profile.doingProblemCnt }}개</span>
         </div>
         <div class="stat-item">
-          <span class="stat-label">도전한 문제</span>
-          <span class="stat-value">{{ stats.unSolved }}개</span>
+          <span class="stat-label">미해결 문제</span>
+          <span class="stat-value">{{ profile.notFinishedProblemCnt }}개</span>
         </div>
         <div class="stat-item">
           <span class="stat-label">해결한 문제</span>
-          <span class="stat-value">{{ stats.solved }}개</span>
+          <span class="stat-value">{{ profile.finishedProblemCnt }}개</span>
         </div>
       </div>
     </div>
@@ -119,7 +137,7 @@ onMounted(() => {
       <h2 class="section-title">계정 탈퇴</h2>
       <div class="withdrawal-content">
         <p>계정 탈퇴 시 프로필이 삭제됩니다.</p>
-        <button class="withdrawal-btn">탈퇴하기</button>
+        <button class="withdrawal-btn" @click="handleDeleteClick">탈퇴하기</button>
       </div>
     </div>
   </div>
@@ -157,6 +175,10 @@ onMounted(() => {
 .profile-image {
   width: 80px;
   height: 80px;
+  min-width: 80px;
+  min-height: 80px;
+  max-width: 80px;
+  max-height: 80px;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -278,7 +300,7 @@ onMounted(() => {
   border-radius: 4px;
   padding: 4px 8px;
   outline: none;
-  width: 200px;
+  width: 150px;
 }
 
 .username-input:focus {
@@ -297,5 +319,10 @@ onMounted(() => {
 
 .update:hover {
   background-color: rgba(33, 150, 243, 0.1);
+}
+
+.provider-icon {
+  width: 16px;
+  height: 16px;
 }
 </style>

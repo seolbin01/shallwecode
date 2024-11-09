@@ -494,4 +494,9 @@ button {
   color: #ccc;
   cursor: not-allowed;
 }
+
+.provider-icon {
+  width: 16px;
+  height: 16px;
+}
 </style>
