@@ -25,14 +25,12 @@ const providerIcon = computed(() => {
 const authStore = useAuthStore();
 const profile = ref('');
 const isEditing = ref(false);
-const newName = ref('');
 const tempUsername = ref('');
 
 const fetchProfile = async () => {
   try {
     const response = await getFetch('http://localhost:8080/api/v1/user/profile');
     profile.value = response.data;
-    newName.value = profile.value.nickname;
   } catch (error) {
     console.error('프로필을 불러오는데 에러가 발생했습니다.', error.response ? error.response.data : error.message);
   }
@@ -42,17 +40,26 @@ const handleUpdateClick = () => {
   if (isEditing.value) {
     handleSaveClick();
   } else {
-    tempUsername.value = newName.value;
+    tempUsername.value = profile.value.nickname;
     isEditing.value = true;
   }
 }
 
 const handleSaveClick = async () => {
   try {
-    await putFetch('http://localhost:8080/api/v1/user/nickname', {
-      nickName: newName.value
+    if (!tempUsername.value.trim()) {
+      alert('닉네임을 입력해주세요.');
+      return;
+    }
+
+    await axios.put('http://localhost:8080/api/v1/user/nickname', {
+      nickname: tempUsername.value
+    },{
+      headers: {
+        Authorization: `Bearer ${authStore.accessToken}`
+      }
     })
-    newName.value = tempUsername.value;
+
     isEditing.value = false;
     await fetchProfile();
   } catch (error) {
@@ -61,11 +68,18 @@ const handleSaveClick = async () => {
   }
 }
 
+const deleteCookies = () => {
+  document.cookie = 'accessToken=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;';
+  document.cookie = 'refreshToken=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;';
+}
+
 const handleDeleteClick = async () => {
   try {
     await delFetch('http://localhost:8080/api/v1/user');
     authStore.logout();
+    deleteCookies();
     alert('계정이 탈퇴되었습니다.');
+    window.location.href = "http://localhost:5173";
   } catch (error) {
     console.error('계정을 탈퇴하는데 에러가 발생했습니다.', error.response ? error.response.data : error.message);
     alert('계정 탈퇴에 실패했습니다.');
@@ -100,6 +114,7 @@ onMounted(() => {
                 class="username-input"
                 type="text"
                 @keyup.enter="handleSaveClick"
+                :placeholder="profile.nickname"
             />
             <div class="update"
                  v-if="!isEditing"

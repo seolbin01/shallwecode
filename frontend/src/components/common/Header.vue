@@ -71,15 +71,22 @@ const logout = async () => {
 
   if (response.status === 200) { // 응답 상태가 200인지 확인
     alert('로그아웃 성공');
+    deleteCookies();
     window.location.href = "http://localhost:5173"; // 홈 페이지로 리다이렉트
   } else {
     alert('로그아웃에 실패했습니다.');
   }
 }
 
+const deleteCookies = () => {
+  document.cookie = 'accessToken=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;';
+  document.cookie = 'refreshToken=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;';
+}
+
 const handleLogoutClick = () => {
   logout();
   store.logout();
+  deleteCookies();
   alert('로그아웃 되었습니다.');
   window.location.reload();
 }
