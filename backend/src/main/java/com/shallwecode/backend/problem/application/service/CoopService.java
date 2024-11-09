@@ -2,6 +2,7 @@ package com.shallwecode.backend.problem.application.service;
 
 import com.shallwecode.backend.common.exception.CustomException;
 import com.shallwecode.backend.common.exception.ErrorCode;
+import com.shallwecode.backend.common.util.CustomUserUtils;
 import com.shallwecode.backend.problem.application.dto.CoopDTO;
 import com.shallwecode.backend.problem.application.dto.CoopResDTO;
 import com.shallwecode.backend.problem.application.dto.CoopUserResDTO;
@@ -24,7 +25,7 @@ public class CoopService {
 
     public void saveCoopFriend(Long codingRoomId, Long userId) {
 
-        Long loginUserId = 3L; // 유저 id
+        Long loginUserId = CustomUserUtils.getCurrentUserSeq();
 
         // 초대하려는 친구가 이미 코딩방에 있으면 안됨. (협업 친구 테이블에 있으면 안됨)
         CoopResDTO findCoop = coopDomainService.findByCoop(codingRoomId, userId);
@@ -51,7 +52,7 @@ public class CoopService {
     public void deleteCoop(Long codingRoomId) {
 
         // 유저 id와 코딩방 id를 가지고 coopId 찾기
-        Long loginUserId = 3L; // 유저 id
+        Long loginUserId = CustomUserUtils.getCurrentUserSeq();
 
         CoopResDTO findCoop = coopDomainService.findByCoop(codingRoomId, loginUserId);
 
@@ -68,7 +69,7 @@ public class CoopService {
     /* 코딩방에서 협업 친구 강퇴 */
     public void deleteCoopFriend(Long codingRoomId, Long coopId) {
 
-        Long loginUserId = 3L; // 호스트 유저 아이디
+        Long loginUserId = CustomUserUtils.getCurrentUserSeq();
 
         // 코딩방에 해당 유저가 존재하는지 확인(협업 친구 테이블 조회)
         // coopId 값으로 조회한 결과를 반환
