@@ -69,7 +69,7 @@ public class FriendController {
     @GetMapping("/request")
     public ResponseEntity<List<FriendResListDTO>> findAllFriendReq() {
 
-        Long loginUserId = 1L;
+        Long loginUserId = CustomUserUtils.getCurrentUserSeq();
         List<FriendResListDTO> friendReqList = friendService.findAllFriendReq(loginUserId);
         return ResponseEntity.ok(friendReqList);
     }
@@ -78,7 +78,7 @@ public class FriendController {
     @DeleteMapping
     public ResponseEntity<Void> deleteFriend(@RequestParam Long userId) {
 
-        Long loginUserId = 1L;
+        Long loginUserId = CustomUserUtils.getCurrentUserSeq();
 
         friendService.deleteFriend(userId, loginUserId);
         return ResponseEntity.ok().build();

@@ -2,6 +2,7 @@ package com.shallwecode.backend.user.application.service;
 
 import com.shallwecode.backend.common.exception.CustomException;
 import com.shallwecode.backend.common.exception.ErrorCode;
+import com.shallwecode.backend.common.util.CustomUserUtils;
 import com.shallwecode.backend.user.application.dto.friend.*;
 import com.shallwecode.backend.user.application.dto.noti.SaveNotiDTO;
 import com.shallwecode.backend.user.domain.aggregate.FriendStatus;
@@ -24,7 +25,7 @@ public class FriendService {
     @Transactional
     public void saveFriend(SaveFriendReqDTO saveFriendReqDTO) {
 
-        Long loginUserId = 3L;
+        Long loginUserId = CustomUserUtils.getCurrentUserSeq();
 
         boolean isExistFriendResult = friendDomainService.isExistFriend(loginUserId, saveFriendReqDTO.getToUserId());
 
