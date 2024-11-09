@@ -1,12 +1,14 @@
 <script setup>
 import {ref, reactive, onMounted, onUnmounted} from "vue";
+import { useAuthStore } from "@/stores/auth.js";
 import axios from "axios";
 
-// Props 로 로그인한 유저 데이터 내려받음 (받았다고 가정)
-const tempProps = {
-  userId : 1,
-  codingRoomId: 3,
-  userNickname : 'dummy1'
+const useAuth = useAuthStore();
+
+const tempObjectInfo = {
+  userId : useAuth.userId,
+  accessToken : useAuth.accessToken,
+  refreshToken : useAuth.refreshToken
 }
 
 // 필요한 객체 생성
@@ -16,12 +18,12 @@ const webSocket = ref({});
 // 필요한 정보 조회, 협업 친구 조회
 const communicateCoopInfo = async(codingRoomId) => {
   try {
-    const response = await axios.get(`http://localhost:8080/api/v1/codingroom/${codingRoomId}`, {
-      headers : {
-        Authorization : 'Bearer eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJjaGF0QGdtYWlsLmNvbSIsImF1dGgiOlsiUk9MRV9VU0VSIl0sImV4cCI6MTczMDI1MTc5N30.aM3knHn_RuZanzSNI9Hd-dsXIEQaaJUTEWD0fEg-9WCUfb7VahwTzza5e4tQ4EnrtzFPH_TnJsKtgKXqXFAWDQ'
-      },
-      withCredentials : true
+    const response = await axios.get(`http://localhost:8080/api/v1/codingroom/friendList/${codingRoomId}`, {
+      headers: {
+        Authorization: `Bearer ${tempObjectInfo.accessToken}`
+      }
     });
+
     for(let i = 0; i < response.data.coopList.length; i++) {
       const tempObject = {
         codingRoomId: response.data.coopList[i].codingRoomId,
@@ -45,10 +47,10 @@ const sendMessage = () => {
   if (newMessage.value.trim()) {
     const sendMess = {
       type: "chat",
-      id: Date.now(),
+      id: tempObjectInfo.userId,
       text: newMessage.value,
       sender: 'user',
-      senderName: tempProps.userNickname,
+      senderName: coopMember.userNickname,
       timestamp: new Date().toLocaleTimeString()
     }
     messages.value.push(sendMess);
@@ -58,11 +60,14 @@ const sendMessage = () => {
 
   // 메시지를 수신 했을 때
   webSocket.value.onmessage = (message) => {
-    const receiveMessage = JSON.parse(message);
+    const receiveMessage = JSON.parse(message.data);
+
+    // 본인 메시지는 제외
+    if(receiveMessage.id === tempObjectInfo.userId) return;
 
     const receiveMess = {
       type: "chat",
-      id: Date.now(),
+      id: receiveMessage.id,
       text: receiveMessage.text,
       sender: 'other',
       senderName: receiveMessage.senderName,
@@ -74,13 +79,13 @@ const sendMessage = () => {
 };
 
 // 웹 소켓 연결 함수
-const connectWebSocket = () => {
-  webSocket.value = new WebSocket(`ws://localhost:8080/ws/coding-room/${tempProps.codingRoomId}`);
+const connectWebSocket = (codingRoomId) => {
+  webSocket.value = new WebSocket(`ws://localhost:8080/ws/coding-room/${codingRoomId}`);
   // 연결시 온, 오프라인 구별을 위해 정보를 송신
   webSocket.value.onopen = () => {
     const statusCheck = {
       type: "statusCheck",
-      userId : tempProps.userId,
+      userId : tempObjectInfo.userId,
       status : "online"
     };
 
@@ -113,8 +118,8 @@ const disConnectWebSocket = () => {
 
 // DOM 로딩 전
 onMounted(async () => {
-  await communicateCoopInfo(3);
-  connectWebSocket();
+  await communicateCoopInfo(10);
+  connectWebSocket(10);
 })
 
 onUnmounted(async() => {
