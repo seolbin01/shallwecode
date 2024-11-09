@@ -1,9 +1,10 @@
 package com.shallwecode.backend.user.application.service;
 
 import com.nimbusds.openid.connect.sdk.UserInfoResponse;
-import com.shallwecode.backend.user.application.dto.FindUserDetailDTO;
-import com.shallwecode.backend.user.application.dto.UserSaveDTO;
-import com.shallwecode.backend.user.application.dto.UserUpdateDTO;
+import com.shallwecode.backend.user.application.dto.user.FindUserDTO;
+import com.shallwecode.backend.user.application.dto.user.FindUserDetailDTO;
+import com.shallwecode.backend.user.application.dto.user.UserSaveDTO;
+import com.shallwecode.backend.user.application.dto.user.UserUpdateDTO;
 import com.shallwecode.backend.user.domain.aggregate.UserInfo;
 import com.shallwecode.backend.user.domain.repository.UserRepository;
 import com.shallwecode.backend.user.domain.service.UserDomainService;
@@ -18,9 +19,8 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.List;
-
 import java.util.ArrayList;
+import java.util.List;
 
 @Service
 @RequiredArgsConstructor
@@ -32,15 +32,15 @@ public class UserService implements UserDetailsService {
     // 회원 가입
     @Transactional
     public void saveUser(UserSaveDTO userSaveDTO) {
+        userDomainService.validateNewUser(userSaveDTO);
         userDomainService.save(userSaveDTO);
+
     }
 
     // 회원 닉네임 수정
     @Transactional
     public void updateUser(UserUpdateDTO userUpdateDTO) {
-        UserInfo userInfo = userRepository.findById(userUpdateDTO.getUserId()).orElseThrow(() -> new IllegalArgumentException("조회된 회원이 없습니다."));
-        userDomainService.updateUser(userInfo, userUpdateDTO);
-        userRepository.save(userInfo);
+        userDomainService.updateUser(userUpdateDTO);
     }
 
     // 회원 삭제
@@ -48,7 +48,6 @@ public class UserService implements UserDetailsService {
     public void deleteUser(Long userId) {
         userDomainService.deleteUser(userId);
     }
-
 
     @Override
     public UserDetails loadUserByUsername(String userId) throws UsernameNotFoundException {
@@ -61,21 +60,33 @@ public class UserService implements UserDetailsService {
         return new User(String.valueOf(loginUser.getUserId()), "", grantedAuthorities);
     }
 
-    public UserInfoResponse getUserInfoById(Long id) {
-
-        UserInfo user = userRepository.findById(id).orElseThrow();
-        return modelMapper.map(user, UserInfoResponse.class);
-
-    }
-    // 전체 회원 조회
+    // 닉네임으로 회원 목록 조회
     @Transactional(readOnly = true)
-    public List<UserInfo> getAllUsers() {
-        return userRepository.findAll();
+    public List<FindUserDetailDTO> findUserDetailsByNickname(String nickname) {
+        List<FindUserDetailDTO> userDetailList = new ArrayList<>();
+
+        List<FindUserDTO> userList = userDomainService.findAllUsers(nickname);
+
+        Long allProblemCnt = userDomainService.findAllProblemCnt();
+
+        for (FindUserDTO findUserDTO : userList) {
+            FindUserDetailDTO userDetailDTO = modelMapper.map(findUserDTO, FindUserDetailDTO.class);
+            userDetailList.add(userDetailDTO);
+
+            Long doingProblemCnt = userDomainService.findDoingProblemCnt(findUserDTO.getUserId());
+            Long finishedProblemCnt = userDomainService.findFinishedProblemCnt(findUserDTO.getUserId());
+            Long notFinishedProblemCnt = allProblemCnt - doingProblemCnt;
+
+            userDetailDTO.setDoingProblemCnt(doingProblemCnt);
+            userDetailDTO.setFinishedProblemCnt(finishedProblemCnt);
+            userDetailDTO.setNotFinishedProblemCnt(notFinishedProblemCnt);
+        }
+
+        return userDetailList;
     }
 
     public FindUserDetailDTO findUserDetail(Long loginUserId) {
-
-        Long allProblemCnt = userDomainService.findAllProblemCnt(loginUserId);
+        Long allProblemCnt = userDomainService.findAllProblemCnt();
         Long doingProblemCnt = userDomainService.findDoingProblemCnt(loginUserId);
         Long finishedProblemCnt = userDomainService.findFinishedProblemCnt(loginUserId);
 

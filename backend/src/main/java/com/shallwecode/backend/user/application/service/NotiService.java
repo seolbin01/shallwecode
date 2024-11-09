@@ -1,7 +1,7 @@
 package com.shallwecode.backend.user.application.service;
 
-import com.shallwecode.backend.user.application.dto.NotiResListDTO;
-import com.shallwecode.backend.user.application.dto.UpdateNotiReqDTO;
+import com.shallwecode.backend.user.application.dto.noti.NotiResListDTO;
+import com.shallwecode.backend.user.application.dto.noti.UpdateNotiReqDTO;
 import com.shallwecode.backend.user.domain.service.NotiDomainService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;

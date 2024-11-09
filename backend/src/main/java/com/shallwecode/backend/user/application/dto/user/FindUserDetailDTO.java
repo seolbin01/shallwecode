@@ -1,4 +1,4 @@
-package com.shallwecode.backend.user.application.dto;
+package com.shallwecode.backend.user.application.dto.user;
 
 import com.shallwecode.backend.user.domain.aggregate.AuthType;
 import com.shallwecode.backend.user.domain.aggregate.SocialType;

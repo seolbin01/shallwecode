@@ -1,23 +1,24 @@
 package com.shallwecode.backend.user.domain.service;
 
+import com.querydsl.core.types.Projections;
 import com.querydsl.jpa.impl.JPAQueryFactory;
-import com.shallwecode.backend.common.util.CustomUserUtils;
-import com.shallwecode.backend.problem.domain.aggregate.QProblem;
-import com.shallwecode.backend.problem.domain.aggregate.QTry;
-import com.shallwecode.backend.user.application.dto.FindUserDetailDTO;
-import com.shallwecode.backend.user.application.dto.UserSaveDTO;
 import com.shallwecode.backend.common.exception.CustomException;
 import com.shallwecode.backend.common.exception.ErrorCode;
-import com.shallwecode.backend.user.application.dto.FindUserDTO;
-import com.shallwecode.backend.user.application.dto.UserUpdateDTO;
+import com.shallwecode.backend.problem.domain.aggregate.QProblem;
+import com.shallwecode.backend.problem.domain.aggregate.QTry;
+import com.shallwecode.backend.user.application.dto.user.FindUserDTO;
+import com.shallwecode.backend.user.application.dto.user.FindUserDetailDTO;
+import com.shallwecode.backend.user.application.dto.user.UserSaveDTO;
+import com.shallwecode.backend.user.application.dto.user.UserUpdateDTO;
 import com.shallwecode.backend.user.domain.aggregate.QUserInfo;
 import com.shallwecode.backend.user.domain.aggregate.UserInfo;
 import com.shallwecode.backend.user.domain.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
-import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.util.List;
 
 @RequiredArgsConstructor
 @Service
@@ -26,17 +27,26 @@ public class UserDomainService {
     private final ModelMapper modelMapper;
     private final JPAQueryFactory jpaQueryFactory;
 
+    // 회원 가입 시 유효성 검사
+    public void validateNewUser(UserSaveDTO saveUserDTO) {
+        if (userRepository.existsByEmail(saveUserDTO.getEmail())) {
+            throw new CustomException(ErrorCode.NOT_FOUND_USER);
+        }
+    }
+
     // 회원 닉네임 수정
-    public void updateUser(UserInfo userInfo, UserUpdateDTO userUpdateDTO) {
-        userInfo.updateUser(userUpdateDTO.getNickName());
+    public void updateUser(UserUpdateDTO userUpdateDTO) {
+        UserInfo userInfo = userRepository.findById(userUpdateDTO.getUserId())
+                .orElseThrow(() -> new CustomException(ErrorCode.NOT_FOUND_USER));
+        modelMapper.map(userUpdateDTO, userInfo);
     }
 
     // 회원 삭제
     public void deleteUser(Long userId){
-        UserInfo userInfo = userRepository.findById(userId).orElseThrow(()->new UsernameNotFoundException("user not found " + userId));
-        userRepository.delete(userInfo);
+        userRepository.deleteById(userId);
     }
 
+    // 회원 찾기
     public FindUserDTO findById(Long userId) {
         UserInfo foundUser = userRepository.findById(userId)
                 .orElseThrow(() -> new CustomException(ErrorCode.NOT_FOUND_USER));
@@ -45,20 +55,13 @@ public class UserDomainService {
 
     // 회원 가입 시 유효성 검사
     public void save(UserSaveDTO saveUserDTO) {
-        if(userRepository.existsByEmail(saveUserDTO.getEmail())) {
-            throw new CustomException(ErrorCode.OVERLAPPING_SAVED_USER);
-        }
-
         UserInfo saveUser = userRepository.findById(saveUserDTO.getUserId())
                 .orElseThrow(() -> new CustomException(ErrorCode.NOT_FOUND_USER));
-
         modelMapper.map(saveUserDTO, saveUser);
         saveUser.updateAuth();
     }
 
     public Long findFinishedProblemCnt(Long loginUserId) {
-
-        QUserInfo userInfo = QUserInfo.userInfo;
         QProblem qProblem = QProblem.problem;
         QTry qTry = QTry.try$;
 
@@ -73,8 +76,6 @@ public class UserDomainService {
     }
 
     public Long findDoingProblemCnt(Long loginUserId) {
-
-        QUserInfo userInfo = QUserInfo.userInfo;
         QProblem qProblem = QProblem.problem;
         QTry qTry = QTry.try$;
 
@@ -87,9 +88,7 @@ public class UserDomainService {
                 .fetchOne();
     }
 
-    public Long findAllProblemCnt(Long loginUserId) {
-
-        QUserInfo userInfo = QUserInfo.userInfo;
+    public Long findAllProblemCnt() {
         QProblem qProblem = QProblem.problem;
         QTry qTry = QTry.try$;
 
@@ -115,5 +114,19 @@ public class UserDomainService {
                 .orElseThrow(() -> new CustomException(ErrorCode.NOT_FOUND_USER));
 
         userInfo.updateRefreshToken(refreshToken);
+    }
+
+    public List<FindUserDTO> findAllUsers(String nickname) {
+        QUserInfo userInfo = QUserInfo.userInfo;
+
+        return jpaQueryFactory
+                .select(Projections.constructor(FindUserDTO.class,
+                        userInfo.userId,
+                        userInfo.email,
+                        userInfo.nickname,
+                        userInfo.auth))
+                .from(userInfo)
+                .where(userInfo.nickname.containsIgnoreCase(nickname.trim()))
+                .fetch();
     }
 }
