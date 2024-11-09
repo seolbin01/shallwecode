@@ -1,6 +1,7 @@
 package com.shallwecode.backend.user.application.service;
 
 import com.nimbusds.openid.connect.sdk.UserInfoResponse;
+import com.shallwecode.backend.user.application.dto.FindUserListDTO;
 import com.shallwecode.backend.user.application.dto.UserSaveDTO;
 import com.shallwecode.backend.user.application.dto.UserUpdateDTO;
 import com.shallwecode.backend.user.domain.aggregate.UserInfo;
@@ -80,9 +81,16 @@ public class UserService implements UserDetailsService {
         return modelMapper.map(user, UserInfoResponse.class);
 
     }
+
     // 전체 회원 조회
     @Transactional(readOnly = true)
-    public List<UserInfo> getAllUsers() {
+    public List<UserInfo> findAllUsers() {
         return userRepository.findAll();
+    }
+
+    @Transactional(readOnly = true)
+    public List<FindUserListDTO> findRequestUser(Long loginUserId) {
+
+        return userDomainService.findRequestUser(loginUserId);
     }
 }

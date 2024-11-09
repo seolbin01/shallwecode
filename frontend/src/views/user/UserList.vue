@@ -1,6 +1,9 @@
 <script setup>
 import {computed, onMounted, ref} from 'vue'
 import axios from "axios";
+import {useAuthStore} from "@/stores/auth.js";
+
+const authStore = useAuthStore();
 
 const currentPage = ref(1);
 const currentUserPage = ref(1);
@@ -24,21 +27,36 @@ const userProfile = ref({
 
 const fetchTryProblemCount = async () => {
   try {
-    const noTryResponse = await axios.get('http://localhost:8080/api/v1/problem/mylist/notry');
+    const noTryResponse = await axios.get('http://localhost:8080/api/v1/problem/mylist/notry', {
+      headers: {
+        Authorization: `Bearer ${authStore.accessToken}`,
+        'Authorization-refresh': `Bearer ${authStore.refreshToken}`
+      }
+    });
     noTryCount.value = noTryResponse.data;
   } catch (error) {
     console.error('미시도 문제 목록 개수를 불러오는데 에러가 발생했습니다.', error.response ? error.response.data : error.message);
   }
 
   try {
-    const unSolvedResponse = await axios.get('http://localhost:8080/api/v1/problem/mylist/unsolved');
+    const unSolvedResponse = await axios.get('http://localhost:8080/api/v1/problem/mylist/unsolved', {
+      headers: {
+        Authorization: `Bearer ${authStore.accessToken}`,
+        'Authorization-refresh': `Bearer ${authStore.refreshToken}`
+      }
+    });
     unSolvedCount.value = unSolvedResponse.data;
   } catch (error) {
     console.error('미해결 문제 목록 개수를 불러오는데 에러가 발생했습니다.', error.response ? error.response.data : error.message);
   }
 
   try {
-    const solvedResponse = await axios.get('http://localhost:8080/api/v1/problem/mylist/solved');
+    const solvedResponse = await axios.get('http://localhost:8080/api/v1/problem/mylist/solved', {
+      headers: {
+        Authorization: `Bearer ${authStore.accessToken}`,
+        'Authorization-refresh': `Bearer ${authStore.refreshToken}`
+      }
+    });
     SolvedCount.value = solvedResponse.data;
   } catch (error) {
     console.error('해결된 문제 목록 개수를 불러오는데 에러가 발생했습니다.', error.response ? error.response.data : error.message);
@@ -49,10 +67,29 @@ const friendsList = ref([]);
 
 const fetchFriendList = async () => {
   try {
-    const response = await axios.get('http://localhost:8080/api/v1/friend');
+    const response = await axios.get('http://localhost:8080/api/v1/friend',{
+      headers: {
+        Authorization: `Bearer ${authStore.accessToken}`,
+        'Authorization-refresh': `Bearer ${authStore.refreshToken}`
+      }
+    });
     friendsList.value = response.data;
   } catch (error) {
     console.error('친구 목록을 가져오는 중 오류가 발생했습니다:', error);
+  }
+};
+
+const handleRequestClick = async () => {
+  try {
+    const response = await axios.get('http://localhost:8080/api/v1/friend/request',{
+      headers: {
+        Authorization: `Bearer ${authStore.accessToken}`,
+        'Authorization-refresh': `Bearer ${authStore.refreshToken}`
+      }
+    });
+     await fetchUserList();
+  } catch (error) {
+    console.error('친구 신청 진행 중 오류가 발생했습니다:', error);
   }
 };
 
@@ -84,7 +121,12 @@ const users = ref([]);
 
 const fetchUserList = async () => {
   try {
-    const response = await axios.get('http://localhost:8080/api/v1/user');
+    const response = await axios.get('http://localhost:8080/api/v1/user/list',{
+      headers: {
+        Authorization: `Bearer ${authStore.accessToken}`,
+        'Authorization-refresh': `Bearer ${authStore.refreshToken}`
+      }
+    });
     users.value = response.data;
   } catch (error) {
     console.error('회원 목록을 불러오는 중 에러가 발생했습니다.', error.response ? error.response.data : error.message);
@@ -143,20 +185,18 @@ onMounted(() => {
             <th>번호</th>
             <th>이메일</th>
             <th>닉네임</th>
-            <th></th> <!-- 삭제 버튼을 위한 열 -->
+            <th></th>
           </tr>
           </thead>
           <tbody>
           <tr v-for="(user, index) in displayedUsers" :key="user.userId">
-            <td>{{ (currentUserPage - 1) * ROWS_PER_PAGE + index + 1 }}</td> <!-- 순번 -->
-            <td>{{ user.email }}</td> <!-- 이메일 -->
-            <td>{{ user.nickname }}</td> <!-- 닉네임 -->
-            <td><button @click="deleteUser(user.userId)">친구 신청</button></td> <!-- 삭제 버튼 -->
+            <td>{{ (currentUserPage - 1) * ROWS_PER_PAGE + index + 1 }}</td>
+            <td>{{ user.email }}</td>
+            <td>{{ user.nickname }}</td>
+            <td><button @click="handleRequestClick(user.userId)">친구 신청</button></td>
           </tr>
           </tbody>
         </table>
-
-
 
         <div class="pagination">
           <button
