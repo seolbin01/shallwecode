@@ -61,17 +61,21 @@ const handleRequestClick = async (toUserId) => {
   }
 };
 
-const totalPages = Math.ceil(friendsList.value.length / friendItemsPerPage)
+const totalPages = computed(() =>
+    Math.ceil(friendsList.value.length / friendItemsPerPage)
+);
 
 const paginatedFriends = computed(() => {
-  const start = (currentPage.value - 1) * friendItemsPerPage
-  const end = start + friendItemsPerPage
-  return friendsList.value.slice(start, end)
-})
+  const start = (currentPage.value - 1) * friendItemsPerPage;
+  const end = start + friendItemsPerPage;
+
+  if (friendsList.value.length === 0) return [];
+  return friendsList.value.slice(start, end);
+});
 
 const nextPage = () => {
-  if (currentPage.value < totalPages) {
-    currentPage.value++
+  if (currentPage.value < totalPages.value) {
+    currentPage.value++;
   }
 }
 
@@ -232,7 +236,9 @@ onMounted(() => {
 
         <div class="friends-list">
           <div v-for="friend in paginatedFriends" :key="friend.id" class="friend-item">
-            <div class="friend-avatar"></div>
+            <div class="friend-avatar">
+              <img src="@/assets/icons/profile-friend.svg" alt="프로필 사진"/>
+            </div>
             <span class="friend-name">{{ friend.nickname }}</span>
           </div>
         </div>
@@ -442,11 +448,12 @@ button {
 }
 
 .friend-avatar {
-  width: 40px;
-  height: 40px;
-  border-radius: 50%;
-  background-color: #f0f0f0;
+  width: 32px;
+  height: 32px;
+  margin-left: 12px;
   margin-right: 12px;
+  border-radius: 50%;
+  overflow: hidden;
 }
 
 .friend-name {
