@@ -48,7 +48,7 @@ public class CoopController {
     }
 
     @Operation(summary = "협업 친구 조회하기", description = "코딩방에 있는 협업 친구를 조회한다.")
-    @GetMapping("{codingRoomId}")
+    @GetMapping("/friendList/{codingRoomId}")
     public ResponseEntity<CoopUserResListDTO> selectCoopFriend(@PathVariable Long codingRoomId) {
         List<CoopUserResDTO> coopUserList = coopService.selectCoopFriend(codingRoomId);
         return ResponseEntity.ok().body(new CoopUserResListDTO("조회 성공", coopUserList));
