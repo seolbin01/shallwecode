@@ -1,7 +1,7 @@
 package com.shallwecode.backend.user.application.controller;
 
 import com.shallwecode.backend.common.util.CustomUserUtils;
-import com.shallwecode.backend.user.application.dto.FindUserListDTO;
+import com.shallwecode.backend.user.application.dto.user.FindUserListDTO;
 import com.shallwecode.backend.user.application.dto.user.FindUserDetailDTO;
 import com.shallwecode.backend.user.application.dto.user.UserSaveDTO;
 import com.shallwecode.backend.user.application.dto.user.UserUpdateDTO;

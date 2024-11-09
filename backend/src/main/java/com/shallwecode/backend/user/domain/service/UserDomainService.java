@@ -7,7 +7,7 @@ import com.shallwecode.backend.common.exception.CustomException;
 import com.shallwecode.backend.common.exception.ErrorCode;
 import com.shallwecode.backend.problem.domain.aggregate.QProblem;
 import com.shallwecode.backend.problem.domain.aggregate.QTry;
-import com.shallwecode.backend.user.application.dto.FindUserListDTO;
+import com.shallwecode.backend.user.application.dto.user.FindUserListDTO;
 import com.shallwecode.backend.user.application.dto.user.FindUserDTO;
 import com.shallwecode.backend.user.application.dto.user.FindUserDetailDTO;
 import com.shallwecode.backend.user.application.dto.user.UserSaveDTO;
@@ -128,7 +128,6 @@ public class UserDomainService {
                 .from(qProblem)
                 .fetchOne();
     }
-
 
     public FindUserDetailDTO findSimpleInfoById(Long loginUserId) {
 

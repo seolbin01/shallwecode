@@ -13,7 +13,7 @@ public class ProblemService {
 
     private final ProblemDomainService problemDomainService;
 
-    public List<FindMyProblemResDTO> findAllMyProblem(Long userId) {
+    public List<FindProblemResDTO> findAllMyProblem(Long userId) {
 
         return problemDomainService.findAllMyProblem(userId);
     }
