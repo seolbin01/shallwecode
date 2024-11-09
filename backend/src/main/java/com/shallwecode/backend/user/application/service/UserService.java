@@ -32,9 +32,7 @@ public class UserService implements UserDetailsService {
     // 회원 가입
     @Transactional
     public void saveUser(UserSaveDTO userSaveDTO) {
-        userDomainService.validateNewUser(userSaveDTO); // 회원 유효성 검사
         userDomainService.save(userSaveDTO);
-
     }
 
     // 회원 닉네임 수정
