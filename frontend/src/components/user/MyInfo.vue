@@ -52,12 +52,8 @@ const handleSaveClick = async () => {
       return;
     }
 
-    await axios.put('http://localhost:8080/api/v1/user/nickname', {
+    await putFetch('http://localhost:8080/api/v1/user/nickname', {
       nickname: tempUsername.value
-    },{
-      headers: {
-        Authorization: `Bearer ${authStore.accessToken}`
-      }
     })
 
     isEditing.value = false;

@@ -1,9 +1,7 @@
 <script setup>
-import axios from "axios";
 import {computed, inject, onMounted, ref} from "vue";
-import {useAuthStore} from "@/stores/auth.js";
+import {getFetch, putFetch} from "@/stores/apiClient.js";
 
-const authStore = useAuthStore();
 const ROWS_PER_PAGE = 7;
 const currentPage = ref(1);
 const notis = ref([]);
@@ -12,12 +10,7 @@ const refreshNotiList = inject('refreshNotiList');
 
 const fetchMyNotiList = async () => {
   try {
-    const response = await axios.get('http://localhost:8080/api/v1/noti/all', {
-      headers: {
-        Authorization: `Bearer ${authStore.accessToken}`,
-        'Authorization-refresh': `Bearer ${authStore.refreshToken}`
-      }
-    });
+    const response = await getFetch('http://localhost:8080/api/v1/noti/all');
     notis.value = response.data;
   } catch (error) {
     console.error('알림 목록을 불러오는 중 에러가 발생했습니다.', error.response ? error.response.data : error.message);
@@ -28,14 +21,9 @@ refreshNotiList.value = fetchMyNotiList;
 
 const handleNotiClick = async (noti) => {
   try {
-    if(!noti.isRead) {
-      await axios.put(`http://localhost:8080/api/v1/noti`, {
+    if (!noti.isRead) {
+      await putFetch(`http://localhost:8080/api/v1/noti`, {
         notiId: noti.notiId
-      },{
-        headers: {
-          Authorization: `Bearer ${authStore.accessToken}`,
-          'Authorization-refresh': `Bearer ${authStore.refreshToken}`
-        }
       });
       await fetchMyNotiList();
     }
@@ -126,7 +114,8 @@ onMounted(() => {
         <button
             @click="changePage('prev')"
             :disabled="currentPage === 1"
-        >◀</button>
+        >◀
+        </button>
         <button
             v-for="page in totalPages"
             :key="page"
@@ -138,7 +127,8 @@ onMounted(() => {
         <button
             @click="changePage('next')"
             :disabled="currentPage === totalPages"
-        >▶</button>
+        >▶
+        </button>
       </div>
     </div>
   </div>
