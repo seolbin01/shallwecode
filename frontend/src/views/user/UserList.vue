@@ -1,8 +1,9 @@
 <script setup>
 import {computed, onMounted, ref, watch} from 'vue'
-import axios from "axios";
-import {useAuthStore} from "@/stores/auth.js";
-import {getFetch} from "@/stores/apiClient.js";
+import {getFetch, postFetch} from "@/stores/apiClient.js";
+import kakaoIcon from '@/assets/icons/kakao.svg'
+import naverIcon from '@/assets/icons/naver.svg'
+import googleIcon from '@/assets/icons/google.svg'
 
 const currentPage = ref(1);
 const currentUserPage = ref(1);
@@ -10,42 +11,31 @@ const friendItemsPerPage = 2
 const ROWS_PER_PAGE = 7;
 const searchQuery = ref('');
 
-const noTryCount = ref(0);
-const unSolvedCount = ref(0);
-const SolvedCount = ref(0);
+const profile = ref('');
 
-const userProfile = ref({
-  userId: 'USER01',
-  email: 'testuser01@naver.com',
-  stats: {
-    pendingIssues: computed(() => noTryCount.value),
-    unresolvedIssues: computed(() => unSolvedCount.value),
-    resolvedIssues: computed(() => SolvedCount.value)
-  }
-});
-
-const fetchTryProblemCount = async () => {
+const fetchProfile = async () => {
   try {
-    const noTryResponse = await getFetch('http://localhost:8080/api/v1/problem/mylist/notry');
-    noTryCount.value = noTryResponse.data;
+    const response = await getFetch('http://localhost:8080/api/v1/user/profile');
+    profile.value = response.data;
   } catch (error) {
-    console.error('미시도 문제 목록 개수를 불러오는데 에러가 발생했습니다.', error.response ? error.response.data : error.message);
-  }
-
-  try {
-    const unSolvedResponse = await getFetch('http://localhost:8080/api/v1/problem/mylist/unsolved');
-    unSolvedCount.value = unSolvedResponse.data;
-  } catch (error) {
-    console.error('미해결 문제 목록 개수를 불러오는데 에러가 발생했습니다.', error.response ? error.response.data : error.message);
-  }
-
-  try {
-    const solvedResponse = await getFetch('http://localhost:8080/api/v1/problem/mylist/solved');
-    SolvedCount.value = solvedResponse.data;
-  } catch (error) {
-    console.error('해결된 문제 목록 개수를 불러오는데 에러가 발생했습니다.', error.response ? error.response.data : error.message);
+    console.error('프로필을 불러오는데 에러가 발생했습니다.', error.response ? error.response.data : error.message);
   }
 };
+
+const providerIcon = computed(() => {
+  if (!profile.value || !profile.value.provider) return '';
+
+  switch (profile.value.provider) {
+    case 'KAKAO':
+      return kakaoIcon;
+    case 'NAVER':
+      return naverIcon;
+    case 'GOOGLE':
+      return googleIcon;
+    default:
+      return '';
+  }
+});
 
 const friendsList = ref([]);
 
@@ -58,11 +48,15 @@ const fetchFriendList = async () => {
   }
 };
 
-const handleRequestClick = async () => {
+const handleRequestClick = async (toUserId) => {
   try {
-    await getFetch('http://localhost:8080/api/v1/friend/request');
+    await postFetch('http://localhost:8080/api/v1/friend/request', {
+      toUserId: toUserId
+    });
     await fetchUserList();
+    alert('친구 신청되었습니다.')
   } catch (error) {
+    alert('이미 친구 신청 대기 중입니다.')
     console.error('친구 신청 진행 중 오류가 발생했습니다:', error);
   }
 };
@@ -143,7 +137,7 @@ watch(searchQuery, () => {
 });
 
 onMounted(() => {
-  fetchTryProblemCount();
+  fetchProfile();
   fetchUserList();
   fetchFriendList();
 });
@@ -210,22 +204,25 @@ onMounted(() => {
     <div class="profile-container">
       <div class="profile-card">
         <div class="user-header">
-          <h2 class="user-id">{{ userProfile.userId }}</h2>
-          <p class="user-email">{{ userProfile.email }}</p>
+          <h2 class="user-id">{{ profile.nickname }}</h2>
+          <p class="user-email">
+            {{ profile.email }}
+            <img v-if="profile.provider" :src="providerIcon" :alt="profile.provider" class="provider-icon"/>
+          </p>
         </div>
 
         <div class="stats-container">
           <div class="stat-item">
             <p class="stat-label">도전한 문제</p>
-            <p class="stat-value">{{ userProfile.stats.pendingIssues }}개</p>
+            <p class="stat-value">{{ profile.doingProblemCnt }}개</p>
           </div>
           <div class="stat-item">
             <p class="stat-label">미해결 문제</p>
-            <p class="stat-value">{{ userProfile.stats.unresolvedIssues }}개</p>
+            <p class="stat-value">{{ profile.notFinishedProblemCnt }}개</p>
           </div>
           <div class="stat-item">
             <p class="stat-label">해결한 문제</p>
-            <p class="stat-value">{{ userProfile.stats.resolvedIssues }}개</p>
+            <p class="stat-value">{{ profile.finishedProblemCnt }}개</p>
           </div>
         </div>
       </div>
@@ -381,6 +378,11 @@ button {
   padding: 20px;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
   margin-bottom: 20px;
+}
+
+.provider-icon {
+  width: 15px;
+  height: 15px;
 }
 
 .user-header {
