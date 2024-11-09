@@ -1,6 +1,6 @@
 package com.shallwecode.backend.user.application.service;
 
-import com.nimbusds.openid.connect.sdk.UserInfoResponse;
+import com.shallwecode.backend.user.application.dto.friend.FindFriendDetailDTO;
 import com.shallwecode.backend.user.application.dto.user.FindUserDTO;
 import com.shallwecode.backend.user.application.dto.user.FindUserDetailDTO;
 import com.shallwecode.backend.user.application.dto.user.UserSaveDTO;
@@ -99,5 +99,12 @@ public class UserService implements UserDetailsService {
         findUserDetailDTO.setNotFinishedProblemCnt(notFinishedProblemCnt);
 
         return findUserDetailDTO;
+    }
+
+
+    public FindFriendDetailDTO findFriendDetail(Long userId) {
+
+        FindUserDetailDTO userDetailDTO = findUserDetail(userId);
+        return modelMapper.map(userDetailDTO, FindFriendDetailDTO.class);
     }
 }
