@@ -1,4 +1,4 @@
-package com.shallwecode.backend.user.application.dto;
+package com.shallwecode.backend.user.application.dto.user;
 
 import jakarta.validation.constraints.NotBlank;
 import lombok.Getter;

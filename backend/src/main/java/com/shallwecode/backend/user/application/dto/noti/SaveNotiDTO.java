@@ -1,5 +1,6 @@
-package com.shallwecode.backend.user.application.dto;
+package com.shallwecode.backend.user.application.dto.noti;
 
+import com.shallwecode.backend.user.application.dto.user.FindUserDTO;
 import com.shallwecode.backend.user.domain.aggregate.NotiType;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
