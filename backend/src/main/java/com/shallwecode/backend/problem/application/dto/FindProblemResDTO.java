@@ -12,4 +12,5 @@ public class FindProblemResDTO {
     private Long problemId;
     private String title;
     private int level;
+    private boolean isFinished;
 }

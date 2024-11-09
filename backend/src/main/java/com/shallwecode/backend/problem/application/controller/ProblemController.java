@@ -102,11 +102,21 @@ public class ProblemController {
         return ResponseEntity.ok().body(problemListResDTO);
     }
 
-    @GetMapping("/list")
-    @Operation(summary = "문제 전체 조회", description = "")
+    @GetMapping("/guest")
+    @Operation(summary = "문제 전체 조회(비회원)", description = "문제 목록을 조회합니다. 회원의 해결 유무도 포함하여 반환합니다.")
     public ResponseEntity<List<FindProblemResDTO>> findAllProblem() {
 
         List<FindProblemResDTO> problemList = problemService.findAllProblem();
+
+        return new ResponseEntity<>(problemList, HttpStatus.OK);
+    }
+
+    @GetMapping
+    @Operation(summary = "문제 전체 조회(회원)", description = "문제 목록을 조회합니다. 회원의 해결 유무도 포함하여 반환합니다.")
+    public ResponseEntity<List<FindProblemResDTO>> findAllProblemByUser() {
+
+        Long loginUserId = CustomUserUtils.getCurrentUserSeq();
+        List<FindProblemResDTO> problemList = problemService.findAllProblemByUser(loginUserId);
 
         return new ResponseEntity<>(problemList, HttpStatus.OK);
     }
@@ -115,7 +125,7 @@ public class ProblemController {
     @GetMapping("/mylist/notry")
     public ResponseEntity<Long> findAllMyUnTryProblemCount() {
 
-        Long userId = CustomUserUtils.getCurrentUserSeq(); // 추후 로그인된 회원의 userId를 가져오도록 수정
+        Long userId = CustomUserUtils.getCurrentUserSeq();
         Long myNoTryProblemCount = problemService.findAllNoTryProblemCount(userId);
 
         return new ResponseEntity<>(myNoTryProblemCount, HttpStatus.OK);
@@ -125,7 +135,7 @@ public class ProblemController {
     @GetMapping("/mylist/unsolved")
     public ResponseEntity<Long> findAllMyUnsolvedProblemCount() {
 
-        Long userId = CustomUserUtils.getCurrentUserSeq(); // 추후 로그인된 회원의 userId를 가져오도록 수정
+        Long userId = CustomUserUtils.getCurrentUserSeq();
         Long myUnsolvedProblemCount = problemService.findAllUnSolvedProblemCount(userId);
 
         return new ResponseEntity<>(myUnsolvedProblemCount, HttpStatus.OK);
@@ -135,7 +145,7 @@ public class ProblemController {
     @GetMapping("/mylist/solved")
     public ResponseEntity<Long> findAllMySolvedProblemCount() {
 
-        long userId = CustomUserUtils.getCurrentUserSeq();
+        Long userId = CustomUserUtils.getCurrentUserSeq();
         Long mySolvedProblemCount = problemService.findAllSolvedProblemCount(userId);
 
         return new ResponseEntity<>(mySolvedProblemCount, HttpStatus.OK);

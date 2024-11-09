@@ -3,19 +3,16 @@ package com.shallwecode.backend.problem.domain.service;
 import com.querydsl.core.BooleanBuilder;
 import com.querydsl.core.types.Projections;
 import com.querydsl.core.types.dsl.Expressions;
+import com.querydsl.jpa.JPAExpressions;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import com.shallwecode.backend.problem.application.dto.*;
-import com.shallwecode.backend.problem.domain.aggregate.Problem;
-import com.shallwecode.backend.problem.domain.aggregate.QProblem;
-import com.shallwecode.backend.problem.domain.aggregate.QTry;
-import com.shallwecode.backend.problem.domain.aggregate.QTestcase;
-import com.shallwecode.backend.problem.domain.aggregate.Testcase;
+import com.shallwecode.backend.problem.domain.aggregate.*;
 import com.shallwecode.backend.problem.domain.repository.ProblemRepository;
 import com.shallwecode.backend.problem.domain.repository.TestcaseRepository;
-import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
@@ -121,8 +118,6 @@ public class ProblemDomainService {
                 .fetchOne();
     }
 
-
-
     public List<ProblemOneResDTO> selectOneProblem(Long problemId) {
 
         QProblem qProblem = QProblem.problem;
@@ -142,6 +137,7 @@ public class ProblemDomainService {
                 .fetch();
     }
 
+    @Transactional(readOnly = true)
     public List<FindMyProblemResDTO> findAllMyProblem(Long userId) {
 
         QProblem qProblem = QProblem.problem;
@@ -165,6 +161,7 @@ public class ProblemDomainService {
     }
 
     /* 문제 목록 조회 기능 */
+    @Transactional(readOnly=true)
     public List<ProblemDTO> selectProblemList(String keyword, Integer option, Long offset, Long size) {
         QProblem qProblem = QProblem.problem;
         BooleanBuilder whereClause = new BooleanBuilder();
@@ -199,6 +196,7 @@ public class ProblemDomainService {
                 .fetchOne();
     }
 
+    @Transactional(readOnly = true)
     public List<FindProblemResDTO> findAllProblem() {
 
         QProblem problem = QProblem.problem;
@@ -207,8 +205,28 @@ public class ProblemDomainService {
                 .select(Projections.constructor(FindProblemResDTO.class,
                         problem.problemId,
                         problem.title,
-                        problem.problemLevel))
+                        problem.problemLevel,
+                        Expressions.constant(false)))
                 .from(problem)
+                .fetch();
+    }
+
+    public List<FindProblemResDTO> findAllProblemByUser(Long loginUserId) {
+
+        QProblem problem = QProblem.problem;
+        QTry qTry = QTry.try$;
+
+        return queryFactory
+                .select(Projections.constructor(FindProblemResDTO.class,
+                        problem.problemId,
+                        problem.title,
+                        problem.problemLevel,
+                        qTry.isSolved.coalesce(false)))
+                .from(problem)
+                .leftJoin(qTry)
+                .on(problem.problemId.eq(qTry.problemId)
+                        .and(qTry.userId.eq(loginUserId))
+                        .and(qTry.isSolved.eq(true)))
                 .fetch();
     }
 }

@@ -1,53 +1,46 @@
 <script setup>
-import {computed, onMounted, ref} from 'vue';
+import {computed, onMounted, ref, watch} from 'vue';
 import axios from "axios";
+import {getFetch} from "@/stores/apiClient.js";
+import kakaoIcon from '@/assets/icons/kakao.svg'
+import naverIcon from '@/assets/icons/naver.svg'
+import googleIcon from '@/assets/icons/google.svg'
 import {useAuthStore} from "@/stores/auth.js";
-import {getFetch, putFetch, delFetch, postFetch} from "@/stores/apiClient.js";
-
-const currentPage = ref(1);
-const currentProblemPage = ref(1); // 문제 페이징을 위한 변수
-const friendItemsPerPage = 2;
-const ROWS_PER_PAGE = 7;
-const searchQuery = ref('');
-
-const noTryCount = ref(0);
-const unSolvedCount = ref(0);
-const SolvedCount = ref(0);
 
 const store = useAuthStore();
 
-const userProfile = ref({
-  userId: 'USER01',
-  email: 'testuser01@naver.com',
-  stats: {
-    pendingIssues: computed(() => noTryCount.value),
-    unresolvedIssues: computed(() => unSolvedCount.value),
-    resolvedIssues: computed(() => SolvedCount.value)
-  }
-});
+const currentPage = ref(1);
+const currentProblemPage = ref(1);
+const friendItemsPerPage = 2;
+const ROWS_PER_PAGE = 7;
+const searchQuery = ref('');
+const selectedLevel = ref(null);
 
-const fetchTryProblemCount = async () => {
-  try {
-    const noTryResponse = await getFetch('http://localhost:8080/api/v1/problem/mylist/notry');
-    noTryCount.value = noTryResponse.data;
-  } catch (error) {
-    console.error('미시도 문제 목록 개수를 불러오는데 에러가 발생했습니다.', error.response ? error.response.data : error.message);
-  }
+const profile = ref('');
 
+const fetchProfile = async () => {
   try {
-    const unSolvedResponse = await getFetch('http://localhost:8080/api/v1/problem/mylist/unsolved');
-    unSolvedCount.value = unSolvedResponse.data;
+    const response = await getFetch('http://localhost:8080/api/v1/user/profile');
+    profile.value = response.data;
   } catch (error) {
-    console.error('미해결 문제 목록 개수를 불러오는데 에러가 발생했습니다.', error.response ? error.response.data : error.message);
-  }
-
-  try {
-    const solvedResponse = await getFetch('http://localhost:8080/api/v1/problem/mylist/solved');
-    SolvedCount.value = solvedResponse.data;
-  } catch (error) {
-    console.error('해결된 문제 목록 개수를 불러오는데 에러가 발생했습니다.', error.response ? error.response.data : error.message);
+    console.error('프로필을 불러오는데 에러가 발생했습니다.', error.response ? error.response.data : error.message);
   }
 };
+
+const providerIcon = computed(() => {
+  if (!profile.value || !profile.value.provider) return '';
+
+  switch (profile.value.provider) {
+    case 'KAKAO':
+      return kakaoIcon;
+    case 'NAVER':
+      return naverIcon;
+    case 'GOOGLE':
+      return googleIcon;
+    default:
+      return '';
+  }
+});
 
 const friendsList = ref([]);
 
@@ -67,6 +60,8 @@ const totalPages = computed(() =>
 const paginatedFriends = computed(() => {
   const start = (currentPage.value - 1) * friendItemsPerPage;
   const end = start + friendItemsPerPage;
+
+  if (friendsList.value.length === 0) return [];
   return friendsList.value.slice(start, end);
 });
 
@@ -74,23 +69,23 @@ const nextPage = () => {
   if (currentPage.value < totalPages.value) {
     currentPage.value++;
   }
-};
+}
 
 const prevPage = () => {
   if (currentPage.value > 1) {
-    currentPage.value--;
+    currentPage.value--
   }
-};
+}
 
 const goToPage = (page) => {
-  currentPage.value = page;
-};
+  currentPage.value = page
+}
 
 const problems = ref([]);
 
 const fetchProblemList = async () => {
   try {
-    const response = await axios.get('http://localhost:8080/api/v1/problem/list');
+    const response = await getFetch('http://localhost:8080/api/v1/problem');
     problems.value = response.data;
   } catch (error) {
     console.error('문제 목록을 불러오는 중 에러가 발생했습니다.', error.response ? error.response.data : error.message);
@@ -106,18 +101,46 @@ const handleProblemClick = async (problem) => {
 };
 
 const displayedProblems = computed(() => {
+  let filteredProblems = problems.value;
+
+  if (searchQuery.value) {
+    filteredProblems = filteredProblems.filter(problem =>
+        problem.title.toLowerCase().includes(searchQuery.value.toLowerCase())
+    );
+  }
+
+  if (selectedLevel.value) {
+    filteredProblems = filteredProblems.filter(problem =>
+        problem.level === selectedLevel.value
+    );
+  }
+
   const startIdx = (currentProblemPage.value - 1) * ROWS_PER_PAGE;
   const endIdx = startIdx + ROWS_PER_PAGE;
-  return problems.value.slice(startIdx, endIdx);
+  return filteredProblems.slice(startIdx, endIdx);
 });
 
 const emptyRowsCount = computed(() =>
     ROWS_PER_PAGE - displayedProblems.value.length
 );
 
-const totalProblemPages = computed(() =>
-    Math.ceil(problems.value.length / ROWS_PER_PAGE)
-);
+const totalProblemPages = computed(() => {
+  let filteredProblems = problems.value;
+
+  if (searchQuery.value) {
+    filteredProblems = filteredProblems.filter(problem =>
+        problem.title.toLowerCase().includes(searchQuery.value.toLowerCase())
+    );
+  }
+
+  if (selectedLevel.value) {
+    filteredProblems = filteredProblems.filter(problem =>
+        problem.level === selectedLevel.value
+    );
+  }
+
+  return Math.ceil(filteredProblems.length / ROWS_PER_PAGE);
+});
 
 const changeProblemPage = (page) => {
   if (page === 'prev' && currentProblemPage.value > 1) {
@@ -136,6 +159,18 @@ function getCookie(name) {
   return null;
 }
 
+watch(searchQuery, () => {
+  currentProblemPage.value = 1;
+});
+
+watch(selectedLevel, () => {
+  currentProblemPage.value = 1;
+});
+
+const handleLevelFilter = (level) => {
+  selectedLevel.value = selectedLevel.value === level ? null : level;
+};
+
 onMounted(() => {
 
   if (!store.accessToken) {
@@ -149,7 +184,7 @@ onMounted(() => {
   }
 
   if (store.accessToken) {
-    fetchTryProblemCount();
+    fetchProfile();
     fetchFriendList();
   }
   fetchProblemList();
@@ -168,14 +203,24 @@ onMounted(() => {
           <input
               type="text"
               class="search-input"
-              placeholder="문제 검색"
+              placeholder="문제 제목 검색"
               v-model="searchQuery"
           >
         </div>
 
         <div class="filter-area">
           <button class="filter-button">상태 ▼</button>
-          <button class="filter-button">난이도 ▼</button>
+          <div class="level-filter">
+            <button
+                v-for="level in [1, 2, 3, 4, 5]"
+                :key="level"
+                class="filter-button"
+                :class="{ active: selectedLevel === level }"
+                @click="handleLevelFilter(level)"
+            >
+              Lv.{{ level }}
+            </button>
+          </div>
           <button class="filter-button">해결 ▼</button>
         </div>
 
@@ -185,6 +230,7 @@ onMounted(() => {
             <th>번호</th>
             <th>제목</th>
             <th>난이도</th>
+            <th>상태</th>
           </tr>
           </thead>
           <tbody>
@@ -195,6 +241,11 @@ onMounted(() => {
             <td>{{ (currentProblemPage - 1) * ROWS_PER_PAGE + index + 1 }}</td>
             <td>{{ problem.title }}</td>
             <td><span class="level-badge">Lv. {{ problem.level }}</span></td>
+            <td>
+              <span :class="['status', problem.finished ? 'status-solved' : 'status-unsolved']">
+                {{ problem.finished ? '해결' : '미해결' }}
+              </span>
+            </td>
           </tr>
           </tbody>
         </table>
@@ -224,22 +275,25 @@ onMounted(() => {
     <div class="profile-container">
       <div class="profile-card">
         <div class="user-header">
-          <h2 class="user-id">{{ userProfile.userId }}</h2>
-          <p class="user-email">{{ userProfile.email }}</p>
+          <h2 class="user-id">{{ profile.nickname }}</h2>
+          <p class="user-email">
+            {{ profile.email }}
+            <img v-if="profile.provider" :src="providerIcon" :alt="profile.provider" class="provider-icon"/>
+          </p>
         </div>
 
         <div class="stats-container">
           <div class="stat-item">
-            <p class="stat-label">미도전 문제</p>
-            <p class="stat-value">{{ userProfile.stats.pendingIssues }}개</p>
+            <p class="stat-label">도전한 문제</p>
+            <p class="stat-value">{{ profile.doingProblemCnt }}개</p>
           </div>
           <div class="stat-item">
-            <p class="stat-label">도전한 문제</p>
-            <p class="stat-value">{{ userProfile.stats.unresolvedIssues }}개</p>
+            <p class="stat-label">미해결 문제</p>
+            <p class="stat-value">{{ profile.notFinishedProblemCnt }}개</p>
           </div>
           <div class="stat-item">
             <p class="stat-label">해결한 문제</p>
-            <p class="stat-value">{{ userProfile.stats.resolvedIssues }}개</p>
+            <p class="stat-value">{{ profile.finishedProblemCnt }}개</p>
           </div>
         </div>
       </div>
@@ -249,7 +303,9 @@ onMounted(() => {
 
         <div class="friends-list">
           <div v-for="friend in paginatedFriends" :key="friend.id" class="friend-item">
-            <div class="friend-avatar"></div>
+            <div class="friend-avatar">
+              <img src="@/assets/icons/profile-friend.svg" alt="프로필 사진"/>
+            </div>
             <span class="friend-name">{{ friend.nickname }}</span>
           </div>
         </div>
@@ -317,8 +373,35 @@ onMounted(() => {
 }
 
 .filter-area {
+  display: flex;
+  justify-content: center;
+  gap: 10px;
   margin-bottom: 12px;
-  text-align: center;
+}
+
+.level-filter {
+  display: flex;
+  gap: 4px;
+}
+
+.filter-button {
+  padding: 6px 12px;
+  border: 1px solid #e1e1e1;
+  border-radius: 4px;
+  background: white;
+  font-size: 14px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.filter-button:hover {
+  background: #f5f5f5;
+}
+
+.filter-button.active {
+  background: #1a1b3a;
+  color: white;
+  border-color: #1a1b3a;
 }
 
 .table {
@@ -367,6 +450,19 @@ button {
   padding: 4px 8px;
   border-radius: 4px;
   font-size: 12px;
+}
+
+.status {
+  border-radius: 4px;
+  font-size: 12px;
+}
+
+.status-solved {
+  color: #1a8cff;
+}
+
+.status-unsolved {
+  color: #666;
 }
 
 .pagination {
@@ -466,11 +562,12 @@ button {
 }
 
 .friend-avatar {
-  width: 40px;
-  height: 40px;
-  border-radius: 50%;
-  background-color: #f0f0f0;
+  width: 32px;
+  height: 32px;
+  margin-left: 12px;
   margin-right: 12px;
+  border-radius: 50%;
+  overflow: hidden;
 }
 
 .friend-name {

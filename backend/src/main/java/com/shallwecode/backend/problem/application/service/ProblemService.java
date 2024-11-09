@@ -66,4 +66,9 @@ public class ProblemService {
 
         return problemDomainService.findAllProblem();
     }
+
+    public List<FindProblemResDTO> findAllProblemByUser(Long loginUserId) {
+
+        return problemDomainService.findAllProblemByUser(loginUserId);
+    }
 }

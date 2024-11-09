@@ -90,7 +90,7 @@ public class UserService implements UserDetailsService {
         Long doingProblemCnt = userDomainService.findDoingProblemCnt(loginUserId);
         Long finishedProblemCnt = userDomainService.findFinishedProblemCnt(loginUserId);
 
-        Long notFinishedProblemCnt = allProblemCnt - doingProblemCnt;
+        Long notFinishedProblemCnt = allProblemCnt - finishedProblemCnt;
 
         FindUserDetailDTO findUserDetailDTO = userDomainService.findSimpleInfoById(loginUserId);
 
