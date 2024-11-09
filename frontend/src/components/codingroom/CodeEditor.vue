@@ -5,6 +5,7 @@ import {WebsocketProvider} from "y-websocket";
 import {MonacoBinding} from "y-monaco";
 import * as monaco from 'monaco-editor';
 import axios from "axios";
+import {useAuthStore} from "@/stores/auth.js";
 
 const MONACO_EDITOR_OPTIONS = {
   automaticLayout: true,
@@ -18,7 +19,13 @@ const languages = [
   {id: 'python', name: 'Python'}
 ];
 
-const code = ref('// Java code here...');
+const authStore = useAuthStore();
+
+const code = ref('public class Solution {\n' +
+    '    public static void main(String[] args) {\n' +
+    '        \n' +
+    '    }\n' +
+    '}');
 const editorInstance = shallowRef(null);
 const showDropdown = ref(false);
 const selectedLanguage = ref(languages[0]);
@@ -98,10 +105,16 @@ const runCode = async () => {
       code.value = editorInstance.value.getValue();
     }
 
-    const response = await axios.post('http://localhost:8080/api/v1/compile/run', {
-      code: code.value,
-      language: selectedLanguage.value.id.toLowerCase()
-    });
+    const response = await axios.post('http://localhost:8080/api/v1/compile/run',
+        {
+          code: code.value,
+          language: selectedLanguage.value.id.toLowerCase()},
+        {
+          headers: {
+            Authorization: `Bearer ${authStore.accessToken}`,
+            'Authorization-refresh': `Bearer ${authStore.refreshToken}`
+          }
+        });
 
     // 각각의 응답 처리
     output.value = response.data.output || '';

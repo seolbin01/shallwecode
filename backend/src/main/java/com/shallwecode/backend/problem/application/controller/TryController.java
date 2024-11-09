@@ -1,5 +1,6 @@
 package com.shallwecode.backend.problem.application.controller;
 
+import com.shallwecode.backend.common.util.CustomUserUtils;
 import com.shallwecode.backend.problem.application.dto.FindMyTryResDTO;
 import com.shallwecode.backend.problem.application.dto.FindTryResDTO;
 import com.shallwecode.backend.problem.application.dto.SaveTryReqDTO;
@@ -26,8 +27,8 @@ public class TryController {
     public ResponseEntity<Void> saveTry(@PathVariable Long problemId,
                                         @RequestBody SaveTryReqDTO saveTryReqDTO) {
 
-        Long userId = 1L;   // 추후 로그인된 회원의 userId를 가져오도록 수정
-        tryService.saveTry(userId, problemId, saveTryReqDTO);
+        Long loginUserId = CustomUserUtils.getCurrentUserSeq();
+        tryService.saveTry(loginUserId, problemId, saveTryReqDTO);
 
         return ResponseEntity.status(HttpStatus.CREATED).build();
     }
@@ -37,8 +38,8 @@ public class TryController {
     public ResponseEntity<String> deleteTry(@PathVariable Long problemId,
                                             @PathVariable Long tryId) {
 
-        Long userId = 1L;   // 추후 로그인된 회원의 userId를 가져오도록 수정
-        tryService.deleteTry(userId, problemId, tryId);
+        Long loginUserId = CustomUserUtils.getCurrentUserSeq();
+        tryService.deleteTry(loginUserId, problemId, tryId);
 
         return ResponseEntity.ok().body("풀이 시도 삭제 완료");
     }
@@ -47,8 +48,8 @@ public class TryController {
     @Operation(summary = "내 풀이 시도 조회", description = "내 풀이 시도를 조회 한다.")
     public ResponseEntity<List<FindMyTryResDTO>> findAllMyTry(@PathVariable Long problemId) {
 
-        Long userId = 1L;   // 추후 로그인된 회원의 userId를 가져오도록 수정
-        List<FindMyTryResDTO> myTryList = tryService.findAllMyTry(userId, problemId);
+        Long loginUserId = CustomUserUtils.getCurrentUserSeq();
+        List<FindMyTryResDTO> myTryList = tryService.findAllMyTry(loginUserId, problemId);
 
         return new ResponseEntity<>(myTryList, HttpStatus.OK);
     }
@@ -57,7 +58,6 @@ public class TryController {
     @Operation(summary = "특정 풀이 시도 조회", description = "특정 풀이 시도를 조회 한다.")
     public ResponseEntity<FindTryResDTO> findTry(@PathVariable Long tryId) {
 
-        Long userId = 1L;   // 추후 로그인된 회원의 userId를 가져오도록 수정
         FindTryResDTO tryResDTO = tryService.findTry(tryId);
 
         return new ResponseEntity<>(tryResDTO, HttpStatus.OK);

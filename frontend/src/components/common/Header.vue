@@ -2,6 +2,9 @@
 import {inject, onMounted, onUnmounted, ref} from 'vue'
 import axios from "axios";
 import {useAuthStore} from "@/stores/auth.js";
+import {getFetch, putFetch} from "@/stores/apiClient.js";
+
+const authStore = useAuthStore();
 
 const showNotis = ref(false);
 const notis = ref([]);
@@ -11,7 +14,7 @@ const isLogin = ref(false);
 
 const fetchMyNotReadNotiList = async () => {
   try {
-    const response = await axios.get('http://localhost:8080/api/v1/noti');
+    const response = await getFetch('http://localhost:8080/api/v1/noti');
     notis.value = response.data;
   } catch (error) {
     console.error('알림 목록을 불러오는 중 에러가 발생했습니다.', error.response ? error.response.data : error.message);
@@ -20,7 +23,7 @@ const fetchMyNotReadNotiList = async () => {
 
 const handleNotiClick = async (noti) => {
   try {
-    await axios.put(`http://localhost:8080/api/v1/noti`, {
+    await putFetch(`http://localhost:8080/api/v1/noti`, {
       notiId: noti.notiId
     });
     await fetchMyNotReadNotiList();
@@ -68,15 +71,22 @@ const logout = async () => {
 
   if (response.status === 200) { // 응답 상태가 200인지 확인
     alert('로그아웃 성공');
+    deleteCookies();
     window.location.href = "http://localhost:5173"; // 홈 페이지로 리다이렉트
   } else {
     alert('로그아웃에 실패했습니다.');
   }
 }
 
+const deleteCookies = () => {
+  document.cookie = 'accessToken=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;';
+  document.cookie = 'refreshToken=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;';
+}
+
 const handleLogoutClick = () => {
   logout();
   store.logout();
+  deleteCookies();
   alert('로그아웃 되었습니다.');
   window.location.reload();
 }
@@ -108,7 +118,6 @@ onMounted(() => {
 
   if (isLogin.value) {
     fetchMyNotReadNotiList();
-    handleNotiClick();
     document.addEventListener('click', closeNotis)
   }
 })
@@ -122,10 +131,12 @@ onUnmounted(() => {
   <header class="header">
     <router-link to="/" class="logo">ShallWeCode</router-link>
     <div v-if=isLogin class="menu">
+      <router-link to="/mypage" class="menu-item">마이페이지</router-link>
+      <router-link to="/" class="menu-item">문제 목록</router-link>
       <router-link to="/user-list" class="menu-item">회원 목록</router-link>
-      <div class="log-out" @click="handleLogoutClick">로그아웃</div>
+      <div class="menu-item" @click="handleLogoutClick">로그아웃</div>
       <div class="notification-container">
-        <button @click="toggleNotis" class="menu-item notification-btn">
+        <button @click="toggleNotis" class="notification-btn">
           알림
         </button>
         <div v-if="showNotis" class="notifications-dropdown">
@@ -172,7 +183,7 @@ onUnmounted(() => {
   gap: 1.5rem;
 }
 
-.menu-item {
+.menu-item:not(.notification-btn) {
   color: white;
   text-decoration: none;
   font-size: 0.875rem;
@@ -183,6 +194,25 @@ onUnmounted(() => {
 }
 
 .menu-item:hover {
+  color: #8be9fd;
+}
+
+.notification-btn {
+  color: white;
+  text-decoration: none;
+  font-size: 0.875rem;
+  background: none;
+  border: none;
+  padding: 0;
+  cursor: pointer;
+  line-height: 1;
+  display: flex;
+  align-items: center;
+  height: 100%;
+  margin-top: 1.5px;
+}
+
+.notification-btn:hover {
   color: #8be9fd;
 }
 
@@ -243,9 +273,5 @@ onUnmounted(() => {
 
 .notification-item:hover {
   background-color: #f5f5f5;
-}
-
-.log-out {
-  cursor: pointer;
 }
 </style>

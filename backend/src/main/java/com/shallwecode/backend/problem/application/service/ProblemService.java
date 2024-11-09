@@ -13,7 +13,7 @@ public class ProblemService {
 
     private final ProblemDomainService problemDomainService;
 
-    public List<FindMyProblemResDTO> findAllMyProblem(Long userId) {
+    public List<FindProblemResDTO> findAllMyProblem(Long userId) {
 
         return problemDomainService.findAllMyProblem(userId);
     }
@@ -62,8 +62,8 @@ public class ProblemService {
                 .build();
     }
 
-    public List<FindProblemResDTO> findAllProblem() {
+    public List<FindProblemResDTO> findAllProblem(ProblemSearchFilter filter) {
 
-        return problemDomainService.findAllProblem();
+        return problemDomainService.findAllProblem(filter);
     }
 }

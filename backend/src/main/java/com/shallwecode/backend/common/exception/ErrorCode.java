@@ -20,6 +20,7 @@ public enum ErrorCode {
     UNAUTHORIZED(HttpStatus.UNAUTHORIZED, "인증 실패"),
     SOCIAL_LOGIN_FAIL(HttpStatus.UNAUTHORIZED, "소셜 로그인 실패"),
     OVERLAPPING_SAVED_USER(HttpStatus.CONFLICT, "이미 존재하는 회원입니다."),
+    GUEST_SOLVED_FILTER_FORBIDDEN(HttpStatus.FORBIDDEN, "비회원은 해결 여부 필터링 기능을 사용할 수 없습니다."),
 
 
     // 코딩방 및 협업 친구

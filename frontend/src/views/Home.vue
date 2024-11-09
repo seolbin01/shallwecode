@@ -1,53 +1,67 @@
 <script setup>
-import {computed, onMounted, ref} from 'vue';
-import axios from "axios";
+import {computed, onMounted, onUnmounted, ref, watch} from 'vue';
+import {getFetch} from "@/stores/apiClient.js";
+import kakaoIcon from '@/assets/icons/kakao.svg'
+import naverIcon from '@/assets/icons/naver.svg'
+import googleIcon from '@/assets/icons/google.svg'
 import {useAuthStore} from "@/stores/auth.js";
-import {getFetch, putFetch, delFetch, postFetch} from "@/stores/apiClient.js";
-
-const currentPage = ref(1);
-const currentProblemPage = ref(1); // 문제 페이징을 위한 변수
-const friendItemsPerPage = 2;
-const ROWS_PER_PAGE = 7;
-const searchQuery = ref('');
-
-const noTryCount = ref(0);
-const unSolvedCount = ref(0);
-const SolvedCount = ref(0);
+import axios from "axios";
+import router from "@/router/index.js";
 
 const store = useAuthStore();
 
-const userProfile = ref({
-  userId: 'USER01',
-  email: 'testuser01@naver.com',
-  stats: {
-    pendingIssues: computed(() => noTryCount.value),
-    unresolvedIssues: computed(() => unSolvedCount.value),
-    resolvedIssues: computed(() => SolvedCount.value)
-  }
-});
+const currentPage = ref(1);
+const currentProblemPage = ref(1);
+const friendItemsPerPage = 2;
+const ROWS_PER_PAGE = 7;
+const searchQuery = ref('');
+const selectedStatus = ref(null);
+const selectedLevel = ref(null);
+const isStatusDropdownOpen = ref(false);
+const isLevelDropdownOpen = ref(false);
+const loading = ref(false);
+const isLogin = ref(false);
 
-const fetchTryProblemCount = async () => {
-  try {
-    const noTryResponse = await getFetch('http://localhost:8080/api/v1/problem/mylist/notry');
-    noTryCount.value = noTryResponse.data;
-  } catch (error) {
-    console.error('미시도 문제 목록 개수를 불러오는데 에러가 발생했습니다.', error.response ? error.response.data : error.message);
-  }
+const levelOptions = [
+  { value: null, label: '난이도' },
+  { value: 1, label: 'Lv.1' },
+  { value: 2, label: 'Lv.2' },
+  { value: 3, label: 'Lv.3' },
+  { value: 4, label: 'Lv.4' },
+  { value: 5, label: 'Lv.5' },
+];
 
-  try {
-    const unSolvedResponse = await getFetch('http://localhost:8080/api/v1/problem/mylist/unsolved');
-    unSolvedCount.value = unSolvedResponse.data;
-  } catch (error) {
-    console.error('미해결 문제 목록 개수를 불러오는데 에러가 발생했습니다.', error.response ? error.response.data : error.message);
-  }
+const statusOptions = [
+  { value: null, label: '상태' },
+  { value: true, label: '해결' },
+  { value: false, label: '미해결' },
+];
 
+const profile = ref('');
+
+const fetchProfile = async () => {
   try {
-    const solvedResponse = await getFetch('http://localhost:8080/api/v1/problem/mylist/solved');
-    SolvedCount.value = solvedResponse.data;
+    const response = await getFetch('http://localhost:8080/api/v1/user/profile');
+    profile.value = response.data;
   } catch (error) {
-    console.error('해결된 문제 목록 개수를 불러오는데 에러가 발생했습니다.', error.response ? error.response.data : error.message);
+    console.error('프로필을 불러오는데 에러가 발생했습니다.', error.response ? error.response.data : error.message);
   }
 };
+
+const providerIcon = computed(() => {
+  if (!profile.value || !profile.value.provider) return '';
+
+  switch (profile.value.provider) {
+    case 'KAKAO':
+      return kakaoIcon;
+    case 'NAVER':
+      return naverIcon;
+    case 'GOOGLE':
+      return googleIcon;
+    default:
+      return '';
+  }
+});
 
 const friendsList = ref([]);
 
@@ -67,6 +81,8 @@ const totalPages = computed(() =>
 const paginatedFriends = computed(() => {
   const start = (currentPage.value - 1) * friendItemsPerPage;
   const end = start + friendItemsPerPage;
+
+  if (friendsList.value.length === 0) return [];
   return friendsList.value.slice(start, end);
 });
 
@@ -74,28 +90,48 @@ const nextPage = () => {
   if (currentPage.value < totalPages.value) {
     currentPage.value++;
   }
-};
+}
 
 const prevPage = () => {
   if (currentPage.value > 1) {
-    currentPage.value--;
+    currentPage.value--
   }
-};
+}
 
 const goToPage = (page) => {
-  currentPage.value = page;
-};
+  currentPage.value = page
+}
 
 const problems = ref([]);
 
 const fetchProblemList = async () => {
   try {
-    const response = await axios.get('http://localhost:8080/api/v1/problem/list');
-    problems.value = response.data;
+    loading.value = true;
+    const params = {
+      isSolved: selectedStatus.value,
+      problemLevel: selectedLevel.value,
+    };
+
+    if(store.accessToken) {
+      const response = await axios.get('http://localhost:8080/api/v1/problem', { params,
+        headers: {
+          Authorization: `Bearer ${store.accessToken}`
+        }
+      });
+      problems.value = response.data;
+    } else {
+      const response = await axios.get('http://localhost:8080/api/v1/problem/guest', { params });
+      problems.value = response.data;
+    }
   } catch (error) {
     console.error('문제 목록을 불러오는 중 에러가 발생했습니다.', error.response ? error.response.data : error.message);
   }
 };
+
+watch(selectedLevel, () => {
+  currentProblemPage.value = 1;
+  fetchProblemList();
+});
 
 const handleProblemClick = async (problem) => {
   try {
@@ -105,27 +141,80 @@ const handleProblemClick = async (problem) => {
   }
 };
 
+const handleLevelSelect = (level) => {
+  selectedLevel.value = level;
+  isLevelDropdownOpen.value = false;
+};
+
+const selectedLevelText = computed(() => {
+  const selected = levelOptions.find(option => option.value === selectedLevel.value);
+  return selected ? selected.label : '난이도';
+});
+
+const handleStatusSelect = (status) => {
+  selectedStatus.value = status;
+  isStatusDropdownOpen.value = false;
+  currentProblemPage.value = 1;
+  fetchProblemList();
+};
+
+const selectedStatusText = computed(() => {
+  const selected = statusOptions.find(option => option.value === selectedStatus.value);
+  return selected ? selected.label : '상태';
+});
+
+const handleClickOutside = (event) => {
+  const levelDropdown = document.querySelector('.level-dropdown');
+  const statusDropdown = document.querySelector('.status-dropdown');
+
+  if (levelDropdown && !levelDropdown.contains(event.target) &&
+      !event.target.classList.contains('level-filter-button')) {
+    isLevelDropdownOpen.value = false;
+  }
+
+  if (statusDropdown && !statusDropdown.contains(event.target) &&
+      !event.target.classList.contains('status-filter-button')) {
+    isStatusDropdownOpen.value = false;
+  }
+};
+
 const displayedProblems = computed(() => {
+  let filteredProblems = problems.value;
+
+  if (searchQuery.value) {
+    filteredProblems = filteredProblems.filter(problem =>
+        problem.title.toLowerCase().includes(searchQuery.value.toLowerCase())
+    );
+  }
+
   const startIdx = (currentProblemPage.value - 1) * ROWS_PER_PAGE;
   const endIdx = startIdx + ROWS_PER_PAGE;
-  return problems.value.slice(startIdx, endIdx);
+  return filteredProblems.slice(startIdx, endIdx);
 });
 
 const emptyRowsCount = computed(() =>
     ROWS_PER_PAGE - displayedProblems.value.length
 );
 
-const totalProblemPages = computed(() =>
-    Math.ceil(problems.value.length / ROWS_PER_PAGE)
-);
+const totalProblemPages = computed(() => {
+  let filteredProblems = problems.value;
+
+  if (searchQuery.value) {
+    filteredProblems = filteredProblems.filter(problem =>
+        problem.title.toLowerCase().includes(searchQuery.value.toLowerCase())
+    );
+  }
+
+  return Math.ceil(filteredProblems.length / ROWS_PER_PAGE);
+});
 
 const changeProblemPage = (page) => {
   if (page === 'prev' && currentProblemPage.value > 1) {
-    currentProblemPage.value--; // 문제 페이징 변수 사용
+    currentProblemPage.value--;
   } else if (page === 'next' && currentProblemPage.value < totalProblemPages.value) {
-    currentProblemPage.value++; // 문제 페이징 변수 사용
+    currentProblemPage.value++;
   } else if (typeof page === 'number') {
-    currentProblemPage.value = page; // 문제 페이징 변수 사용
+    currentProblemPage.value = page;
   }
 };
 
@@ -136,7 +225,24 @@ function getCookie(name) {
   return null;
 }
 
+watch(searchQuery, () => {
+  currentProblemPage.value = 1;
+});
+
+watch(selectedLevel, () => {
+  currentProblemPage.value = 1;
+});
+
+const handleLevelFilter = (level) => {
+  selectedLevel.value = selectedLevel.value === level ? null : level;
+};
+
+const goToLogin = () => {
+  router.push('/login');
+}
+
 onMounted(() => {
+  document.addEventListener('click', handleClickOutside);
 
   if (!store.accessToken) {
     const token = getCookie('accessToken');  // 쿠키에서 'token' 값 가져오기
@@ -149,11 +255,16 @@ onMounted(() => {
   }
 
   if (store.accessToken) {
-    fetchTryProblemCount();
+    fetchProfile();
     fetchFriendList();
+    isLogin.value = true;
   }
   fetchProblemList();
 
+});
+
+onUnmounted(() => {
+  document.removeEventListener('click', handleClickOutside);
 });
 </script>
 
@@ -168,15 +279,50 @@ onMounted(() => {
           <input
               type="text"
               class="search-input"
-              placeholder="문제 검색"
+              placeholder="문제 제목 검색"
               v-model="searchQuery"
           >
         </div>
 
         <div class="filter-area">
-          <button class="filter-button">상태 ▼</button>
-          <button class="filter-button">난이도 ▼</button>
-          <button class="filter-button">해결 ▼</button>
+          <div class="status-filter-container" v-if="isLogin">
+            <button
+                class="filter-button status-filter-button"
+                @click="isStatusDropdownOpen = !isStatusDropdownOpen"
+            >
+              {{ selectedStatusText }} ▼
+            </button>
+            <div class="status-dropdown" v-if="isStatusDropdownOpen">
+              <div
+                  v-for="option in statusOptions"
+                  :key="String(option.value)"
+                  class="status-option"
+                  :class="{ active: selectedStatus === option.value }"
+                  @click="handleStatusSelect(option.value)"
+              >
+                {{ option.label }}
+              </div>
+            </div>
+          </div>
+          <div class="level-filter-container">
+            <button
+                class="filter-button level-filter-button"
+                @click="isLevelDropdownOpen = !isLevelDropdownOpen"
+            >
+              {{ selectedLevelText }} ▼
+            </button>
+            <div class="level-dropdown" v-if="isLevelDropdownOpen">
+              <div
+                  v-for="option in levelOptions"
+                  :key="option.value"
+                  class="level-option"
+                  :class="{ active: selectedLevel === option.value }"
+                  @click="handleLevelSelect(option.value)"
+              >
+                {{ option.label }}
+              </div>
+            </div>
+          </div>
         </div>
 
         <table class="table">
@@ -185,6 +331,7 @@ onMounted(() => {
             <th>번호</th>
             <th>제목</th>
             <th>난이도</th>
+            <th>상태</th>
           </tr>
           </thead>
           <tbody>
@@ -194,7 +341,12 @@ onMounted(() => {
           >
             <td>{{ (currentProblemPage - 1) * ROWS_PER_PAGE + index + 1 }}</td>
             <td>{{ problem.title }}</td>
-            <td><span class="level-badge">Lv. {{ problem.level }}</span></td>
+            <td><span class="level-badge">Lv. {{ problem.problemLevel }}</span></td>
+            <td>
+              <span :class="['status', problem.solved ? 'status-solved' : 'status-unsolved']">
+                {{ problem.solved ? '해결' : '미해결' }}
+              </span>
+            </td>
           </tr>
           </tbody>
         </table>
@@ -221,25 +373,28 @@ onMounted(() => {
         </div>
       </div>
     </div>
-    <div class="profile-container">
+    <div class="profile-container" v-if="isLogin">
       <div class="profile-card">
         <div class="user-header">
-          <h2 class="user-id">{{ userProfile.userId }}</h2>
-          <p class="user-email">{{ userProfile.email }}</p>
+          <h2 class="user-id">{{ profile.nickname }}</h2>
+          <p class="user-email">
+            {{ profile.email }}
+            <img v-if="profile.provider" :src="providerIcon" :alt="profile.provider" class="provider-icon"/>
+          </p>
         </div>
 
         <div class="stats-container">
           <div class="stat-item">
-            <p class="stat-label">미도전 문제</p>
-            <p class="stat-value">{{ userProfile.stats.pendingIssues }}개</p>
+            <p class="stat-label">도전한 문제</p>
+            <p class="stat-value">{{ profile.doingProblemCnt }}개</p>
           </div>
           <div class="stat-item">
-            <p class="stat-label">도전한 문제</p>
-            <p class="stat-value">{{ userProfile.stats.unresolvedIssues }}개</p>
+            <p class="stat-label">미해결 문제</p>
+            <p class="stat-value">{{ profile.notFinishedProblemCnt }}개</p>
           </div>
           <div class="stat-item">
             <p class="stat-label">해결한 문제</p>
-            <p class="stat-value">{{ userProfile.stats.resolvedIssues }}개</p>
+            <p class="stat-value">{{ profile.finishedProblemCnt }}개</p>
           </div>
         </div>
       </div>
@@ -249,7 +404,9 @@ onMounted(() => {
 
         <div class="friends-list">
           <div v-for="friend in paginatedFriends" :key="friend.id" class="friend-item">
-            <div class="friend-avatar"></div>
+            <div class="friend-avatar">
+              <img src="@/assets/icons/profile-friend.svg" alt="프로필 사진"/>
+            </div>
             <span class="friend-name">{{ friend.nickname }}</span>
           </div>
         </div>
@@ -281,6 +438,18 @@ onMounted(() => {
         </div>
       </div>
     </div>
+    <div class="profile-container" v-else>
+      <div class="profile-card login-card">
+        <div class="login-message">환영합니다! 👋</div>
+        <div class="login-description">
+          로그인하시면 친구와 함께 풀기 등<br>
+          더 많은 기능을 사용하실 수 있습니다.
+        </div>
+        <button class="login-button" @click="goToLogin">
+          로그인하러 가기
+        </button>
+      </div>
+    </div>
   </div>
 </template>
 
@@ -288,12 +457,15 @@ onMounted(() => {
 .main-container {
   background-color: var(--background-color);
   display: flex;
+  justify-content: center;
   padding: 20px;
   gap: 20px;
+  margin: 0 auto;
+  min-height: calc(100vh - 40px);
 }
 
 .container {
-  width: 1000px;
+  width: 800px;
   background: white;
   border-radius: 16px;
   padding: 24px;
@@ -302,6 +474,7 @@ onMounted(() => {
   display: flex;
   justify-content: center;
   gap: 70px;
+  height: fit-content;
 }
 
 .title {
@@ -317,8 +490,134 @@ onMounted(() => {
 }
 
 .filter-area {
+  display: flex;
+  justify-content: center;
+  gap: 10px;
   margin-bottom: 12px;
-  text-align: center;
+}
+
+.filter-button {
+  padding: 6px 12px;
+  border: 1px solid #e1e1e1;
+  border-radius: 4px;
+  background: white;
+  font-size: 14px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.filter-button:hover {
+  background: #f5f5f5;
+}
+
+.filter-button.active {
+  background: #1a1b3a;
+  color: white;
+  border-color: #1a1b3a;
+}
+
+.status-filter-container {
+  position: relative;
+  display: inline-block;
+}
+
+.status-filter-button {
+  min-width: 60px;
+  text-align: left;
+}
+
+.status-dropdown {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  z-index: 1000;
+  min-width: 120px;
+  background: white;
+  border: 1px solid #e1e1e1;
+  border-radius: 4px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  margin-top: 4px;
+  transform-origin: top;
+  animation: dropdownAnimation 0.2s ease-out forwards;
+}
+
+.status-option {
+  padding: 8px 16px;
+  cursor: pointer;
+  transition: all 0.2s;
+  text-align: left;
+}
+
+.status-option:hover {
+  background: #f5f5f5;
+}
+
+.status-option.active {
+  background: #1a1b3a;
+  color: white;
+}
+
+.status-option:not(:last-child) {
+  border-bottom: 1px solid #f0f0f0;
+}
+
+.level-filter-container {
+  position: relative;
+  display: inline-block;
+}
+
+.level-filter-button {
+  min-width: 60px;
+  text-align: left;
+}
+
+.level-dropdown {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  z-index: 1000;
+  min-width: 120px;
+  background: white;
+  border: 1px solid #e1e1e1;
+  border-radius: 4px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  margin-top: 4px;
+}
+
+.level-option {
+  padding: 8px 16px;
+  cursor: pointer;
+  transition: all 0.2s;
+  text-align: left;
+}
+
+.level-option:hover {
+  background: #f5f5f5;
+}
+
+.level-option.active {
+  background: #1a1b3a;
+  color: white;
+}
+
+.level-option:not(:last-child) {
+  border-bottom: 1px solid #f0f0f0;
+}
+
+.level-dropdown {
+  transform-origin: top;
+  animation: dropdownAnimation 0.2s ease-out forwards;
+}
+
+@keyframes dropdownAnimation {
+  from {
+    opacity: 0;
+    transform: scaleY(0);
+  }
+  to {
+    opacity: 1;
+    transform: scaleY(1);
+  }
 }
 
 .table {
@@ -369,6 +668,19 @@ button {
   font-size: 12px;
 }
 
+.status {
+  border-radius: 4px;
+  font-size: 12px;
+}
+
+.status-solved {
+  color: #1a8cff;
+}
+
+.status-unsolved {
+  color: #666;
+}
+
 .pagination {
   display: flex;
   justify-content: center;
@@ -397,8 +709,9 @@ button {
 
 .profile-container {
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-  max-width: 400px;
-  margin: 0 auto;
+  width: 400px;
+  min-width: 300px;
+  margin: 0;
 }
 
 .profile-card, .friends-card {
@@ -434,6 +747,8 @@ button {
 
 .stat-item {
   flex: 1;
+  margin-left: 4px;
+  margin-right: 4px;
 }
 
 .stat-label {
@@ -466,11 +781,12 @@ button {
 }
 
 .friend-avatar {
-  width: 40px;
-  height: 40px;
-  border-radius: 50%;
-  background-color: #f0f0f0;
+  width: 32px;
+  height: 32px;
+  margin-left: 12px;
   margin-right: 12px;
+  border-radius: 50%;
+  overflow: hidden;
 }
 
 .friend-name {
@@ -505,5 +821,58 @@ button {
 .pagination-btn:disabled {
   color: #ccc;
   cursor: not-allowed;
+}
+
+.login-card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  padding: 32px 24px;
+}
+
+.login-message {
+  font-size: 18px;
+  font-weight: 600;
+  color: #333;
+  margin-bottom: 12px;
+}
+
+.login-description {
+  font-size: 14px;
+  color: #666;
+  margin-bottom: 24px;
+  line-height: 1.6;
+}
+
+.login-button {
+  background-color: #4285f4;
+  color: white;
+  border: none;
+  padding: 12px 24px;
+  border-radius: 8px;
+  font-size: 16px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.login-button:hover {
+  background-color: #3367d6;
+  transform: translateY(-1px);
+}
+
+.login-button svg {
+  width: 20px;
+  height: 20px;
+}
+
+.provider-icon {
+  width: 16px;
+  height: 16px;
 }
 </style>

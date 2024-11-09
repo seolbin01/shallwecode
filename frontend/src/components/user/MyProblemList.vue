@@ -1,6 +1,6 @@
 <script setup>
-import {ref, computed, watch, onMounted} from 'vue'
-import axios from 'axios';
+import {computed, onMounted, ref, watch} from 'vue'
+import {getFetch} from "@/stores/apiClient.js";
 
 const ROWS_PER_PAGE = 7;
 const itemsPerPage = 7;
@@ -16,7 +16,7 @@ const isModalOpen = ref(false);
 
 const fetchMyProblemList = async () => {
   try {
-    const response = await axios.get('http://localhost:8080/api/v1/problem/mylist');
+    const response = await getFetch('http://localhost:8080/api/v1/problem/mylist');
     problems.value = response.data;
   } catch (error) {
     console.error('내 풀이 문제 목록을 불러오는 중 에러가 발생했습니다.', error.response ? error.response.data : error.message);
@@ -25,7 +25,7 @@ const fetchMyProblemList = async () => {
 
 const fetchTryList = async (problemId) => {
   try {
-    const response = await axios.get(`http://localhost:8080/api/v1/problem/${problemId}/try`);
+    const response = await getFetch(`http://localhost:8080/api/v1/problem/${problemId}/try`);
     trys.value = response.data;
   } catch (error) {
     console.error('풀이 시도 목록을 불러오는 중 에러가 발생했습니다.', error.response ? error.response.data : error.message);
@@ -34,12 +34,9 @@ const fetchTryList = async (problemId) => {
 
 const handleTryClick = async (tryId) => {
   try {
-    const response = await axios.get(
-        `http://localhost:8080/api/v1/problem/try/${tryId}`
-    );
+    const response = await getFetch(`http://localhost:8080/api/v1/problem/try/${tryId}`);
 
     curTry.value = response.data;
-    console.log(curTry.value)
     isModalOpen.value = true;
 
   } catch (error) {

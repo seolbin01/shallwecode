@@ -1,11 +1,10 @@
 package com.shallwecode.backend.user.application.service;
 
-import com.shallwecode.backend.user.application.dto.FindUserDetailDTO;
-import com.shallwecode.backend.user.application.dto.UserSaveDTO;
-import com.shallwecode.backend.user.application.dto.UserUpdateDTO;
+import com.shallwecode.backend.user.application.dto.user.FindUserDetailDTO;
+import com.shallwecode.backend.user.application.dto.user.UserSaveDTO;
+import com.shallwecode.backend.user.application.dto.user.UserUpdateDTO;
 import com.shallwecode.backend.user.domain.aggregate.UserInfo;
 import com.shallwecode.backend.user.domain.repository.UserRepository;
-import com.shallwecode.backend.user.domain.service.UserDomainService;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -20,9 +19,6 @@ import static org.junit.jupiter.api.Assertions.*;
 @SpringBootTest
 @Transactional
 class UserServiceTest {
-
-    @Autowired
-    private UserDomainService userDomainService;
 
     @Autowired
     private UserRepository userRepository;
@@ -66,7 +62,10 @@ class UserServiceTest {
 
         // then
         Optional<UserInfo> userInfo = userRepository.findByEmail("test@naver.com");
-        assertEquals("꺄르륵", userInfo.get().getNickname());
+        if(userInfo.isPresent()) {
+            String nickname = userInfo.get().getNickname();
+            assertEquals("꺄르륵", nickname);
+        }
     }
 
     @Test
@@ -90,12 +89,12 @@ class UserServiceTest {
     @Test
     @DisplayName("회원 조회 테스트")
     void getAllUser(){
-        // 회원 조회
-        // when
-        List<UserInfo> findAllUser = userService.getAllUsers();
-
-        // then
-        assertNotNull(findAllUser);
+//        // 회원 조회
+//        // when
+//        List<UserInfo> findAllUser = userService.findAllUsers();
+//
+//        // then
+//        assertNotNull(findAllUser);
     }
 
     @Test

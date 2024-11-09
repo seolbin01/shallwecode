@@ -1,6 +1,7 @@
 package com.shallwecode.backend.user.application.controller;
 
 import com.shallwecode.backend.common.util.CustomUserUtils;
+import com.shallwecode.backend.user.application.dto.user.FindUserListDTO;
 import com.shallwecode.backend.user.application.dto.user.FindUserDetailDTO;
 import com.shallwecode.backend.user.application.dto.user.UserSaveDTO;
 import com.shallwecode.backend.user.application.dto.user.UserUpdateDTO;
@@ -12,6 +13,7 @@ import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -21,7 +23,7 @@ import java.util.List;
 @Slf4j
 @RestController
 @RequestMapping("/api/v1/user")
-@Tag(name = "User", description = "User API")
+@Tag(name = "User", description = "회원 관련 API")
 public class UserController {
 
     private final UserService userService;
@@ -66,6 +68,16 @@ public class UserController {
 
         List<FindUserDetailDTO> userList = userService.findUserDetailsByNickname(nickname);
         return ResponseEntity.ok(userList);
+    }
+
+    @GetMapping("/list")
+    @Operation(summary = "회원 목록 조회", description = "친구 신청을 할 수 있는 회원을 조회한다.")
+    public ResponseEntity<List<FindUserListDTO>> findRequestUser() {
+
+        Long loginUserId = CustomUserUtils.getCurrentUserSeq();
+        List<FindUserListDTO> userList = userService.findRequestUser(loginUserId);
+
+        return new ResponseEntity<>(userList, HttpStatus.OK);
     }
 
     @GetMapping("/profile")

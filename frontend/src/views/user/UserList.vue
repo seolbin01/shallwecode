@@ -1,6 +1,9 @@
 <script setup>
-import {computed, onMounted, ref} from 'vue'
-import axios from "axios";
+import {computed, onMounted, ref, watch} from 'vue'
+import {getFetch, postFetch} from "@/stores/apiClient.js";
+import kakaoIcon from '@/assets/icons/kakao.svg'
+import naverIcon from '@/assets/icons/naver.svg'
+import googleIcon from '@/assets/icons/google.svg'
 
 const currentPage = ref(1);
 const currentUserPage = ref(1);
@@ -8,65 +11,71 @@ const friendItemsPerPage = 2
 const ROWS_PER_PAGE = 7;
 const searchQuery = ref('');
 
-const noTryCount = ref(0);
-const unSolvedCount = ref(0);
-const SolvedCount = ref(0);
+const profile = ref('');
 
-const userProfile = ref({
-  userId: 'USER01',
-  email: 'testuser01@naver.com',
-  stats: {
-    pendingIssues: computed(() => noTryCount.value),
-    unresolvedIssues: computed(() => unSolvedCount.value),
-    resolvedIssues: computed(() => SolvedCount.value)
-  }
-});
-
-const fetchTryProblemCount = async () => {
+const fetchProfile = async () => {
   try {
-    const noTryResponse = await axios.get('http://localhost:8080/api/v1/problem/mylist/notry');
-    noTryCount.value = noTryResponse.data;
+    const response = await getFetch('http://localhost:8080/api/v1/user/profile');
+    profile.value = response.data;
   } catch (error) {
-    console.error('미시도 문제 목록 개수를 불러오는데 에러가 발생했습니다.', error.response ? error.response.data : error.message);
-  }
-
-  try {
-    const unSolvedResponse = await axios.get('http://localhost:8080/api/v1/problem/mylist/unsolved');
-    unSolvedCount.value = unSolvedResponse.data;
-  } catch (error) {
-    console.error('미해결 문제 목록 개수를 불러오는데 에러가 발생했습니다.', error.response ? error.response.data : error.message);
-  }
-
-  try {
-    const solvedResponse = await axios.get('http://localhost:8080/api/v1/problem/mylist/solved');
-    SolvedCount.value = solvedResponse.data;
-  } catch (error) {
-    console.error('해결된 문제 목록 개수를 불러오는데 에러가 발생했습니다.', error.response ? error.response.data : error.message);
+    console.error('프로필을 불러오는데 에러가 발생했습니다.', error.response ? error.response.data : error.message);
   }
 };
+
+const providerIcon = computed(() => {
+  if (!profile.value || !profile.value.provider) return '';
+
+  switch (profile.value.provider) {
+    case 'KAKAO':
+      return kakaoIcon;
+    case 'NAVER':
+      return naverIcon;
+    case 'GOOGLE':
+      return googleIcon;
+    default:
+      return '';
+  }
+});
 
 const friendsList = ref([]);
 
 const fetchFriendList = async () => {
   try {
-    const response = await axios.get('http://localhost:8080/api/v1/friend');
+    const response = await getFetch('http://localhost:8080/api/v1/friend');
     friendsList.value = response.data;
   } catch (error) {
     console.error('친구 목록을 가져오는 중 오류가 발생했습니다:', error);
   }
 };
 
-const totalPages = Math.ceil(friendsList.value.length / friendItemsPerPage)
+const handleRequestClick = async (toUserId) => {
+  try {
+    await postFetch('http://localhost:8080/api/v1/friend/request', {
+      toUserId: toUserId
+    });
+    await fetchUserList();
+    alert('친구 신청되었습니다.')
+  } catch (error) {
+    alert('이미 친구 신청 대기 중입니다.')
+    console.error('친구 신청 진행 중 오류가 발생했습니다:', error);
+  }
+};
+
+const totalPages = computed(() =>
+    Math.ceil(friendsList.value.length / friendItemsPerPage)
+);
 
 const paginatedFriends = computed(() => {
-  const start = (currentPage.value - 1) * friendItemsPerPage
-  const end = start + friendItemsPerPage
-  return friendsList.value.slice(start, end)
-})
+  const start = (currentPage.value - 1) * friendItemsPerPage;
+  const end = start + friendItemsPerPage;
+
+  if (friendsList.value.length === 0) return [];
+  return friendsList.value.slice(start, end);
+});
 
 const nextPage = () => {
-  if (currentPage.value < totalPages) {
-    currentPage.value++
+  if (currentPage.value < totalPages.value) {
+    currentPage.value++;
   }
 }
 
@@ -84,7 +93,7 @@ const users = ref([]);
 
 const fetchUserList = async () => {
   try {
-    const response = await axios.get('http://localhost:8080/api/v1/user');
+    const response = await getFetch('http://localhost:8080/api/v1/user/list');
     users.value = response.data;
   } catch (error) {
     console.error('회원 목록을 불러오는 중 에러가 발생했습니다.', error.response ? error.response.data : error.message);
@@ -92,18 +101,30 @@ const fetchUserList = async () => {
 };
 
 const displayedUsers = computed(() => {
+  const filteredUsers = searchQuery.value
+      ? users.value.filter(user =>
+          user.nickname.toLowerCase().includes(searchQuery.value.toLowerCase())
+      )
+      : users.value;
+
   const startIdx = (currentUserPage.value - 1) * ROWS_PER_PAGE;
   const endIdx = startIdx + ROWS_PER_PAGE;
-  return users.value.slice(startIdx, endIdx);
+  return filteredUsers.slice(startIdx, endIdx);
 });
 
 const emptyRowsCount = computed(() =>
     ROWS_PER_PAGE - displayedUsers.value.length
 );
 
-const totalUserPages = computed(() =>
-    Math.ceil(users.value.length / ROWS_PER_PAGE)
-);
+const totalUserPages = computed(() => {
+  const filteredUsers = searchQuery.value
+      ? users.value.filter(user =>
+          user.nickname.toLowerCase().includes(searchQuery.value.toLowerCase())
+      )
+      : users.value;
+
+  return Math.ceil(filteredUsers.length / ROWS_PER_PAGE);
+});
 
 const changeUserPage = (page) => {
   if (page === 'prev' && currentUserPage.value > 1) {
@@ -115,8 +136,12 @@ const changeUserPage = (page) => {
   }
 };
 
+watch(searchQuery, () => {
+  currentUserPage.value = 1;
+});
+
 onMounted(() => {
-  fetchTryProblemCount();
+  fetchProfile();
   fetchUserList();
   fetchFriendList();
 });
@@ -143,20 +168,20 @@ onMounted(() => {
             <th>번호</th>
             <th>이메일</th>
             <th>닉네임</th>
-            <th></th> <!-- 삭제 버튼을 위한 열 -->
+            <th></th>
           </tr>
           </thead>
           <tbody>
           <tr v-for="(user, index) in displayedUsers" :key="user.userId">
-            <td>{{ (currentUserPage - 1) * ROWS_PER_PAGE + index + 1 }}</td> <!-- 순번 -->
-            <td>{{ user.email }}</td> <!-- 이메일 -->
-            <td>{{ user.nickname }}</td> <!-- 닉네임 -->
-            <td><button @click="deleteUser(user.userId)">친구 신청</button></td> <!-- 삭제 버튼 -->
+            <td>{{ (currentUserPage - 1) * ROWS_PER_PAGE + index + 1 }}</td>
+            <td>{{ user.email }}</td>
+            <td>{{ user.nickname }}</td>
+            <td>
+              <button v-if="!user.friend" @click="handleRequestClick(user.userId)">친구 신청</button>
+            </td>
           </tr>
           </tbody>
         </table>
-
-
 
         <div class="pagination">
           <button
@@ -183,22 +208,25 @@ onMounted(() => {
     <div class="profile-container">
       <div class="profile-card">
         <div class="user-header">
-          <h2 class="user-id">{{ userProfile.userId }}</h2>
-          <p class="user-email">{{ userProfile.email }}</p>
+          <h2 class="user-id">{{ profile.nickname }}</h2>
+          <p class="user-email">
+            {{ profile.email }}
+            <img v-if="profile.provider" :src="providerIcon" :alt="profile.provider" class="provider-icon"/>
+          </p>
         </div>
 
         <div class="stats-container">
           <div class="stat-item">
             <p class="stat-label">도전한 문제</p>
-            <p class="stat-value">{{ userProfile.stats.pendingIssues }}개</p>
+            <p class="stat-value">{{ profile.doingProblemCnt }}개</p>
           </div>
           <div class="stat-item">
             <p class="stat-label">미해결 문제</p>
-            <p class="stat-value">{{ userProfile.stats.unresolvedIssues }}개</p>
+            <p class="stat-value">{{ profile.notFinishedProblemCnt }}개</p>
           </div>
           <div class="stat-item">
             <p class="stat-label">해결한 문제</p>
-            <p class="stat-value">{{ userProfile.stats.resolvedIssues }}개</p>
+            <p class="stat-value">{{ profile.finishedProblemCnt }}개</p>
           </div>
         </div>
       </div>
@@ -208,7 +236,9 @@ onMounted(() => {
 
         <div class="friends-list">
           <div v-for="friend in paginatedFriends" :key="friend.id" class="friend-item">
-            <div class="friend-avatar"></div>
+            <div class="friend-avatar">
+              <img src="@/assets/icons/profile-friend.svg" alt="프로필 사진"/>
+            </div>
             <span class="friend-name">{{ friend.nickname }}</span>
           </div>
         </div>
@@ -247,12 +277,15 @@ onMounted(() => {
 .main-container {
   background-color: var(--background-color);
   display: flex;
+  justify-content: center;
   padding: 20px;
   gap: 20px;
+  margin: 0 auto;
+  min-height: calc(100vh - 40px);
 }
 
 .container {
-  width: 1000px;
+  width: 800px;
   background: white;
   border-radius: 16px;
   padding: 24px;
@@ -261,6 +294,7 @@ onMounted(() => {
   display: flex;
   justify-content: center;
   gap: 70px;
+  height: fit-content;
 }
 
 .title {
@@ -344,8 +378,9 @@ button {
 
 .profile-container {
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-  max-width: 400px;
-  margin: 0 auto;
+  width: 400px;
+  min-width: 300px;
+  margin: 0;
 }
 
 .profile-card, .friends-card {
@@ -354,6 +389,11 @@ button {
   padding: 20px;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
   margin-bottom: 20px;
+}
+
+.provider-icon {
+  width: 15px;
+  height: 15px;
 }
 
 .user-header {
@@ -413,11 +453,12 @@ button {
 }
 
 .friend-avatar {
-  width: 40px;
-  height: 40px;
-  border-radius: 50%;
-  background-color: #f0f0f0;
+  width: 32px;
+  height: 32px;
+  margin-left: 12px;
   margin-right: 12px;
+  border-radius: 50%;
+  overflow: hidden;
 }
 
 .friend-name {
@@ -452,5 +493,10 @@ button {
 .pagination-btn:disabled {
   color: #ccc;
   cursor: not-allowed;
+}
+
+.provider-icon {
+  width: 16px;
+  height: 16px;
 }
 </style>

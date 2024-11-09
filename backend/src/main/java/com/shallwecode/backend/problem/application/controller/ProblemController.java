@@ -1,10 +1,13 @@
 package com.shallwecode.backend.problem.application.controller;
 
+import com.shallwecode.backend.common.exception.CustomException;
+import com.shallwecode.backend.common.exception.ErrorCode;
 import com.shallwecode.backend.common.util.CustomUserUtils;
 import com.shallwecode.backend.problem.application.dto.*;
 import com.shallwecode.backend.problem.application.service.ProblemService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
@@ -78,20 +81,20 @@ public class ProblemController {
 
     @GetMapping("/mylist")
     @Operation(summary = "내 문제 목록 전체 조회", description = "내 문제 목록을 전체 조회 한다.")
-    public ResponseEntity<List<FindMyProblemResDTO>> findAllMyProblem() {
+    public ResponseEntity<List<FindProblemResDTO>> findAllMyProblem() {
 
-        Long userId = 1L;   // 추후 로그인된 회원의 userId를 가져오도록 수정
-        List<FindMyProblemResDTO> myProblemList = problemService.findAllMyProblem(userId);
+        Long loginUserId = CustomUserUtils.getCurrentUserSeq();
+        List<FindProblemResDTO> myProblemList = problemService.findAllMyProblem(loginUserId);
 
         return new ResponseEntity<>(myProblemList, HttpStatus.OK);
     }
 
     /* 문제 목록 조회 - 관리자가 문제 관리 클릭시 문제 목록 조회 */
     @Operation(
-            summary = "문제 목록 조회 기능",
+            summary = "문제 목록 조회(관리자)",
             description = "문제 목록을 조회하는 기능입니다."
     )
-    @GetMapping("/adminList")
+    @GetMapping("/admin")
     public ResponseEntity<ProblemListResDTO> selectProblemList(@RequestParam(defaultValue = "1") Integer page,
                                                                @RequestParam(defaultValue = "10") Long size,
                                                                @RequestParam(required = false) String keyword,
@@ -102,20 +105,39 @@ public class ProblemController {
         return ResponseEntity.ok().body(problemListResDTO);
     }
 
-    @GetMapping("/list")
-    @Operation(summary = "문제 전체 조회", description = "")
-    public ResponseEntity<List<FindProblemResDTO>> findAllProblem() {
+    @GetMapping({"", "/guest"})
+    @Operation(summary = "문제 목록 조회", description = "문제 목록을 조회합니다. 회원/비회원 여부에 따라 해결 유무를 포함하여 반환합니다.")
+    public ResponseEntity<List<FindProblemResDTO>> findAllProblem(
+            HttpServletRequest request,
+            @RequestParam(required = false) Boolean isSolved,
+            @RequestParam(required = false) Integer problemLevel
+    ) {
 
-        List<FindProblemResDTO> problemList = problemService.findAllProblem();
+        System.out.println("상태 " + isSolved);
+        System.out.println("레벨: " + problemLevel);
 
+        boolean isGuestRequest = request.getRequestURI().endsWith("/guest");
+        if (isGuestRequest && (isSolved != null)) {
+            throw new CustomException(ErrorCode.GUEST_SOLVED_FILTER_FORBIDDEN);
+        }
+
+        ProblemSearchFilter searchFilter = ProblemSearchFilter.builder()
+                .userId(isGuestRequest ? null : CustomUserUtils.getCurrentUserSeq())
+                .isSolved(isSolved)
+                .problemLevel(problemLevel)
+                .build();
+
+        List<FindProblemResDTO> problemList = problemService.findAllProblem(searchFilter);
+
+        System.out.println("조회 완료");
         return new ResponseEntity<>(problemList, HttpStatus.OK);
     }
-  
+
     @Operation(summary = "미시도 문제 개수 조회", description = "시도하지 않는 문제 개수를 조회합니다.")
     @GetMapping("/mylist/notry")
     public ResponseEntity<Long> findAllMyUnTryProblemCount() {
 
-        Long userId = CustomUserUtils.getCurrentUserSeq(); // 추후 로그인된 회원의 userId를 가져오도록 수정
+        Long userId = CustomUserUtils.getCurrentUserSeq();
         Long myNoTryProblemCount = problemService.findAllNoTryProblemCount(userId);
 
         return new ResponseEntity<>(myNoTryProblemCount, HttpStatus.OK);
@@ -125,7 +147,7 @@ public class ProblemController {
     @GetMapping("/mylist/unsolved")
     public ResponseEntity<Long> findAllMyUnsolvedProblemCount() {
 
-        Long userId = CustomUserUtils.getCurrentUserSeq(); // 추후 로그인된 회원의 userId를 가져오도록 수정
+        Long userId = CustomUserUtils.getCurrentUserSeq();
         Long myUnsolvedProblemCount = problemService.findAllUnSolvedProblemCount(userId);
 
         return new ResponseEntity<>(myUnsolvedProblemCount, HttpStatus.OK);
@@ -135,7 +157,7 @@ public class ProblemController {
     @GetMapping("/mylist/solved")
     public ResponseEntity<Long> findAllMySolvedProblemCount() {
 
-        long userId = CustomUserUtils.getCurrentUserSeq();
+        Long userId = CustomUserUtils.getCurrentUserSeq();
         Long mySolvedProblemCount = problemService.findAllSolvedProblemCount(userId);
 
         return new ResponseEntity<>(mySolvedProblemCount, HttpStatus.OK);

@@ -27,7 +27,7 @@ public class JwtAuthenticationProcessingFilter extends OncePerRequestFilter {
             new AntPathRequestMatcher("/login/oauth2/code/kakao", "GET"),
             new AntPathRequestMatcher("/login/oauth2/code/naver", "GET"),
             new AntPathRequestMatcher("/login/oauth2/code/google", "GET"),
-            new AntPathRequestMatcher("/api/v1/problem/list", "GET"),
+            new AntPathRequestMatcher("/api/v1/problem/guest", "GET"),
             new AntPathRequestMatcher("/api/v1/user", "PUT")
     };
     private final JwtService jwtService;

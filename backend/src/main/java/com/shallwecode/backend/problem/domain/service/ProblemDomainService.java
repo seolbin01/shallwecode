@@ -5,17 +5,13 @@ import com.querydsl.core.types.Projections;
 import com.querydsl.core.types.dsl.Expressions;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import com.shallwecode.backend.problem.application.dto.*;
-import com.shallwecode.backend.problem.domain.aggregate.Problem;
-import com.shallwecode.backend.problem.domain.aggregate.QProblem;
-import com.shallwecode.backend.problem.domain.aggregate.QTry;
-import com.shallwecode.backend.problem.domain.aggregate.QTestcase;
-import com.shallwecode.backend.problem.domain.aggregate.Testcase;
+import com.shallwecode.backend.problem.domain.aggregate.*;
 import com.shallwecode.backend.problem.domain.repository.ProblemRepository;
 import com.shallwecode.backend.problem.domain.repository.TestcaseRepository;
-import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
@@ -121,8 +117,6 @@ public class ProblemDomainService {
                 .fetchOne();
     }
 
-
-
     public List<ProblemOneResDTO> selectOneProblem(Long problemId) {
 
         QProblem qProblem = QProblem.problem;
@@ -142,13 +136,14 @@ public class ProblemDomainService {
                 .fetch();
     }
 
-    public List<FindMyProblemResDTO> findAllMyProblem(Long userId) {
+    @Transactional(readOnly = true)
+    public List<FindProblemResDTO> findAllMyProblem(Long userId) {
 
         QProblem qProblem = QProblem.problem;
         QTry qTry = QTry.try$;
 
         return queryFactory
-                .select(Projections.constructor(FindMyProblemResDTO.class,
+                .select(Projections.constructor(FindProblemResDTO.class,
                         qProblem.problemId,
                         qProblem.title,
                         qProblem.problemLevel,
@@ -165,6 +160,7 @@ public class ProblemDomainService {
     }
 
     /* 문제 목록 조회 기능 */
+    @Transactional(readOnly=true)
     public List<ProblemDTO> selectProblemList(String keyword, Integer option, Long offset, Long size) {
         QProblem qProblem = QProblem.problem;
         BooleanBuilder whereClause = new BooleanBuilder();
@@ -199,7 +195,8 @@ public class ProblemDomainService {
                 .fetchOne();
     }
 
-    public List<FindProblemResDTO> findAllProblem() {
+    @Transactional(readOnly = true)
+    public List<FindProblemResDTO> findAllProblemByGuest() {
 
         QProblem problem = QProblem.problem;
 
@@ -207,8 +204,59 @@ public class ProblemDomainService {
                 .select(Projections.constructor(FindProblemResDTO.class,
                         problem.problemId,
                         problem.title,
-                        problem.problemLevel))
+                        problem.problemLevel,
+                        Expressions.constant(0)))
                 .from(problem)
+                .fetch();
+    }
+
+    @Transactional(readOnly = true)
+    public List<FindProblemResDTO> findAllProblem(ProblemSearchFilter filter) {
+
+        QProblem qProblem = QProblem.problem;
+        QTry qTry = QTry.try$;
+
+        BooleanBuilder whereConditions = new BooleanBuilder();
+
+        if (filter.getProblemLevel() != null) {
+            whereConditions.and(qProblem.problemLevel.eq(filter.getProblemLevel()));
+        }
+
+        if (filter.isGuestSearch()) {
+            return queryFactory
+                    .select(Projections.constructor(FindProblemResDTO.class,
+                            qProblem.problemId,
+                            qProblem.title,
+                            qProblem.problemLevel,
+                            Expressions.constant(0)))
+                    .from(qProblem)
+                    .where(whereConditions)
+                    .orderBy(qProblem.problemId.asc())
+                    .fetch();
+        }
+
+        if (filter.getIsSolved() != null) {
+            whereConditions.and(qTry.isSolved.eq(filter.getIsSolved()));
+        }
+
+        return queryFactory
+                .select(Projections.constructor(FindProblemResDTO.class,
+                        qProblem.problemId,
+                        qProblem.title,
+                        qProblem.problemLevel,
+                        QTry.try$.isSolved
+                                .when(true).then(1)
+                                .otherwise(0)
+                                .max().coalesce(0)))
+                .from(qProblem)
+                .leftJoin(qTry)
+                .on(qTry.problemId.eq(qProblem.problemId)
+                        .and(qTry.userId.eq(filter.getUserId())))
+                .where(whereConditions)
+                .groupBy(qProblem.problemId,
+                        qProblem.title,
+                        qProblem.problemLevel)
+                .orderBy(qProblem.problemId.asc())
                 .fetch();
     }
 }
