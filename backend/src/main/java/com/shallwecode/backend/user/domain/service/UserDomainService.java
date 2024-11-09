@@ -1,14 +1,11 @@
 package com.shallwecode.backend.user.domain.service;
 
-import com.querydsl.core.types.Projections;
 import com.querydsl.jpa.impl.JPAQueryFactory;
-import com.shallwecode.backend.common.util.CustomUserUtils;
-import com.shallwecode.backend.user.application.dto.FindUserListDTO;
-import com.shallwecode.backend.user.application.dto.UserSaveDTO;
 import com.shallwecode.backend.common.exception.CustomException;
 import com.shallwecode.backend.common.exception.ErrorCode;
-import com.shallwecode.backend.user.application.dto.FindUserDTO;
-import com.shallwecode.backend.user.application.dto.UserUpdateDTO;
+import com.shallwecode.backend.problem.domain.aggregate.QProblem;
+import com.shallwecode.backend.problem.domain.aggregate.QTry;
+import com.shallwecode.backend.user.application.dto.*;
 import com.shallwecode.backend.user.domain.aggregate.QUserInfo;
 import com.shallwecode.backend.user.domain.aggregate.UserInfo;
 import com.shallwecode.backend.user.domain.repository.UserRepository;
@@ -16,6 +13,7 @@ import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -26,7 +24,7 @@ public class UserDomainService {
 
     private final UserRepository userRepository;
     private final ModelMapper modelMapper;
-    private final JPAQueryFactory queryFactory;
+    private final JPAQueryFactory jpaQueryFactory;
 
     // 회원 가입 시 유효성 검사
     public void validateNewUser(UserSaveDTO saveUserDTO) {
@@ -53,8 +51,7 @@ public class UserDomainService {
     }
 
     public void save(UserSaveDTO saveUserDTO) {
-        Long loginUserId = CustomUserUtils.getCurrentUserSeq();
-        UserInfo saveUser = userRepository.findById(loginUserId)
+        UserInfo saveUser = userRepository.findById(saveUserDTO.getUserId())
                 .orElseThrow(() -> new CustomException(ErrorCode.NOT_FOUND_USER));
 
         modelMapper.map(saveUserDTO, saveUser);
@@ -77,5 +74,66 @@ public class UserDomainService {
 //                .fetch();
 
         return list;
+    }
+
+    public Long findFinishedProblemCnt(Long loginUserId) {
+
+        QUserInfo userInfo = QUserInfo.userInfo;
+        QProblem qProblem = QProblem.problem;
+        QTry qTry = QTry.try$;
+
+        return jpaQueryFactory
+                .select(qProblem.problemId.countDistinct())
+                .from(qProblem)
+                .leftJoin(qTry)
+                .on(qProblem.problemId.eq(qTry.problemId))
+                .where(qTry.userId.eq(loginUserId)
+                        .and(qTry.isSolved.eq(true)))
+                .fetchOne();
+    }
+
+    public Long findDoingProblemCnt(Long loginUserId) {
+
+        QUserInfo userInfo = QUserInfo.userInfo;
+        QProblem qProblem = QProblem.problem;
+        QTry qTry = QTry.try$;
+
+        return jpaQueryFactory
+                .select(qProblem.problemId.countDistinct())
+                .from(qProblem)
+                .leftJoin(qTry)
+                .on(qProblem.problemId.eq(qTry.problemId))
+                .where(qTry.userId.eq(loginUserId))
+                .fetchOne();
+    }
+
+    public Long findAllProblemCnt(Long loginUserId) {
+
+        QUserInfo userInfo = QUserInfo.userInfo;
+        QProblem qProblem = QProblem.problem;
+        QTry qTry = QTry.try$;
+
+        return jpaQueryFactory
+                .select(qProblem.count())
+                .from(qProblem)
+                .fetchOne();
+    }
+
+
+    public FindUserDetailDTO findSimpleInfoById(Long loginUserId) {
+
+        UserInfo userInfo = userRepository.findById(loginUserId)
+                .orElseThrow(() -> new CustomException(ErrorCode.NOT_FOUND_USER));
+
+        return modelMapper.map(userInfo, FindUserDetailDTO.class);
+    }
+
+    // refreshToken 재저장
+    @Transactional
+    public void updateRefreshToken(Long userId, String refreshToken) {
+        UserInfo userInfo = userRepository.findById(userId)
+                .orElseThrow(() -> new CustomException(ErrorCode.NOT_FOUND_USER));
+
+        userInfo.updateRefreshToken(refreshToken);
     }
 }

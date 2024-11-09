@@ -65,20 +65,57 @@ const formatDate = (dateString) => {
   });
 };
 
+const logout = async () => {
+  const response = await axios.post('http://localhost:8080/api/v1/user/logout', {}, {
+    headers: {
+      Authorization: `Bearer ${store.accessToken}`
+    },
+    withCredentials: true, // 쿠키를 포함시키기 위해
+  });
+
+  if (response.status === 200) { // 응답 상태가 200인지 확인
+    alert('로그아웃 성공');
+    window.location.href = "http://localhost:5173"; // 홈 페이지로 리다이렉트
+  } else {
+    alert('로그아웃에 실패했습니다.');
+  }
+}
+
 const handleLogoutClick = () => {
+  logout();
   store.logout();
   alert('로그아웃 되었습니다.');
   window.location.reload();
 }
 
+function getCookie(name) {
+  const value = `; ${document.cookie}`;
+  const parts = value.split(`; ${name}=`);
+  if (parts.length === 2) return parts.pop().split(';').shift();
+  return null;
+}
+
 onMounted(() => {
 
-  if(store.accessToken != null) {
+  if (!store.accessToken){
+    const token = getCookie('accessToken');  // 쿠키에서 'token' 값 가져오기
+    const token2 = getCookie('refreshToken');
+    if (token) {
+      console.log('쿠키에서 토큰을 가져왔습니다:', token);
+      console.log('리프레시 토큰 : ', token2);
+      store.login(token, token2);  // 로그인설정
+    } else {
+      console.log('쿠키에 토큰이 없습니다.');
+    }
+  }
+
+  if (store.accessToken != null) {
     isLogin.value = true;
   }
 
-  if(isLogin) {
+  if (isLogin.value) {
     fetchMyNotReadNotiList();
+    handleNotiClick();
     document.addEventListener('click', closeNotis)
   }
 })

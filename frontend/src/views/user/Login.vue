@@ -31,15 +31,7 @@
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue';
-import { useRouter } from 'vue-router';
-import axios from 'axios';
-import { useAuthStore } from "@/stores/auth.js";
 
-const router = useRouter();
-const store = useAuthStore();
-
-const authStore = useAuthStore();
 // 소셜 로그인 리디렉션 URL
 const redirectToSocial = (platform) => {
   let url = '';
@@ -61,17 +53,7 @@ const redirectToSocial = (platform) => {
   // 외부 소셜 로그인 페이지로 리디렉션
   window.location.href = url;
 }
-// 콜백 URL에서 JWT 토큰 처리
-const handleCallback = async () => {
 
-};
-
-// 페이지가 로드될 때 콜백 처리
-// onMounted(() => {
-//   if (window.location.pathname === '/sign-up') {
-//     handleCallback();
-//   }
-// });
 </script>
 
 <style scoped>

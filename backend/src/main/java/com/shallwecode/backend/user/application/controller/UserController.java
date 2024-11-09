@@ -1,12 +1,16 @@
 package com.shallwecode.backend.user.application.controller;
 
 import com.shallwecode.backend.common.util.CustomUserUtils;
+import com.shallwecode.backend.user.application.dto.FindUserDetailDTO;
 import com.shallwecode.backend.user.application.dto.FindUserListDTO;
 import com.shallwecode.backend.user.application.dto.UserSaveDTO;
 import com.shallwecode.backend.user.application.dto.UserUpdateDTO;
 import com.shallwecode.backend.user.application.service.UserService;
 import com.shallwecode.backend.user.domain.aggregate.UserInfo;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.servlet.http.Cookie;
+import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -20,6 +24,7 @@ import java.util.List;
 @Slf4j
 @RestController
 @RequestMapping("/api/v1/user")
+@Tag(name = "User", description = "회원 관련 API")
 public class UserController {
 
     private final UserService userService;
@@ -64,5 +69,37 @@ public class UserController {
         List<FindUserListDTO> userList = userService.findRequestUser(loginUserId);
 
         return new ResponseEntity<>(userList, HttpStatus.OK);
+    }
+
+    @GetMapping("/profile")
+    @Operation(summary = "회원 상세 조회", description = "회원을 상세 조회한다.")
+    public ResponseEntity<FindUserDetailDTO> findUserDetail() {
+        Long loginUserId = CustomUserUtils.getCurrentUserSeq();
+
+        FindUserDetailDTO findUserDetailDTO = userService.findUserDetail(loginUserId);
+
+        return ResponseEntity.ok(findUserDetailDTO);
+    }
+
+    @PostMapping("/logout")
+    @Operation(summary = "로그아웃", description = "로그아웃을 한다.")
+    public ResponseEntity<String> logout(HttpServletResponse response) {
+        // 쿠키 삭제
+        Cookie accessCookie = new Cookie("accessToken", null);
+        accessCookie.setHttpOnly(false);
+        accessCookie.setSecure(false);
+        accessCookie.setPath("/");
+        accessCookie.setMaxAge(0);
+
+        Cookie refreshCookie = new Cookie("refreshToken", null);
+        refreshCookie.setHttpOnly(false);
+        refreshCookie.setSecure(false);
+        refreshCookie.setPath("/");
+        refreshCookie.setMaxAge(0);
+
+        response.addCookie(accessCookie);
+        response.addCookie(refreshCookie);
+
+        return ResponseEntity.ok("로그아웃 성공");
     }
 }
