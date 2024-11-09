@@ -45,10 +45,18 @@ public class UserController {
     }
 
     // 회원 삭제
-    @DeleteMapping
+    @DeleteMapping("/{userId}")
     @Operation(summary = "회원 삭제", description = "회원을 삭제한다.")
-    public ResponseEntity<Void> deleteUser(@RequestParam("userId") Long userId) {
+    public ResponseEntity<Void> deleteUser(@PathVariable Long userId) {
         userService.deleteUser(userId);
+        return ResponseEntity.ok().build();
+    }
+
+    @DeleteMapping
+    @Operation(summary = "회원 탈퇴", description = "회원이 탈퇴한다.")
+    public ResponseEntity<Void> deleteSelfUser() {
+        Long loginUserId = CustomUserUtils.getCurrentUserSeq();
+        userService.deleteUser(loginUserId);
         return ResponseEntity.ok().build();
     }
 
@@ -56,6 +64,7 @@ public class UserController {
     @GetMapping
     @Operation(summary = "회원 목록 조회", description = "회원 목록을 조회한다.")
     public ResponseEntity<List<FindUserDetailDTO>> getAllUser(@RequestParam(defaultValue = "", required = false) String nickname) {
+
         List<FindUserDetailDTO> userList = userService.findUserDetailsByNickname(nickname);
         return ResponseEntity.ok(userList);
     }

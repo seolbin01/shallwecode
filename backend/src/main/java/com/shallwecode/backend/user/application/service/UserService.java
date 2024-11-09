@@ -1,10 +1,7 @@
 package com.shallwecode.backend.user.application.service;
 
-import com.shallwecode.backend.user.application.dto.user.FindUserListDTO;
-import com.shallwecode.backend.user.application.dto.user.FindUserDTO;
-import com.shallwecode.backend.user.application.dto.user.FindUserDetailDTO;
-import com.shallwecode.backend.user.application.dto.user.UserSaveDTO;
-import com.shallwecode.backend.user.application.dto.user.UserUpdateDTO;
+import com.shallwecode.backend.user.application.dto.friend.FindFriendDetailDTO;
+import com.shallwecode.backend.user.application.dto.user.*;
 import com.shallwecode.backend.user.domain.aggregate.UserInfo;
 import com.shallwecode.backend.user.domain.repository.UserRepository;
 import com.shallwecode.backend.user.domain.service.UserDomainService;
@@ -85,12 +82,6 @@ public class UserService implements UserDetailsService {
         return userDetailList;
     }
 
-    // 전체 회원 조회
-    @Transactional(readOnly = true)
-    public List<UserInfo> findAllUsers() {
-        return userRepository.findAll();
-    }
-
     public FindUserDetailDTO findUserDetail(Long loginUserId) {
 
         Long allProblemCnt = userDomainService.findAllProblemCnt();
@@ -112,5 +103,11 @@ public class UserService implements UserDetailsService {
     public List<FindUserListDTO> findRequestUser(Long loginUserId) {
 
         return userDomainService.findRequestUser(loginUserId);
+    }
+
+    public FindFriendDetailDTO findFriendDetail(Long userId) {
+
+        FindUserDetailDTO userDetailDTO = findUserDetail(userId);
+        return modelMapper.map(userDetailDTO, FindFriendDetailDTO.class);
     }
 }
