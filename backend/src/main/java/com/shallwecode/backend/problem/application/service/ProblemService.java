@@ -1,7 +1,13 @@
 package com.shallwecode.backend.problem.application.service;
 
+import com.shallwecode.backend.common.exception.CustomException;
+import com.shallwecode.backend.common.exception.ErrorCode;
+import com.shallwecode.backend.common.util.CustomUserUtils;
 import com.shallwecode.backend.problem.application.dto.*;
 import com.shallwecode.backend.problem.domain.service.ProblemDomainService;
+import com.shallwecode.backend.user.application.dto.user.FindUserDTO;
+import com.shallwecode.backend.user.domain.aggregate.AuthType;
+import com.shallwecode.backend.user.domain.service.UserDomainService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -12,6 +18,7 @@ import java.util.List;
 public class ProblemService {
 
     private final ProblemDomainService problemDomainService;
+    private final UserDomainService userDomainService;
 
     public List<FindMyProblemResDTO> findAllMyProblem(Long userId) {
 
@@ -35,14 +42,38 @@ public class ProblemService {
     }
 
     public void deleteProblem(Long problemId) {
+
+        Long loginUserId = CustomUserUtils.getCurrentUserSeq();
+        FindUserDTO userInfo = userDomainService.findById(loginUserId);
+
+        if(userInfo.getAuth() != AuthType.ADMIN){
+            throw new CustomException(ErrorCode.NOT_ADMIN_DELETE_PROBLEM);
+        }
+
         problemDomainService.deleteProblem(problemId);
     }
 
     public void updateProblem(Long problemId, ProblemReqDTO newProblemInfo) {
+
+        Long loginUserId = CustomUserUtils.getCurrentUserSeq();
+        FindUserDTO userInfo = userDomainService.findById(loginUserId);
+
+        if(userInfo.getAuth() != AuthType.ADMIN){
+            throw new CustomException(ErrorCode.NOT_ADMIN_UPDATE_PROBLEM);
+        }
+
         problemDomainService.updateProblem(problemId, newProblemInfo);
     }
 
     public void saveProblem(ProblemReqDTO newProblemInfo) {
+
+        Long loginUserId = CustomUserUtils.getCurrentUserSeq();
+        FindUserDTO userInfo = userDomainService.findById(loginUserId);
+
+        if(userInfo.getAuth() != AuthType.ADMIN){
+            throw new CustomException(ErrorCode.NOT_ADMIN_SAVE_PROBLEM);
+        }
+
         problemDomainService.saveProblem(newProblemInfo);
     }
 
