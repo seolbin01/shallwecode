@@ -26,13 +26,6 @@ public class UserDomainService {
     private final ModelMapper modelMapper;
     private final JPAQueryFactory jpaQueryFactory;
 
-    // 회원 가입 시 유효성 검사
-    public void validateNewUser(UserSaveDTO saveUserDTO) {
-        if (userRepository.existsByEmail(saveUserDTO.getEmail())) {
-            throw new IllegalArgumentException("이미 존재하는 사용자 email 입니다.");
-        }
-    }
-
     // 회원 닉네임 수정
     public void updateUser(UserInfo userInfo, UserUpdateDTO userUpdateDTO) {
         userInfo.updateUser(userUpdateDTO.getNickName());
@@ -50,7 +43,12 @@ public class UserDomainService {
         return modelMapper.map(foundUser, FindUserDTO.class);
     }
 
+    // 회원 가입 시 유효성 검사
     public void save(UserSaveDTO saveUserDTO) {
+        if(userRepository.existsByEmail(saveUserDTO.getEmail())) {
+            throw new CustomException(ErrorCode.OVERLAPPING_SAVED_USER);
+        }
+
         UserInfo saveUser = userRepository.findById(saveUserDTO.getUserId())
                 .orElseThrow(() -> new CustomException(ErrorCode.NOT_FOUND_USER));
 
