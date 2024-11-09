@@ -36,8 +36,8 @@ public class UserService implements UserDetailsService {
 
     // 회원 닉네임 수정
     @Transactional
-    public void updateUser(UserUpdateDTO userUpdateDTO) {
-        userDomainService.updateUser(userUpdateDTO);
+    public void updateUser(UserUpdateDTO userUpdateDTO, Long loginUserId) {
+        userDomainService.updateUser(userUpdateDTO, loginUserId);
     }
 
     // 회원 삭제

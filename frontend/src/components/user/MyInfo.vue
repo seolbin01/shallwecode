@@ -5,6 +5,7 @@ import {delFetch, getFetch, putFetch} from "@/stores/apiClient.js";
 import kakaoIcon from '@/assets/icons/kakao.svg'
 import naverIcon from '@/assets/icons/naver.svg'
 import googleIcon from '@/assets/icons/google.svg'
+import {useAuthStore} from "@/stores/auth.js";
 
 const providerIcon = computed(() => {
   if (!profile.value || !profile.value.provider) return '';
@@ -21,6 +22,7 @@ const providerIcon = computed(() => {
   }
 });
 
+const authStore = useAuthStore();
 const profile = ref('');
 const isEditing = ref(false);
 const newName = ref('');
@@ -62,6 +64,7 @@ const handleSaveClick = async () => {
 const handleDeleteClick = async () => {
   try {
     await delFetch('http://localhost:8080/api/v1/user');
+    authStore.logout();
     alert('계정이 탈퇴되었습니다.');
   } catch (error) {
     console.error('계정을 탈퇴하는데 에러가 발생했습니다.', error.response ? error.response.data : error.message);

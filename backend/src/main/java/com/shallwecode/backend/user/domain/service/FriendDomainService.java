@@ -30,7 +30,6 @@ public class FriendDomainService {
     public SaveFriendDTO save(SaveFriendReqDTO saveFriendReqDTO) {
 
         Long loginUserId = CustomUserUtils.getCurrentUserSeq();
-
         FindUserDTO fromUserDTO = userDomainService.findById(loginUserId);
 
         FindUserDTO toUserDTO = userDomainService.findById(saveFriendReqDTO.getToUserId());
@@ -64,7 +63,6 @@ public class FriendDomainService {
     public FindFriendDTO findMyFriend(UpdateFriendReqDTO updateFriendReqDTO) {
 
         Long loginUserId = CustomUserUtils.getCurrentUserSeq();
-
         Friend findfriend = friendRepository.findByFromUser_UserIdAndToUser_UserId(updateFriendReqDTO.getFromUserId(), loginUserId)
                 .orElseThrow(() -> new CustomException(ErrorCode.NOT_FOUND_FRIEND));
 

@@ -40,7 +40,8 @@ public class UserController {
     @PutMapping("nickname")
     @Operation(summary = "회원 닉네임 수정", description = "회원 닉네임을 수정한다.")
     public ResponseEntity<Void> updateUser(@Valid @RequestBody UserUpdateDTO userUpdateDTO) {
-        userService.updateUser(userUpdateDTO);
+        Long loginUserId = CustomUserUtils.getCurrentUserSeq();
+        userService.updateUser(userUpdateDTO, loginUserId);
         return ResponseEntity.ok().build();
     }
 

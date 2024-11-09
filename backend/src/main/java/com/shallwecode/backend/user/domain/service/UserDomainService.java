@@ -40,8 +40,8 @@ public class UserDomainService {
     }
 
     // 회원 닉네임 수정
-    public void updateUser(UserUpdateDTO userUpdateDTO) {
-        UserInfo userInfo = userRepository.findById(userUpdateDTO.getUserId())
+    public void updateUser(UserUpdateDTO userUpdateDTO, Long loginUserId) {
+        UserInfo userInfo = userRepository.findById(loginUserId)
                 .orElseThrow(() -> new CustomException(ErrorCode.NOT_FOUND_USER));
         modelMapper.map(userUpdateDTO, userInfo);
     }

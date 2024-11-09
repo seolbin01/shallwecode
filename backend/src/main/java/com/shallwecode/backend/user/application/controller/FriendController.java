@@ -71,7 +71,6 @@ public class FriendController {
     public ResponseEntity<List<FriendResListDTO>> findAllFriendReq() {
 
         Long loginUserId = CustomUserUtils.getCurrentUserSeq();
-
         List<FriendResListDTO> friendReqList = friendService.findAllFriendReq(loginUserId);
         return ResponseEntity.ok(friendReqList);
     }
