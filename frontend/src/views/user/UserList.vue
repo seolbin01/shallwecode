@@ -1,9 +1,8 @@
 <script setup>
-import {computed, onMounted, ref} from 'vue'
+import {computed, onMounted, ref, watch} from 'vue'
 import axios from "axios";
 import {useAuthStore} from "@/stores/auth.js";
-
-const authStore = useAuthStore();
+import {getFetch} from "@/stores/apiClient.js";
 
 const currentPage = ref(1);
 const currentUserPage = ref(1);
@@ -27,36 +26,21 @@ const userProfile = ref({
 
 const fetchTryProblemCount = async () => {
   try {
-    const noTryResponse = await axios.get('http://localhost:8080/api/v1/problem/mylist/notry', {
-      headers: {
-        Authorization: `Bearer ${authStore.accessToken}`,
-        'Authorization-refresh': `Bearer ${authStore.refreshToken}`
-      }
-    });
+    const noTryResponse = await getFetch('http://localhost:8080/api/v1/problem/mylist/notry');
     noTryCount.value = noTryResponse.data;
   } catch (error) {
     console.error('미시도 문제 목록 개수를 불러오는데 에러가 발생했습니다.', error.response ? error.response.data : error.message);
   }
 
   try {
-    const unSolvedResponse = await axios.get('http://localhost:8080/api/v1/problem/mylist/unsolved', {
-      headers: {
-        Authorization: `Bearer ${authStore.accessToken}`,
-        'Authorization-refresh': `Bearer ${authStore.refreshToken}`
-      }
-    });
+    const unSolvedResponse = await getFetch('http://localhost:8080/api/v1/problem/mylist/unsolved');
     unSolvedCount.value = unSolvedResponse.data;
   } catch (error) {
     console.error('미해결 문제 목록 개수를 불러오는데 에러가 발생했습니다.', error.response ? error.response.data : error.message);
   }
 
   try {
-    const solvedResponse = await axios.get('http://localhost:8080/api/v1/problem/mylist/solved', {
-      headers: {
-        Authorization: `Bearer ${authStore.accessToken}`,
-        'Authorization-refresh': `Bearer ${authStore.refreshToken}`
-      }
-    });
+    const solvedResponse = await getFetch('http://localhost:8080/api/v1/problem/mylist/solved');
     SolvedCount.value = solvedResponse.data;
   } catch (error) {
     console.error('해결된 문제 목록 개수를 불러오는데 에러가 발생했습니다.', error.response ? error.response.data : error.message);
@@ -67,12 +51,7 @@ const friendsList = ref([]);
 
 const fetchFriendList = async () => {
   try {
-    const response = await axios.get('http://localhost:8080/api/v1/friend',{
-      headers: {
-        Authorization: `Bearer ${authStore.accessToken}`,
-        'Authorization-refresh': `Bearer ${authStore.refreshToken}`
-      }
-    });
+    const response = await getFetch('http://localhost:8080/api/v1/friend');
     friendsList.value = response.data;
   } catch (error) {
     console.error('친구 목록을 가져오는 중 오류가 발생했습니다:', error);
@@ -81,13 +60,8 @@ const fetchFriendList = async () => {
 
 const handleRequestClick = async () => {
   try {
-    const response = await axios.get('http://localhost:8080/api/v1/friend/request',{
-      headers: {
-        Authorization: `Bearer ${authStore.accessToken}`,
-        'Authorization-refresh': `Bearer ${authStore.refreshToken}`
-      }
-    });
-     await fetchUserList();
+    await getFetch('http://localhost:8080/api/v1/friend/request');
+    await fetchUserList();
   } catch (error) {
     console.error('친구 신청 진행 중 오류가 발생했습니다:', error);
   }
@@ -121,12 +95,7 @@ const users = ref([]);
 
 const fetchUserList = async () => {
   try {
-    const response = await axios.get('http://localhost:8080/api/v1/user/list',{
-      headers: {
-        Authorization: `Bearer ${authStore.accessToken}`,
-        'Authorization-refresh': `Bearer ${authStore.refreshToken}`
-      }
-    });
+    const response = await getFetch('http://localhost:8080/api/v1/user/list');
     users.value = response.data;
   } catch (error) {
     console.error('회원 목록을 불러오는 중 에러가 발생했습니다.', error.response ? error.response.data : error.message);
@@ -134,18 +103,30 @@ const fetchUserList = async () => {
 };
 
 const displayedUsers = computed(() => {
+  const filteredUsers = searchQuery.value
+      ? users.value.filter(user =>
+          user.nickname.toLowerCase().includes(searchQuery.value.toLowerCase())
+      )
+      : users.value;
+
   const startIdx = (currentUserPage.value - 1) * ROWS_PER_PAGE;
   const endIdx = startIdx + ROWS_PER_PAGE;
-  return users.value.slice(startIdx, endIdx);
+  return filteredUsers.slice(startIdx, endIdx);
 });
 
 const emptyRowsCount = computed(() =>
     ROWS_PER_PAGE - displayedUsers.value.length
 );
 
-const totalUserPages = computed(() =>
-    Math.ceil(users.value.length / ROWS_PER_PAGE)
-);
+const totalUserPages = computed(() => {
+  const filteredUsers = searchQuery.value
+      ? users.value.filter(user =>
+          user.nickname.toLowerCase().includes(searchQuery.value.toLowerCase())
+      )
+      : users.value;
+
+  return Math.ceil(filteredUsers.length / ROWS_PER_PAGE);
+});
 
 const changeUserPage = (page) => {
   if (page === 'prev' && currentUserPage.value > 1) {
@@ -156,6 +137,10 @@ const changeUserPage = (page) => {
     currentUserPage.value = page;
   }
 };
+
+watch(searchQuery, () => {
+  currentUserPage.value = 1;
+});
 
 onMounted(() => {
   fetchTryProblemCount();
@@ -193,7 +178,9 @@ onMounted(() => {
             <td>{{ (currentUserPage - 1) * ROWS_PER_PAGE + index + 1 }}</td>
             <td>{{ user.email }}</td>
             <td>{{ user.nickname }}</td>
-            <td><button @click="handleRequestClick(user.userId)">친구 신청</button></td>
+            <td>
+              <button v-if="!user.friend" @click="handleRequestClick(user.userId)">친구 신청</button>
+            </td>
           </tr>
           </tbody>
         </table>

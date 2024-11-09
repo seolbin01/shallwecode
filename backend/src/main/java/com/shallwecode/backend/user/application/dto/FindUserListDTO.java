@@ -14,5 +14,5 @@ public class FindUserListDTO {
     private Long userId;
     private String email;
     private String nickname;
-    private String isFriend;
+    private boolean isFriend;
 }
