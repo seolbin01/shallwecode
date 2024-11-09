@@ -2,6 +2,7 @@ package com.shallwecode.backend.problem.application.service;
 
 import com.shallwecode.backend.common.exception.CustomException;
 import com.shallwecode.backend.common.exception.ErrorCode;
+import com.shallwecode.backend.common.util.CustomUserUtils;
 import com.shallwecode.backend.problem.application.dto.CoopResDTO;
 import com.shallwecode.backend.problem.application.dto.FindMyCodingRoomResDTO;
 import com.shallwecode.backend.problem.domain.service.CodingRoomDomainService;
@@ -32,7 +33,7 @@ public class CodingRoomService {
         Long codingRoomId = codingRoomDomainService.saveCodingRoom(codingRoomReqDTO);
 
         // 호스트 정보 협업 친구 테이블에 저장하기
-        Long loginUserId = 3L; // 로그인 유저 가져오기
+        Long loginUserId = CustomUserUtils.getCurrentUserSeq();
 
         CoopDTO coopDTO = new CoopDTO();
         coopDTO.setCodingRoomId(codingRoomId);
@@ -46,7 +47,7 @@ public class CodingRoomService {
     public void deleteCodingRoom(Long codingRoomId) {
 
         // 호스트인지 여부를 확인해야 함
-        Long loginUserId = 3L;
+        Long loginUserId = CustomUserUtils.getCurrentUserSeq();
         CoopResDTO UserInfo = coopDomainService.findByCoop(codingRoomId, loginUserId);
 
         if (!UserInfo.isHost()) {

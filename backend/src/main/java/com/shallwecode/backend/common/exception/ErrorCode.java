@@ -22,6 +22,10 @@ public enum ErrorCode {
     OVERLAPPING_SAVED_USER(HttpStatus.CONFLICT, "이미 존재하는 회원입니다."),
     GUEST_SOLVED_FILTER_FORBIDDEN(HttpStatus.FORBIDDEN, "비회원은 해결 여부 필터링 기능을 사용할 수 없습니다."),
 
+    // 문제 등록, 수정, 삭제시 관리자 권한 확인
+    NOT_ADMIN_SAVE_PROBLEM(HttpStatus.FORBIDDEN, "관리자만 문제를 등록할 수 있습니다."),
+    NOT_ADMIN_UPDATE_PROBLEM(HttpStatus.FORBIDDEN, "관리자만 문제를 수정할 수 있습니다."),
+    NOT_ADMIN_DELETE_PROBLEM(HttpStatus.FORBIDDEN, "관리자만 문제를 삭제할 수 있습니다."),
 
     // 코딩방 및 협업 친구
     DUPLICATED_COOP_USER(HttpStatus.CONFLICT, "이미 코딩방에 존재하는 사람을 초대 할 수 없습니다."),
