@@ -66,4 +66,22 @@ class UserServiceTest {
         Optional<UserInfo> userInfo = userRepository.findByEmail("sr1094@naver.com");
         assertEquals("꺄르륵", userInfo.get().getNickname());
     }
+
+    @Test
+    @DisplayName("회원 삭제 테스트")
+    void deleteUser(){
+        // 삭제테스트 위한 회원가입
+        // given
+        UserSaveDTO userSaveDTO = new UserSaveDTO();
+        userSaveDTO.setUserId(32L);
+        userSaveDTO.setEmail("sr1094@naver.com");
+        userSaveDTO.setNickname("serom");
+        userService.saveUser(userSaveDTO);
+
+        // when
+        userService.deleteUser(32L);
+
+        // then
+        assertFalse(userRepository.findByEmail("sr1094@naver.com").isPresent());
+    }
 }
