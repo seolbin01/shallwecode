@@ -72,7 +72,7 @@ public class UserController {
     }
 
     @GetMapping("/profile")
-    @Operation(summary = "회원 상세 조회", description = "회원을 상세 조회한다.")
+    @Operation(summary = "내 정보 조회", description = "회원을 상세 조회한다.")
     public ResponseEntity<FindUserDetailDTO> findUserDetail() {
         Long loginUserId = CustomUserUtils.getCurrentUserSeq();
 
