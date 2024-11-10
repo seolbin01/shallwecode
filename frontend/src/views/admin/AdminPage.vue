@@ -1,9 +1,14 @@
 <script setup>
-import {ref} from "vue"
+import { ref } from "vue"
 import UserListComponent from "@/components/admin/UserListComponent.vue";
 import ProbListComponent from "@/components/admin/ProbListComponent.vue";
 
 const selectedMenu = ref('user');
+
+const menuItems = {
+  user: { label: '회원 관리', icon: '👥' },
+  problem: { label: '문제 관리', icon: '📝' }
+};
 
 const selectMenu = (menu) => {
   selectedMenu.value = menu;
@@ -11,13 +16,20 @@ const selectMenu = (menu) => {
 </script>
 
 <template>
-  <div class="container">
+  <div class="admin-container">
     <div class="menu-container">
-      <div class="menu-button" :class="{ 'active': selectedMenu === 'user' }" @click="selectMenu('user')">
-        <a>회원 관리</a>
-      </div>
-      <div class="menu-button" :class="{ 'active': selectedMenu === 'problem' }" @click="selectMenu('problem')">
-        <a>문제 관리</a>
+      <h2 class="menu-title">관리자 메뉴</h2>
+      <div class="menu-divider"></div>
+      <div
+          v-for="(item, key) in menuItems"
+          :key="key"
+          class="menu-button"
+          :class="{ 'active': selectedMenu === key }"
+          @click="selectMenu(key)"
+      >
+        <div class="menu-icon">{{ item.icon }}</div>
+        <span class="menu-text">{{ item.label }}</span>
+        <div class="menu-indicator"></div>
       </div>
     </div>
     <div class="content">
@@ -28,62 +40,119 @@ const selectMenu = (menu) => {
 </template>
 
 <style scoped>
-body {
-  font-family: Arial, sans-serif;
-  margin: 0;
-  padding: 0;
-  background-color: #f5f5f5;
-}
-
-.container {
+.admin-container {
   display: flex;
-  padding: 20px;
+  gap: 24px;
+  padding: 24px;
+  min-width: 320px;
   background-color: var(--background-color);
+  min-height: calc(100vh - 48px);
 }
 
 .menu-container {
   flex: 0 0 auto;
-  min-width: 180px;
-  max-width: 220px;
-  width: 20%;
+  min-width: 240px;
+  max-width: 280px;
   height: fit-content;
   background: #ffffff;
-  border-radius: 12px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-  padding: 8px;
-  margin: 20px;
-  border: 1px solid var(--gray-line);
+  border-radius: 16px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+  padding: 20px 12px;
+  border: 1px solid rgba(0, 0, 0, 0.06);
+  transition: all 0.3s ease;
 }
 
-.content {
-  flex-grow: 1;
-  background-color: #ffffff;
-  padding: 20px;
-  border-radius: 10px;
-  border: 1px solid #ddd;
-  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+.menu-title {
+  font-size: 18px;
+  font-weight: 600;
+  color: #1a1b3a;
+  padding: 0 16px;
+  margin: 0 0 16px 0;
+}
+
+.menu-divider {
+  height: 1px;
+  background: #eaeaea;
+  margin: 8px 0;
 }
 
 .menu-button {
-  font-size: clamp(14px, 2vw, 16px);
-  font-weight: 600;
-  color: var(--black);
+  position: relative;
+  display: flex;
+  align-items: center;
+  font-size: 15px;
+  font-weight: 500;
+  color: #666;
   cursor: pointer;
-  padding: 12px 16px;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
+  padding: 14px 16px;
+  margin: 4px 0;
+  border-radius: 12px;
+  transition: all 0.2s ease;
+}
+
+.menu-icon {
+  margin-right: 12px;
+  font-size: 18px;
+  opacity: 0.8;
+}
+
+.menu-text {
+  flex: 1;
 }
 
 .menu-button:hover {
-  background-color: var(--hover);
+  background-color: rgba(0, 0, 0, 0.03);
+  color: #333;
 }
 
-.menu-button:active {
-  background-color: var(--active);
+.menu-button.active {
+  background-color: #f0f7ff;
+  color: #1a73e8;
+  font-weight: 600;
 }
 
-.menu-button:not(:last-child) {
-  border-bottom: 1px solid var(--gray-line);
+.menu-button.active .menu-icon {
+  opacity: 1;
+}
+
+.menu-button .menu-indicator {
+  position: absolute;
+  left: 0;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 3px;
+  height: 0;
+  background-color: #1a73e8;
+  border-radius: 0 4px 4px 0;
+  transition: height 0.2s ease;
+}
+
+.menu-button.active .menu-indicator {
+  height: 24px;
+}
+
+.content {
+  flex: 1;
+  min-width: 0;
+  background: #ffffff;
+  padding: 32px;
+  border-radius: 16px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+  border: 1px solid rgba(0, 0, 0, 0.06);
+}
+
+@media (max-width: 768px) {
+  .admin-container {
+    flex-direction: column;
+  }
+
+  .menu-container {
+    min-width: 100%;
+    max-width: 100%;
+  }
+
+  .content {
+    width: 100%;
+  }
 }
 </style>
