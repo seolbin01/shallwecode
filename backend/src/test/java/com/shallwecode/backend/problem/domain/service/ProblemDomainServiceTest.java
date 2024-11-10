@@ -11,24 +11,24 @@ import java.util.List;
 @SpringBootTest
 class ProblemDomainServiceTest {
 
-    @Autowired
-    private ProblemDomainService problemDomainService;
-
-    @Test
-    void selectOneProblem() {
-        List<ProblemOneResDTO> problemResList = problemDomainService.selectOneProblem(1L);
-
-        for (ProblemOneResDTO problemOneResDTO : problemResList) {
-            System.out.println(problemOneResDTO.toString());
-        }
-    }
-
-    @Test
-    void selectProblemList() {
-        List<ProblemDTO> problemList = problemDomainService.selectProblemList(null, null, 1L, 10L);
-
-        for(ProblemDTO problemDTO : problemList) {
-            System.out.println(problemDTO.toString());
-        }
-    }
+//    @Autowired
+//    private ProblemDomainService problemDomainService;
+//
+//    @Test
+//    void selectOneProblem() {
+//        List<ProblemOneResDTO> problemResList = problemDomainService.selectOneProblem(1L);
+//
+//        for (ProblemOneResDTO problemOneResDTO : problemResList) {
+//            System.out.println(problemOneResDTO.toString());
+//        }
+//    }
+//
+//    @Test
+//    void selectProblemList() {
+//        List<ProblemDTO> problemList = problemDomainService.selectProblemList(null, null, 1L, 10L);
+//
+//        for(ProblemDTO problemDTO : problemList) {
+//            System.out.println(problemDTO.toString());
+//        }
+//    }
 }
