@@ -45,13 +45,11 @@ const problemSearch = (searchParams) => {
   fetchProblemList(1);
 }
 
-function goToProblemSave(){
+function goToProblemSave() {
   router.push('/admin/problem')
 }
 
 // 문제 수정 처리 함수
-
-
 const handleEditProblem = (problemId) => {
 
   console.log('수정할 문제 ID:', problemId);
@@ -78,7 +76,6 @@ const handleDeleteProblem = async (problemId) => {
 
 };
 
-
 onMounted(async () => {
   await fetchProblemList();
 })
@@ -86,58 +83,202 @@ onMounted(async () => {
 </script>
 
 <template>
-  <SearchBar @problemSearch="problemSearch" />
+  <div class="content-wrapper">
+    <div class="header-section">
+      <h1 class="title">문제 관리</h1>
+      <SearchBar @problemSearch="problemSearch"/>
+    </div>
 
-  <table class="table">
-    <thead>
-    <tr>
-      <th>번호</th>
-      <th>제목</th>
-      <th>난이도</th>
-      <th>수정</th>
-      <th>삭제</th>
-    </tr>
-    </thead>
-    <tbody>
-    <ProbListItemComponent v-for="problem in problemList" :key="problem.problemId" :problem="problem"
-                           @edit-problem="handleEditProblem"
-                           @delete-problem="handleDeleteProblem"/>
-    </tbody>
-  </table>
-  <PageBar :currentPage="currentPage"
-           :totalPages="totalPages"
-           :totalItems="totalItems"
-           @page-change="problemSearch"/>
-
-  <!-- 문제 등록하기 버튼 -->
-  <div class="line">
-
-    <button @click="goToProblemSave" class="register-button">문제 등록하기</button>
+    <div class="table-container">
+      <table class="table">
+        <thead>
+        <tr>
+          <th>번호</th>
+          <th>제목</th>
+          <th>난이도</th>
+          <th>수정</th>
+          <th>삭제</th>
+        </tr>
+        </thead>
+        <tbody>
+        <ProbListItemComponent
+            v-for="problem in problemList"
+            :key="problem.problemId"
+            :problem="problem"
+            @edit-problem="handleEditProblem"
+            @delete-problem="handleDeleteProblem"
+        />
+        </tbody>
+      </table>
+    </div>
+    <div class="footer-section">
+      <div class="left-space"></div>
+      <PageBar
+          :currentPage="currentPage"
+          :totalPages="totalPages"
+          :totalItems="totalItems"
+          @page-change="problemSearch"
+      />
+      <div class="right-space">
+        <button @click="goToProblemSave" class="register-button">
+          <span class="button-icon">✚</span>
+          문제 등록하기
+        </button>
+      </div>
+    </div>
   </div>
-
 </template>
 
 <style scoped>
-.table {
-  width: 100%;
-  border-collapse: collapse;
+.content-wrapper {
+  background: white;
+  border-radius: 16px;
+  padding: 32px;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
 }
 
-.table th, .table td {
-  border: 1px solid #ddd;
-  padding: 10px;
+.header-section {
+  margin-bottom: 32px;
+}
+
+.title {
+  font-size: 24px;
+  font-weight: 600;
+  color: #1a1b3a;
+  margin-bottom: 24px;
   text-align: center;
+  position: relative;
+}
+
+.title:after {
+  content: '';
+  position: absolute;
+  bottom: -8px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 40px;
+  height: 3px;
+  background: #1a73e8;
+  border-radius: 2px;
+}
+
+.table-container {
+  margin: 20px 0;
+  border-radius: 8px;
+  overflow: hidden;
+  box-shadow: 0 0 0 1px #eaeaea;
+}
+
+.table {
+  width: 100%;
+  border-collapse: separate;
+  border-spacing: 0;
 }
 
 .table th {
-  background-color: #f0f0f0;
+  background: #1a73e8;
+  color: white;
+  padding: 16px;
+  font-weight: 500;
+  text-align: center;
+  font-size: 14px;
+  border: none;
+}
+
+.table td {
+  padding: 16px;
+  border-bottom: 1px solid #eaeaea;
+  font-size: 14px;
+  color: #333;
+  text-align: center;
+}
+
+.table tr:hover {
+  background-color: #f8f9ff;
+  transition: background-color 0.2s ease;
+}
+
+.table th:first-child {
+  border-top-left-radius: 8px;
+}
+
+.table th:last-child {
+  border-top-right-radius: 8px;
+}
+
+.footer-section {
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
+  align-items: center;
+  margin-top: 24px;
+  padding-top: 24px;
+  border-top: 1px solid #eaeaea;
+  gap: 16px;
+}
+
+.left-space {
+}
+
+.right-space {
+  display: flex;
+  justify-content: flex-end;
+}
+
+.register-button {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 12px 24px;
+  background-color: #1a73e8;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.register-button:hover {
+  background-color: #1557b0;
+  transform: translateY(-1px);
+}
+
+.button-icon {
+  font-size: 16px;
   font-weight: bold;
 }
 
-.line {
-  display: flex;
-  justify-content: flex-end;
+/* 반응형 디자인 */
+@media (max-width: 768px) {
+  .content-wrapper {
+    padding: 20px;
+  }
 
+  .footer-section {
+    flex-direction: column-reverse;
+    gap: 20px;
+  }
+
+  .register-button {
+    width: 100%;
+    justify-content: center;
+  }
 }
 
+/* 애니메이션 효과 */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.content-wrapper {
+  animation: fadeIn 0.3s ease-out;
+}
 </style>

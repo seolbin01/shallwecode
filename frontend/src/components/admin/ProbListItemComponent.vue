@@ -36,15 +36,98 @@ const handleDelete = () => {
 </template>
 
 <style scoped>
+.level {
+  display: inline-block;
+  padding: 6px 12px;
+  border-radius: 12px;
+  font-weight: 500;
+  font-size: 13px;
+}
 
-.table th, .table td {
-  border: 1px solid #ddd;
-  padding: 10px;
+.level-1 {
+  background-color: #e3f2fd;
+  color: #1565c0;
+}
+
+.level-2 {
+  background-color: #e8f5e9;
+  color: #2e7d32;
+}
+
+.level-3 {
+  background-color: #fff3e0;
+  color: #e65100;
+}
+
+.level-4 {
+  background-color: #ffebee;
+  color: #c62828;
+}
+
+button {
+  padding: 6px 16px;
+  border-radius: 6px;
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s;
+  border: none;
+}
+
+tr td:nth-child(4) button {
+  background-color: #f0f7ff;
+  color: #1a73e8;
+  border: 1px solid #1a73e8;
+}
+
+tr td:nth-child(4) button:hover {
+  background-color: #1a73e8;
+  color: white;
+}
+
+tr td:nth-child(5) button {
+  background-color: #fff1f0;
+  color: #ff4d4f;
+  border: 1px solid #ff4d4f;
+}
+
+tr td:nth-child(5) button:hover {
+  background-color: #ff4d4f;
+  color: white;
+}
+
+td {
+  padding: 16px;
+  border-bottom: 1px solid #eaeaea;
+  font-size: 14px;
+  color: #333;
   text-align: center;
 }
 
-.table th {
-  background-color: #f0f0f0;
-  font-weight: bold;
+td:nth-child(2) {
+  text-align: left;
+  font-weight: 500;
+  color: #1a1b3a;
+}
+
+tr:hover {
+  background-color: #f8f9ff;
+}
+
+@media (max-width: 768px) {
+  td {
+    padding: 12px 8px;
+    font-size: 13px;
+  }
+
+  button {
+    padding: 4px 12px;
+    font-size: 12px;
+  }
+
+  .level {
+    padding: 4px 8px;
+    font-size: 12px;
+  }
 }
 </style>
