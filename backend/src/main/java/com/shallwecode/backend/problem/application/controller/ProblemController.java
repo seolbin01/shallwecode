@@ -71,11 +71,10 @@ public class ProblemController {
             description = "관리자가 문제를 상세 조회하는 기능입니다."
     )
     @GetMapping("/{problemId}")
-    public ResponseEntity<List<ProblemOneResDTO>> selectProblem(@PathVariable Long problemId) {
+    public ResponseEntity<ProblemOneResDTO> selectProblem(@PathVariable Long problemId) {
 
         /* 데이터 조회 */
-        List<ProblemOneResDTO> oneProblem = problemService.selectOneProblem(problemId);
-
+        ProblemOneResDTO oneProblem = problemService.selectOneProblem(problemId);
         return ResponseEntity.ok().body(oneProblem);
     }
 

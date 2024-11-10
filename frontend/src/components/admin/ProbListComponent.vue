@@ -5,6 +5,7 @@ import PageBar from "@/components/admin/PageBar.vue";
 import {onMounted, ref} from "vue";
 import axios from "axios";
 import router from "@/router/index.js";
+import {useAuthStore} from "@/stores/auth.js";
 
 const problemList = ref([]);
 const currentPage = ref(0);
@@ -13,13 +14,13 @@ const totalItems = ref(0);
 const keyword = ref('');
 const option = ref('');
 
-const token = ref('');
+const authStore = useAuthStore();
 
 const fetchProblemList = async (page = 1) => {
   try {
-    const response = await axios.get(`http://localhost:8080/api/v1/problem/adminList`, {
+    const response = await axios.get(`http://localhost:8080/api/v1/problem/admin`, {
       headers: {
-        Authorization: `Bearer ${token.value}`
+        Authorization: `Bearer ${authStore.accessToken}`
       },
       params: {
         page,
@@ -60,9 +61,21 @@ const handleEditProblem = (problemId) => {
 
 
 // 문제 삭제 처리 함수
-const handleDeleteProblem = (problemId) => {
-  console.log('삭제할 문제 ID:', problemId);
-  // 삭제 로직을 추가하세요
+const handleDeleteProblem = async (problemId) => {
+
+  try {
+    await axios.delete(`http://localhost:8080/api/v1/problem/${problemId}`, {
+      headers: {
+        Authorization: `Bearer ${authStore.accessToken}`,
+      },
+    });
+    console.log('문제가 삭제되었습니다:', problemId);
+    await fetchProblemList(currentPage.value); // 페이지를 새로고침하여 목록 업데이트
+  } catch (error) {
+    console.error('문제 삭제 중 오류가 발생했습니다.', error);
+    alert('문제 삭제에 실패했습니다.');
+  }
+
 };
 
 

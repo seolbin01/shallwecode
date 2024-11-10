@@ -1,10 +1,7 @@
 package com.shallwecode.backend.user.application.controller;
 
 import com.shallwecode.backend.common.util.CustomUserUtils;
-import com.shallwecode.backend.user.application.dto.user.FindUserListDTO;
-import com.shallwecode.backend.user.application.dto.user.FindUserDetailDTO;
-import com.shallwecode.backend.user.application.dto.user.UserSaveDTO;
-import com.shallwecode.backend.user.application.dto.user.UserUpdateDTO;
+import com.shallwecode.backend.user.application.dto.user.*;
 import com.shallwecode.backend.user.application.service.UserService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -69,6 +66,16 @@ public class UserController {
         List<FindUserDetailDTO> userList = userService.findUserDetailsByNickname(nickname);
         return ResponseEntity.ok(userList);
     }
+
+    // 관리자 회원 조회
+    @GetMapping("/admin")
+    @Operation(summary = "관리자 회원 목록 조회", description = "회원 목록을 조회한다.")
+    public ResponseEntity<List<FindUserInfoDTO>> getAllUserInfo(@RequestParam(defaultValue = "", required = false) String nickname) {
+
+        List<FindUserInfoDTO> userList = userService.findUserInfoByNickname(nickname);
+        return ResponseEntity.ok(userList);
+    }
+
 
     @GetMapping("/list")
     @Operation(summary = "회원 목록 조회", description = "친구 신청을 할 수 있는 회원을 조회한다.")

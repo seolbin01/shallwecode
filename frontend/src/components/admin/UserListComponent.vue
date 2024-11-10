@@ -1,21 +1,47 @@
 <script setup>
 import {computed, onMounted, ref} from 'vue'
 import axios from "axios";
+import {useAuthStore} from "@/stores/auth.js";
+
+const authStore = useAuthStore();
 
 const currentUserPage = ref(1);
 const ROWS_PER_PAGE = 7;
 const searchQuery = ref('');
-
 const users = ref([]);
 
 const fetchUserList = async () => {
   try {
-    const response = await axios.get('http://localhost:8080/api/v1/user');
+    const response = await axios.get('http://localhost:8080/api/v1/user/admin', {
+      headers: {
+        Authorization: `Bearer ${authStore.accessToken}`
+      }
+    });
     users.value = response.data;
   } catch (error) {
     console.error('회원 목록을 불러오는 중 에러가 발생했습니다.', error.response ? error.response.data : error.message);
   }
 };
+
+// 사용자 삭제 함수
+const deleteUser = async (userId) => {
+  const confirmed = confirm("해당 사용자를 삭제하시겠습니까?");
+  if (!confirmed) return;
+
+  try {
+    await axios.delete(`http://localhost:8080/api/v1/user/${userId}`, {
+      headers: {
+        Authorization: `Bearer ${authStore.accessToken}`
+      }
+    });
+    // 삭제 성공 후 사용자 목록을 다시 로드
+    await fetchUserList();
+  } catch (error) {
+    console.error('사용자 삭제 중 오류가 발생했습니다.', error.response ? error.response.data : error.message);
+  }
+};
+
+
 
 const displayedUsers = computed(() => {
   const startIdx = (currentUserPage.value - 1) * ROWS_PER_PAGE;

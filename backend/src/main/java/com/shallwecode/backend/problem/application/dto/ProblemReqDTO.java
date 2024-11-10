@@ -14,6 +14,6 @@ public class ProblemReqDTO {
     private String title;
     private String content;
     private int problemLevel;
-    private List<TestcaseReqDTO> testcases;
+    private List<TestcaseDTO> testcases;
 
 }

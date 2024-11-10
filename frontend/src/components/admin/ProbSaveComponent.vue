@@ -4,7 +4,7 @@
 
     <div class="form-group">
       <label for="title">제목</label>
-      <input type="text" id="title" v-model="title" placeholder="이번 문제는 누구 풀까?" />
+      <input type="text" id="title" v-model="title" placeholder="문제 제목을 입력해 주세요" />
     </div>
 
     <div class="form-group">
@@ -18,6 +18,8 @@
         <option value="1">Lv.1</option>
         <option value=2>Lv.2</option>
         <option value=3>Lv.3</option>
+        <option value=4>Lv.4</option>
+        <option value=5>Lv.5</option>
       </select>
     </div>
 
@@ -51,9 +53,13 @@
 import { ref } from "vue";
 import axios from "axios";
 import {useRouter} from "vue-router";
+import {useAuthStore} from "@/stores/auth.js";
+
 
 export default {
   setup() {
+
+    const authStore = useAuthStore();
 
     const router = useRouter(); // 라우터 이동 설정
 
@@ -91,10 +97,13 @@ export default {
 
 
       try {
-        // 서버에 POST 요청 보내기
-        // 추후 토큰에 관리자 인증 정보 추가해야 함
-        const response = await axios.post('http://localhost:8080/api/v1/problem', formData);
-        console.log('가게가 성공적으로 등록되었습니다:',response.data);
+        const response = await axios.post('http://localhost:8080/api/v1/problem', formData,{
+          headers: {
+            Authorization: `Bearer ${authStore.accessToken}`,
+            'Authorization-refresh': `Bearer ${authStore.refreshToken}`
+          }
+        });
+        console.log('문제가 성공적으로 등록되었습니다:',response.data);
         await router.push('/admin');
       } catch (error){
         console.error('문제 등록 중 오류가 발생했습니다:', error);

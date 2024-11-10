@@ -82,6 +82,13 @@ public class UserService implements UserDetailsService {
         return userDetailList;
     }
 
+    // 닉네임으로 관리자 회원 목록 조회
+    @Transactional(readOnly = true)
+    public List<FindUserInfoDTO> findUserInfoByNickname(String nickname) {
+        return userDomainService.findAllInfoUsers(nickname);
+    }
+
+
     public FindUserDetailDTO findUserDetail(Long loginUserId) {
 
         Long allProblemCnt = userDomainService.findAllProblemCnt();
