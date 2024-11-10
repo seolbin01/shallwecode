@@ -25,7 +25,7 @@ public class ProblemService {
         return problemDomainService.findAllMyProblem(userId);
     }
 
-    public List<ProblemOneResDTO> selectOneProblem(Long problemId) {
+    public ProblemOneResDTO selectOneProblem(Long problemId) {
         return problemDomainService.selectOneProblem(problemId);
     }
 

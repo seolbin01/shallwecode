@@ -4,7 +4,7 @@
 
     <div class="form-group">
       <label for="title">제목</label>
-      <input type="text" id="title" v-model="title" placeholder="문제 제목을 입력하세요" />
+      <input type="text" id="title" v-model="title" placeholder="문제 제목을 입력해 주세요" />
     </div>
 
     <div class="form-group">
@@ -18,6 +18,8 @@
         <option value="1">Lv.1</option>
         <option value="2">Lv.2</option>
         <option value="3">Lv.3</option>
+        <option value="4">Lv.4</option>
+        <option value="5">Lv.5</option>
       </select>
     </div>
 
@@ -51,37 +53,35 @@
 import { ref, onMounted } from "vue";
 import axios from "axios";
 import { useRouter, useRoute } from "vue-router";
+import { useAuthStore } from "@/stores/auth.js";
 
 export default {
   setup() {
-
+    const authStore = useAuthStore();
     const router = useRouter();
-    const route = useRoute(); // 현재 라우트 정보 가져오기
+    const route = useRoute();
     const title = ref("");
     const content = ref("");
     const problemLevel = ref(1);
-    const testCases = ref([{input: "", output: ""}]);
+    const testCases = ref([{ input: "", output: "" }]);
 
-    // 문제 정보를 조회해서 초기값 설정
     onMounted(async () => {
-      const problemId = route.params.problemId; // 문제 ID 추출
+      const problemId = route.params.problemId;
+      if (!problemId) {
+        console.error("문제 ID가 없습니다.");
+        return;
+      }
       try {
-        const response = await axios.get(`http://localhost:8080/api/v1/problem/${problemId}`);
-        const data = await response.data;
-        console.log("문제 ID:", problemId);  // 문제 ID 확인
-        console.log("데이터:", data);  // 문제 ID 확인
-
-        console.log("등록된 문제:", {
-          title: data.title,
-          content: data.content,
-          problemLevel: data.problemLevel,
-          // testCases: data.testcases,
+        const response = await axios.get(`http://localhost:8080/api/v1/problem/${problemId}`, {
+          headers: {
+            Authorization: `Bearer ${authStore.accessToken}`,
+          },
         });
-
-        // 데이터 바인딩
+        const data = response.data;
         title.value = data.title;
         content.value = data.content;
         problemLevel.value = data.problemLevel;
+        testCases.value = data.testcases;
       } catch (error) {
         console.error("문제 정보를 불러오는데 실패했습니다:", error);
         alert("문제 정보를 불러오는데 실패했습니다.");
@@ -97,16 +97,20 @@ export default {
     };
 
     const updateProblem = async () => {
-      const problemId = route.params.id;
+      const problemId = route.params.problemId;
       const formData = {
         title: title.value,
         content: content.value,
         problemLevel: problemLevel.value,
         testcases: testCases.value,
       };
-
       try {
-        const response = await axios.put(`http://localhost:8080/api/v1/problem/${problemId}`, formData);
+        const response = await axios.put(`http://localhost:8080/api/v1/problem/${problemId}`, formData, {
+          headers: {
+            Authorization: `Bearer ${authStore.accessToken}`,
+            "Authorization-refresh": `Bearer ${authStore.refreshToken}`,
+          },
+        });
         console.log("문제가 성공적으로 수정되었습니다:", response.data);
         await router.push("/admin");
       } catch (error) {
@@ -129,5 +133,94 @@ export default {
 </script>
 
 <style scoped>
-/* 기존 스타일 유지 */
+.problem-register {
+  padding: 20px;
+  background-color: #f9f9f9;
+  border-radius: 8px;
+  max-width: 800px;
+  margin: 0 auto;
+}
+
+h2 {
+  text-align: center;
+}
+
+.form-group {
+  margin-bottom: 20px;
+}
+
+label {
+  font-weight: bold;
+  display: block;
+  margin-bottom: 5px;
+}
+
+input[type="text"],
+textarea,
+select {
+  width: 100%;
+  padding: 10px;
+  font-size: 16px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+}
+
+textarea {
+  resize: vertical;
+}
+
+.test-case-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 10px;
+}
+
+.test-case-table th,
+.test-case-table td {
+  border: 1px solid #ddd;
+  padding: 8px;
+  text-align: center;
+}
+
+.add-button {
+  background-color: #e0e0e0;
+  color: #333;
+  border: none;
+  padding: 8px 16px;
+  cursor: pointer;
+  margin-bottom: 10px;
+}
+
+.add-button:hover {
+  background-color: #d0d0d0;
+}
+
+.button-group {
+  display: flex;
+  justify-content: center;
+  gap: 10px;
+}
+
+.cancel-button,
+.register-button {
+  padding: 10px 20px;
+  font-size: 16px;
+  cursor: pointer;
+  border: none;
+  border-radius: 4px;
+}
+
+.cancel-button {
+  background-color: #ccc;
+  color: #333;
+}
+
+.register-button {
+  background-color: #4CAF50;
+  color: white;
+}
+
+.register-button:hover {
+  background-color: #45a049;
+}
 </style>
