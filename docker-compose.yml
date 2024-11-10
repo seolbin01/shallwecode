@@ -1,0 +1,18 @@
+version: "3"
+
+services:
+  backend:
+    build: ./backend
+    container_name: backend
+    ports:
+      - "8080:8080"
+  frontend:
+    build: ./frontend
+    container_name: frontend
+    ports:
+      - "5173:5173"
+  websocket:
+    build: ./websocket-server
+    container_name: websocket
+    ports:
+      - "1234:1234"
