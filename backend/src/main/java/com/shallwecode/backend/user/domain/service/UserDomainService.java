@@ -7,11 +7,7 @@ import com.shallwecode.backend.common.exception.CustomException;
 import com.shallwecode.backend.common.exception.ErrorCode;
 import com.shallwecode.backend.problem.domain.aggregate.QProblem;
 import com.shallwecode.backend.problem.domain.aggregate.QTry;
-import com.shallwecode.backend.user.application.dto.user.FindUserListDTO;
-import com.shallwecode.backend.user.application.dto.user.FindUserDTO;
-import com.shallwecode.backend.user.application.dto.user.FindUserDetailDTO;
-import com.shallwecode.backend.user.application.dto.user.UserSaveDTO;
-import com.shallwecode.backend.user.application.dto.user.UserUpdateDTO;
+import com.shallwecode.backend.user.application.dto.user.*;
 import com.shallwecode.backend.user.domain.aggregate.FriendStatus;
 import com.shallwecode.backend.user.domain.aggregate.QFriend;
 import com.shallwecode.backend.user.domain.aggregate.QUserInfo;
@@ -159,4 +155,21 @@ public class UserDomainService {
                 .where(userInfo.nickname.containsIgnoreCase(nickname.trim()))
                 .fetch();
     }
+
+
+    public List<FindUserInfoDTO> findAllInfoUsers(String nickname) {
+        QUserInfo userInfo = QUserInfo.userInfo;
+
+        return jpaQueryFactory
+                .select(Projections.constructor(FindUserInfoDTO.class,
+                        userInfo.userId,
+                        userInfo.email,
+                        userInfo.provider,
+                        userInfo.nickname,
+                        userInfo.createdAt))
+                .from(userInfo)
+                .where(userInfo.nickname.containsIgnoreCase(nickname.trim()))
+                .fetch();
+    }
+
 }
