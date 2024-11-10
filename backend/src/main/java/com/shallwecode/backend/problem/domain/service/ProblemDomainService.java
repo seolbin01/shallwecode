@@ -23,7 +23,6 @@ public class ProblemDomainService {
     private final TestcaseRepository testCaseRepository;
     private final ModelMapper modelMapper;
     private final JPAQueryFactory queryFactory;
-    private final ProblemRepository problemRepository;
 
     @Transactional
     public void saveProblem(ProblemReqDTO newProblem) {
@@ -117,23 +116,37 @@ public class ProblemDomainService {
                 .fetchOne();
     }
 
-    public List<ProblemOneResDTO> selectOneProblem(Long problemId) {
+    public ProblemOneResDTO selectOneProblem(Long problemId) {
 
         QProblem qProblem = QProblem.problem;
         QTestcase qTestcase = QTestcase.testcase;
 
-        return queryFactory.select(Projections.constructor(ProblemOneResDTO.class,
-                qProblem.problemId,
-                qProblem.title,
-                qProblem.content,
-                qProblem.problemLevel,
-                qTestcase.testcaseId,
-                qTestcase.input,
-                qTestcase.output))
+        // Problem 정보만 조회
+        ProblemOneResDTO problemInfo = queryFactory.select(
+                        Projections.constructor(ProblemOneResDTO.class,
+                                qProblem.problemId,
+                                qProblem.title,
+                                qProblem.content,
+                                qProblem.problemLevel))
                 .from(qProblem)
-                .leftJoin(qTestcase).on(qTestcase.problemId.eq(qProblem.problemId))
                 .where(qProblem.problemId.eq(problemId))
+                .fetchOne();
+
+        if (problemInfo == null) {
+            return null; // 문제 없음 처리
+        }
+
+        // 해당 Problem에 대한 모든 Testcase를 조회하여 리스트로 추가
+        List<TestcaseDTO> testcases = queryFactory.select(
+                        Projections.constructor(TestcaseDTO.class,
+                                qTestcase.input,
+                                qTestcase.output))
+                .from(qTestcase)
+                .where(qTestcase.problemId.eq(problemId))
                 .fetch();
+
+        problemInfo.setTestcases(testcases);
+        return problemInfo;
     }
 
     @Transactional(readOnly = true)
