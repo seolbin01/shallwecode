@@ -13,6 +13,10 @@ const tryCurrentPage = ref(1);
 const searchQuery = ref('');
 const curTry = ref('');
 const isModalOpen = ref(false);
+const problemFilterStatus = ref('all');
+const tryFilterStatus = ref('all');
+const isProblemFilterOpen = ref(false);
+const isTryFilterOpen = ref(false);
 
 const fetchMyProblemList = async () => {
   try {
@@ -35,10 +39,8 @@ const fetchTryList = async (problemId) => {
 const handleTryClick = async (tryId) => {
   try {
     const response = await getFetch(`http://localhost:8080/api/v1/problem/try/${tryId}`);
-
     curTry.value = response.data;
     isModalOpen.value = true;
-
   } catch (error) {
     console.error('풀이 시도 상세 조회 실패', error);
   }
@@ -62,14 +64,33 @@ const formatDate = (dateString) => {
 };
 
 const filteredProblems = computed(() => {
-  if (!searchQuery.value) return problems.value;
-  return problems.value.filter(problem =>
-      problem.title.toLowerCase().includes(searchQuery.value.toLowerCase())
-  );
+  let filtered = problems.value;
+
+  if (searchQuery.value) {
+    filtered = filtered.filter(problem =>
+        problem.title.toLowerCase().includes(searchQuery.value.toLowerCase())
+    );
+  }
+
+  if (problemFilterStatus.value !== 'all') {
+    filtered = filtered.filter(problem =>
+        problemFilterStatus.value === 'solved' ? problem.solved : !problem.solved
+    );
+  }
+
+  return filtered;
 });
 
 const filteredTrys = computed(() => {
-  return trys.value;
+  let filtered = trys.value;
+
+  if (tryFilterStatus.value !== 'all') {
+    filtered = filtered.filter(try$ =>
+        tryFilterStatus.value === 'solved' ? try$.solved : !try$.solved
+    );
+  }
+
+  return filtered;
 });
 
 const totalProblemPages = computed(() =>
@@ -126,6 +147,28 @@ const selectProblem = async (problem) => {
   await fetchTryList(problem.problemId);
 };
 
+const toggleProblemFilter = () => {
+  isProblemFilterOpen.value = !isProblemFilterOpen.value;
+  isTryFilterOpen.value = false;
+};
+
+const toggleTryFilter = () => {
+  isTryFilterOpen.value = !isTryFilterOpen.value;
+  isProblemFilterOpen.value = false;
+};
+
+const setProblemFilter = (status) => {
+  problemFilterStatus.value = status;
+  isProblemFilterOpen.value = false;
+  currentPage.value = 1;
+};
+
+const setTryFilter = (status) => {
+  tryFilterStatus.value = status;
+  isTryFilterOpen.value = false;
+  tryCurrentPage.value = 1;
+};
+
 watch(searchQuery, () => {
   currentPage.value = 1;
 });
@@ -147,7 +190,17 @@ onMounted(() => {
             placeholder="문제 검색"
             v-model="searchQuery"
         >
-        <button class="filter-button">해결 ▼</button>
+        <div class="filter-dropdown">
+          <button class="filter-button" @click="toggleProblemFilter">
+            {{ problemFilterStatus === 'all' ? '전체' :
+              problemFilterStatus === 'solved' ? '해결' : '미해결' }} ▼
+          </button>
+          <div v-if="isProblemFilterOpen" class="dropdown-content">
+            <div @click="setProblemFilter('all')" :class="{ active: problemFilterStatus === 'all' }">전체</div>
+            <div @click="setProblemFilter('solved')" :class="{ active: problemFilterStatus === 'solved' }">해결</div>
+            <div @click="setProblemFilter('unsolved')" :class="{ active: problemFilterStatus === 'unsolved' }">미해결</div>
+          </div>
+        </div>
       </div>
 
       <table class="problem-table">
@@ -214,7 +267,17 @@ onMounted(() => {
         <h3 v-else>
           왼쪽에서 문제를 선택해주세요
         </h3>
-        <button class="filter-button">해결 ▼</button>
+        <div class="filter-dropdown">
+          <button class="filter-button" @click="toggleTryFilter">
+            {{ tryFilterStatus === 'all' ? '전체' :
+              tryFilterStatus === 'solved' ? '해결' : '미해결' }} ▼
+          </button>
+          <div v-if="isTryFilterOpen" class="dropdown-content">
+            <div @click="setTryFilter('all')" :class="{ active: tryFilterStatus === 'all' }">전체</div>
+            <div @click="setTryFilter('solved')" :class="{ active: tryFilterStatus === 'solved' }">해결</div>
+            <div @click="setTryFilter('unsolved')" :class="{ active: tryFilterStatus === 'unsolved' }">미해결</div>
+          </div>
+        </div>
       </div>
 
       <table class="problem-table">
@@ -352,6 +415,11 @@ onMounted(() => {
   font-size: 14px;
 }
 
+.filter-dropdown {
+  position: relative;
+  display: inline-block;
+}
+
 .filter-button {
   padding: 8px 16px;
   border: 1px solid #e1e1e1;
@@ -362,6 +430,33 @@ onMounted(() => {
   display: flex;
   align-items: center;
   gap: 4px;
+}
+
+.dropdown-content {
+  position: absolute;
+  top: 100%;
+  right: 0;
+  background: white;
+  border: 1px solid #e1e1e1;
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  z-index: 1000;
+  min-width: 120px;
+}
+
+.dropdown-content div {
+  padding: 8px 16px;
+  cursor: pointer;
+  font-size: 14px;
+}
+
+.dropdown-content div:hover {
+  background: #f5f5f5;
+}
+
+.dropdown-content div.active {
+  background: #1a1b3a;
+  color: white;
 }
 
 .problem-table {

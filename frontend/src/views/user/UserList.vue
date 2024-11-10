@@ -235,15 +235,22 @@ onMounted(() => {
         <h3 class="friends-title">친구 목록</h3>
 
         <div class="friends-list">
-          <div v-for="friend in paginatedFriends" :key="friend.id" class="friend-item">
-            <div class="friend-avatar">
-              <img src="@/assets/icons/profile-friend.svg" alt="프로필 사진"/>
+          <template v-if="friendsList.length > 0">
+            <div v-for="friend in paginatedFriends" :key="friend.id" class="friend-item">
+              <div class="friend-avatar">
+                <img src="@/assets/icons/profile-friend.svg" alt="프로필 사진"/>
+              </div>
+              <span class="friend-name">{{ friend.nickname }}</span>
             </div>
-            <span class="friend-name">{{ friend.nickname }}</span>
+          </template>
+          <div v-else class="no-friends-message">
+            <img src="@/assets/icons/profile-friend.svg" alt="친구 아이콘" class="no-friends-icon"/>
+            <p class="no-friends-text">아직 등록된 친구가 없습니다</p>
+            <p class="no-friends-subtext">새로운 친구를 추가해보세요!</p>
           </div>
         </div>
 
-        <div class="pagination">
+        <div class="pagination" v-if="friendsList.length > 0">
           <button
               class="pagination-btn"
               @click="prevPage"
@@ -498,5 +505,34 @@ button {
 .provider-icon {
   width: 16px;
   height: 16px;
+}
+
+.no-friends-message {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 32px 20px;
+  text-align: center;
+}
+
+.no-friends-icon {
+  width: 48px;
+  height: 48px;
+  opacity: 0.5;
+  margin-bottom: 16px;
+}
+
+.no-friends-text {
+  font-size: 15px;
+  color: #333;
+  margin: 0 0 8px 0;
+  font-weight: 500;
+}
+
+.no-friends-subtext {
+  font-size: 13px;
+  color: #666;
+  margin: 0;
 }
 </style>

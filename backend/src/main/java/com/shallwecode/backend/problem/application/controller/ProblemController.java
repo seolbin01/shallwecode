@@ -112,9 +112,6 @@ public class ProblemController {
             @RequestParam(required = false) Integer problemLevel
     ) {
 
-        System.out.println("상태 " + isSolved);
-        System.out.println("레벨: " + problemLevel);
-
         boolean isGuestRequest = request.getRequestURI().endsWith("/guest");
         if (isGuestRequest && (isSolved != null)) {
             throw new CustomException(ErrorCode.GUEST_SOLVED_FILTER_FORBIDDEN);
@@ -128,7 +125,6 @@ public class ProblemController {
 
         List<FindProblemResDTO> problemList = problemService.findAllProblem(searchFilter);
 
-        System.out.println("조회 완료");
         return new ResponseEntity<>(problemList, HttpStatus.OK);
     }
 
