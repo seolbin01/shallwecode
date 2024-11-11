@@ -124,7 +124,7 @@ public class UserService implements UserDetailsService {
         return userDomainService.findAllInfoUsers(nickname);
     }
 
-
+    @Transactional(readOnly = true)
     public FindUserDetailDTO findUserDetail(Long loginUserId) {
 
         Long allProblemCnt = userDomainService.findAllProblemCnt();
@@ -148,6 +148,7 @@ public class UserService implements UserDetailsService {
         return userDomainService.findRequestUser(loginUserId);
     }
 
+    @Transactional(readOnly = true)
     public FindFriendDetailDTO findFriendDetail(Long userId) {
 
         FindUserDetailDTO userDetailDTO = findUserDetail(userId);
