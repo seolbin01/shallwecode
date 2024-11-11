@@ -1,7 +1,6 @@
 package com.shallwecode.backend.problem.application.service;
 
-import com.shallwecode.backend.problem.application.dto.ProblemListResDTO;
-import com.shallwecode.backend.problem.application.dto.ProblemOneResDTO;
+import com.shallwecode.backend.problem.application.dto.problem.ProblemListResDTO;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
