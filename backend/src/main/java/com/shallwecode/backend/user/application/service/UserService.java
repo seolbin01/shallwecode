@@ -2,7 +2,7 @@ package com.shallwecode.backend.user.application.service;
 
 import com.shallwecode.backend.common.exception.CustomException;
 import com.shallwecode.backend.common.exception.ErrorCode;
-import com.shallwecode.backend.problem.application.dto.CoopResDTO;
+import com.shallwecode.backend.problem.application.dto.coop.CoopResDTO;
 import com.shallwecode.backend.problem.domain.service.CodingRoomDomainService;
 import com.shallwecode.backend.problem.domain.service.CoopDomainService;
 import com.shallwecode.backend.problem.domain.service.TryDomainService;
