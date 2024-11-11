@@ -105,7 +105,7 @@ const runCode = async () => {
       code.value = editorInstance.value.getValue();
     }
 
-    const response = await axios.post('http://localhost:8080/api/v1/compile/run',
+    const response = await axios.post('http://localhost/boot/api/v1/compile/run',
         {
           code: code.value,
           language: selectedLanguage.value.id.toLowerCase()},

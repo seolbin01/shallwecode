@@ -2,7 +2,7 @@ import axios from 'axios';
 import {useAuthStore} from "@/stores/auth.js";
 
 const apiClient = axios.create({
-    baseURL: 'http://localhost:8080/api/v1',
+    baseURL: 'http://localhost/boot/api/v1',
     withCredentials: true,
 });
 
@@ -20,7 +20,7 @@ const refreshAccessToken = async () => {
     } catch (error) {
         console.error('Failed to refresh access token:', error);
         store.logout();
-        window.location.href = 'http://localhost:5173';
+        // window.location.href = 'http://localhost';
     }
 };
 

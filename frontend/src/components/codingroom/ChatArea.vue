@@ -18,7 +18,7 @@ const webSocket = ref({});
 // 필요한 정보 조회, 협업 친구 조회
 const communicateCoopInfo = async(codingRoomId) => {
   try {
-    const response = await axios.get(`http://localhost:8080/api/v1/codingroom/friendList/${codingRoomId}`, {
+    const response = await axios.get(`http://localhost/boot/api/v1/codingroom/friendList/${codingRoomId}`, {
       headers: {
         Authorization: `Bearer ${tempObjectInfo.accessToken}`
       }

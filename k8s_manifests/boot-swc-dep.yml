@@ -1,0 +1,26 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: boot-swc-dep
+spec:
+  selector:
+    matchLabels:
+      app: boot-swc-kube
+  # replicas: 3
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: boot-swc-kube
+    spec:
+      containers:
+        - name: boot-container
+          image: seolbin/swc_boot_ing:latest
+          imagePullPolicy: Always
+          ports:
+            - containerPort: 8080
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxUnavailable: 1 # 배포 중 사용할 수 없는 최대 Pod 수
+      maxSurge: 1       # 배포 시 추가 생성 가능한 최대 Pod 수
