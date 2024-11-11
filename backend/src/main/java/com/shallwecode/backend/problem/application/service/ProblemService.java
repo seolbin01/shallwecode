@@ -2,7 +2,6 @@ package com.shallwecode.backend.problem.application.service;
 
 import com.shallwecode.backend.common.exception.CustomException;
 import com.shallwecode.backend.common.exception.ErrorCode;
-import com.shallwecode.backend.common.util.CustomUserUtils;
 import com.shallwecode.backend.problem.application.dto.FindProblemResDTO;
 import com.shallwecode.backend.problem.application.dto.ProblemDTO;
 import com.shallwecode.backend.problem.application.dto.ProblemSearchFilter;
@@ -46,9 +45,9 @@ public class ProblemService {
         return problemDomainService.findAllSolvedProblemCount(userId);
     }
 
-    public void deleteProblem(Long problemId) {
+    public void deleteProblem(Long problemId, Long loginUserId) {
 
-        Long loginUserId = CustomUserUtils.getCurrentUserSeq();
+
         FindUserDTO userInfo = userDomainService.findById(loginUserId);
 
         if(userInfo.getAuth() != AuthType.ADMIN){
@@ -58,9 +57,8 @@ public class ProblemService {
         problemDomainService.deleteProblem(problemId);
     }
 
-    public void updateProblem(Long problemId, ProblemReqDTO newProblemInfo) {
+    public void updateProblem(Long problemId, ProblemReqDTO newProblemInfo, Long loginUserId) {
 
-        Long loginUserId = CustomUserUtils.getCurrentUserSeq();
         FindUserDTO userInfo = userDomainService.findById(loginUserId);
 
         if(userInfo.getAuth() != AuthType.ADMIN){
@@ -70,9 +68,9 @@ public class ProblemService {
         problemDomainService.updateProblem(problemId, newProblemInfo);
     }
 
-    public void saveProblem(ProblemReqDTO newProblemInfo) {
+    public void saveProblem(ProblemReqDTO newProblemInfo, Long loginUserId) {
 
-        Long loginUserId = CustomUserUtils.getCurrentUserSeq();
+
         FindUserDTO userInfo = userDomainService.findById(loginUserId);
 
         if(userInfo.getAuth() != AuthType.ADMIN){
