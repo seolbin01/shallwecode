@@ -6,4 +6,7 @@ import org.springframework.stereotype.Repository;
 
 @Repository
 public interface NotiRepository extends JpaRepository<Noti, Long> {
+
+    // UserInfo 엔티티의 userId를 기준으로 삭제
+    void deleteByUser_UserId(Long userId);
 }

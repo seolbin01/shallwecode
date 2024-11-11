@@ -64,4 +64,9 @@ public class NotiDomainService {
 
         findNoti.updateStatus();
     }
+
+    public void deleteNotiByUserId(Long userId) {
+        notiRepository.deleteByUser_UserId(userId);
+    }
+
 }
