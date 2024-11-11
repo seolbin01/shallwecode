@@ -108,7 +108,6 @@ export default {
         const response = await axios.put(`http://localhost:8080/api/v1/problem/${problemId}`, formData, {
           headers: {
             Authorization: `Bearer ${authStore.accessToken}`,
-            "Authorization-refresh": `Bearer ${authStore.refreshToken}`,
           },
         });
         console.log("문제가 성공적으로 수정되었습니다:", response.data);
