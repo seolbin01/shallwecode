@@ -21,7 +21,7 @@ public class CoopController {
     private final CoopService coopService;
 
     @PostMapping("/{codingroomId}/friend/{userId}")
-    @Operation(summary = "협업 친구 초대", description = "코딩방에 협업 친구를 초대한다.")
+    @Operation(summary = "협업 친구 추가", description = "코딩방에 협업 친구를 추가한다.")
     public ResponseEntity<Void> saveCoopFriend(@PathVariable Long codingroomId, @PathVariable Long userId) {
 
         // 코딩방 Id 값과 초대할 유저 Id 값을 받아온다.
