@@ -1,4 +1,4 @@
-package com.shallwecode.backend.problem.application.dto;
+package com.shallwecode.backend.problem.application.dto.try$;
 
 import lombok.Getter;
 import lombok.NoArgsConstructor;

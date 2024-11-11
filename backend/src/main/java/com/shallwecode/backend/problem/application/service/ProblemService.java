@@ -3,7 +3,7 @@ package com.shallwecode.backend.problem.application.service;
 import com.shallwecode.backend.common.exception.CustomException;
 import com.shallwecode.backend.common.exception.ErrorCode;
 import com.shallwecode.backend.common.util.CustomUserUtils;
-import com.shallwecode.backend.problem.application.dto.*;
+import com.shallwecode.backend.problem.application.dto.problem.*;
 import com.shallwecode.backend.problem.domain.service.ProblemDomainService;
 import com.shallwecode.backend.user.application.dto.user.FindUserDTO;
 import com.shallwecode.backend.user.domain.aggregate.AuthType;

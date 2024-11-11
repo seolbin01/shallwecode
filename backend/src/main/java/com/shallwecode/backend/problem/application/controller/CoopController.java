@@ -1,7 +1,7 @@
 package com.shallwecode.backend.problem.application.controller;
 
-import com.shallwecode.backend.problem.application.dto.CoopUserResDTO;
-import com.shallwecode.backend.problem.application.dto.CoopUserResListDTO;
+import com.shallwecode.backend.problem.application.dto.coop.CoopUserResDTO;
+import com.shallwecode.backend.problem.application.dto.coop.CoopUserResListDTO;
 import com.shallwecode.backend.problem.application.service.CoopService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;

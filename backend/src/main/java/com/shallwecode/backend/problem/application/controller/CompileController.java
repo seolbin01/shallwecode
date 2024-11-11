@@ -1,7 +1,7 @@
 package com.shallwecode.backend.problem.application.controller;
 
-import com.shallwecode.backend.problem.application.dto.CompileReqDTO;
-import com.shallwecode.backend.problem.application.dto.CompileResDTO;
+import com.shallwecode.backend.problem.application.dto.compile.CompileReqDTO;
+import com.shallwecode.backend.problem.application.dto.compile.CompileResDTO;
 import com.shallwecode.backend.problem.application.service.CompileService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;

@@ -4,7 +4,7 @@ import com.querydsl.core.BooleanBuilder;
 import com.querydsl.core.types.Projections;
 import com.querydsl.core.types.dsl.Expressions;
 import com.querydsl.jpa.impl.JPAQueryFactory;
-import com.shallwecode.backend.problem.application.dto.*;
+import com.shallwecode.backend.problem.application.dto.problem.*;
 import com.shallwecode.backend.problem.domain.aggregate.*;
 import com.shallwecode.backend.problem.domain.repository.ProblemRepository;
 import com.shallwecode.backend.problem.domain.repository.TestcaseRepository;
