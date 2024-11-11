@@ -160,7 +160,7 @@ const submitCode = async () => {
       code.value = editorInstance.value.getValue();
     }
 
-    const response = await axios.post(`http://localhost:8080/api/v1/compile/codingroom/${props.codingRoomId}/submission`,
+    const response = await axios.post(`http://localhost/boot/api/v1/compile/codingroom/${props.codingRoomId}/submission`,
         {
           code: code.value,
           language: selectedLanguage.value.id.toLowerCase(),
