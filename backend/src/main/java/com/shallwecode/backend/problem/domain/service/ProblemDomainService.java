@@ -242,7 +242,6 @@ public class ProblemDomainService {
                     .orderBy(qProblem.problemId.asc())
                     .fetch();
         }
-        System.out.println("71434732894782190sdafj");
         return queryFactory
                 .select(Projections.constructor(FindProblemResDTO.class,
                         qProblem.problemId,
