@@ -10,6 +10,8 @@ public enum ErrorCode {
 
     NOT_SAVED_FRIEND(HttpStatus.CONFLICT, "친구 신청 실패"),
     NOT_FOUND_USER(HttpStatus.NOT_FOUND, "회원 조회 실패"),
+    NOT_ADMIN_DELETE_USER(HttpStatus.FORBIDDEN, "관리자만 회원을 삭제할 수 있습니다."),
+    NOT_ADMIN_DELETE_ADMIN(HttpStatus.FORBIDDEN, "다른 관리자를 삭제할 수 없습니다."),
     SENDED_FRIEND(HttpStatus.CONFLICT, "이미 존재하는 친구 초대 요청"),
     DUPLICATED_FRIEND_USER(HttpStatus.BAD_REQUEST, "자신에게 친구 요청을 보낼 수 없습니다."),
     NOT_FOUND_FRIEND(HttpStatus.NOT_FOUND, "해당 친구 요청을 찾을 수 없습니다."),
