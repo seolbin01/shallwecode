@@ -63,6 +63,7 @@ public class CodingRoomDomainService {
         return queryFactory
                 .select(Projections.constructor(FindMyCodingRoomResDTO.class,
                         codingRoom.codingRoomId,
+                        problem.problemId,
                         problem.title,
                         codingRoom.isOpen,
                         Expressions.asNumber(
