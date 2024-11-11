@@ -46,7 +46,6 @@ public class UserService implements UserDetailsService {
     public void saveUser(UserSaveDTO userSaveDTO) {
         userDomainService.validateNewUser(userSaveDTO);
         userDomainService.save(userSaveDTO);
-
     }
 
     // 회원 닉네임 수정

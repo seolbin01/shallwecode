@@ -25,8 +25,6 @@ public class CoopService {
 
     public void saveCoopFriend(Long codingRoomId, Long userId) {
 
-        Long loginUserId = CustomUserUtils.getCurrentUserSeq();
-
         // 초대하려는 친구가 이미 코딩방에 있으면 안됨. (협업 친구 테이블에 있으면 안됨)
         CoopResDTO findCoop = coopDomainService.findByCoop(codingRoomId, userId);
         if(findCoop != null) {
