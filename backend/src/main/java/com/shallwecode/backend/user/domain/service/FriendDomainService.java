@@ -27,9 +27,8 @@ public class FriendDomainService {
     private final ModelMapper modelMapper;
     private final JPAQueryFactory queryFactory;
 
-    public SaveFriendDTO save(SaveFriendReqDTO saveFriendReqDTO) {
+    public SaveFriendDTO save(Long loginUserId, SaveFriendReqDTO saveFriendReqDTO) {
 
-        Long loginUserId = CustomUserUtils.getCurrentUserSeq();
         FindUserDTO fromUserDTO = userDomainService.findById(loginUserId);
 
         FindUserDTO toUserDTO = userDomainService.findById(saveFriendReqDTO.getToUserId());
@@ -60,9 +59,8 @@ public class FriendDomainService {
         return count == null || count > 0;
     }
 
-    public FindFriendDTO findMyFriend(UpdateFriendReqDTO updateFriendReqDTO) {
+    public FindFriendDTO findMyFriend(Long loginUserId, UpdateFriendReqDTO updateFriendReqDTO) {
 
-        Long loginUserId = CustomUserUtils.getCurrentUserSeq();
         Friend findfriend = friendRepository.findByFromUser_UserIdAndToUser_UserId(updateFriendReqDTO.getFromUserId(), loginUserId)
                 .orElseThrow(() -> new CustomException(ErrorCode.NOT_FOUND_FRIEND));
 

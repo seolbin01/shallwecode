@@ -1,4 +1,4 @@
-package com.shallwecode.backend.problem.application.dto.coop;
+package com.shallwecode.backend.problem.application.dto;
 
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
