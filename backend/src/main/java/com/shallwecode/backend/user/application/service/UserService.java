@@ -46,7 +46,6 @@ public class UserService implements UserDetailsService {
     public void saveUser(UserSaveDTO userSaveDTO) {
         userDomainService.validateNewUser(userSaveDTO);
         userDomainService.save(userSaveDTO);
-
     }
 
     // 회원 닉네임 수정
@@ -68,11 +67,13 @@ public class UserService implements UserDetailsService {
         }
 
         CoopResDTO coopResDTO = coopDomainService.findCoopByUserId(userId);
-        if(coopResDTO.isHost()){
-            // 해당 호스트 유저의 코딩방을 삭제한다.
-            codingRoomDomainService.deleteCodingRoom(coopResDTO.getCodingRoomId());
-        }else{
-            coopDomainService.deleteByUserId(userId);
+        if(coopResDTO != null) { // 해당 유저 코딩방 존재하는 경우
+            if (coopResDTO.isHost()) {
+                // 해당 호스트 유저의 코딩방을 삭제한다.
+                codingRoomDomainService.deleteCodingRoom(coopResDTO.getCodingRoomId());
+            } else {
+                coopDomainService.deleteByUserId(userId);
+            }
         }
 
         notiDomainService.deleteNotiByUserId(userId);
