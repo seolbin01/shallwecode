@@ -2,9 +2,10 @@ package com.shallwecode.backend.problem.domain.service;
 
 import com.querydsl.core.types.Projections;
 import com.querydsl.jpa.impl.JPAQueryFactory;
-import com.shallwecode.backend.problem.application.dto.CoopDTO;
+import com.shallwecode.backend.problem.application.dto.coop.CoopDTO;
 import com.shallwecode.backend.problem.application.dto.CoopResDTO;
 import com.shallwecode.backend.problem.application.dto.CoopUserResDTO;
+import com.shallwecode.backend.problem.application.dto.coop.QCoopDTO;
 import com.shallwecode.backend.problem.domain.aggregate.Coop;
 import com.shallwecode.backend.problem.domain.aggregate.QCoop;
 import com.shallwecode.backend.problem.domain.repository.CoopRepository;
@@ -76,4 +77,16 @@ public class CoopDomainService {
                 .where(qCoop.codingRoomId.eq(codingRoomId))
                 .fetch();
     }
+
+
+    public List<CoopDTO> findCoopMembersByCodingRoomId(Long codingRoomId) {
+        QCoop coop = QCoop.coop;
+
+        return queryFactory
+                .select(new QCoopDTO(coop.codingRoomId, coop.userId, coop.isHost))
+                .from(coop)
+                .where(coop.codingRoomId.eq(codingRoomId))
+                .fetch();
+    }
+
 }
