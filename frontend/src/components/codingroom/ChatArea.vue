@@ -1,9 +1,11 @@
 <script setup>
-import {ref, reactive, onMounted, onUnmounted} from "vue";
+import {ref, reactive, onMounted, onUnmounted, computed} from "vue";
 import { useAuthStore } from "@/stores/auth.js";
 import axios from "axios";
+import {useRouter} from "vue-router";
 
 const useAuth = useAuthStore();
+const router = useRouter(); // 라우터 이동 설정
 
 const props = defineProps({
   codingRoomId : {
@@ -55,6 +57,40 @@ const communicateCoopInfo = async(codingRoomId) => {
   }
 }
 
+// 친구추가 테스트
+const updateInviteCoopInfo = async(codingRoomId) => {
+  try {
+    const response = await axios.get(`http://localhost:8080/api/v1/codingroom/friendList/${codingRoomId}`, {
+      headers: {
+        Authorization: `Bearer ${tempObjectInfo.accessToken}`
+      }
+    });
+
+    response.data.coopList.forEach(member => {
+      if (member.userId !== tempObjectInfo.userId) { // 본인을 제외한 친구만 추가
+        const isAlreadyAdded = coopMember.some(existingMember => existingMember.userId === member.userId);
+
+        if (!isAlreadyAdded) { // 중복이 아닐 때만 추가
+          const tempObject = {
+            codingRoomId: member.codingRoomId,
+            userId: member.userId,
+            userNickname: member.userNickname,
+            status: 'offline'
+          };
+
+          coopMember.push(tempObject);
+        }
+      }
+    });
+  } catch (error) {
+    console.error('협업 친구 목록을 조회하는 데 오류가 발생했습니다.', error);
+  }
+}
+
+
+
+
+
 const messages = ref([]);
 const newMessage = ref('');
 const isTyping = ref(false);
@@ -82,15 +118,99 @@ const sendMessage = () => {
   }
 };
 
-// 협업 친구 초대
-const inviteCoop = () => {
-  // 민철님 여기다가 하면 될 것 같습니다.
+
+// 모달 상태 관리
+const isModalVisible = ref(false);
+const friendsList = ref([]);
+
+
+// 친구 목록 페이징
+const currentPage = ref(1);
+const friendItemsPerPage = 2;
+
+const totalPages = computed(() =>
+    Math.ceil(friendsList.value.length / friendItemsPerPage)
+);
+
+const paginatedFriends = computed(() => {
+  const start = (currentPage.value - 1) * friendItemsPerPage;
+  const end = start + friendItemsPerPage;
+
+  if (friendsList.value.length === 0) return [];
+  return friendsList.value.slice(start, end);
+});
+
+// 친구 목록 조회 함수
+const fetchFriends = async () => {
+  try {
+    const response = await axios.get(`http://localhost:8080/api/v1/friend`, {
+      headers: {
+        Authorization: `Bearer ${tempObjectInfo.accessToken}`
+      }
+    });
+    friendsList.value = response.data; // 받아온 친구 목록 저장
+  } catch (error) {
+    console.error("친구 목록을 조회하는 데 오류가 발생했습니다.", error);
+  }
+};
+
+
+// 모달 열기
+const openInviteCoop = async() => {
+  await fetchFriends(); // 친구 목록 조회
+  isModalVisible.value = true; // 모달 열기
 }
 
 // 협업 탈퇴
-const leaveCoop = () => {
-  // 민철님 여기다가 하면 될 것 같습니다.
+const leaveCoop = async () => {
+  // 탈퇴 로직 작성 (예: API 호출)
+  if(confirm('코딩방을 나가시겠습니까?')){
+    try {
+      const response = await axios.delete(`http://localhost:8080/api/v1/codingroom/${props.codingRoomId}/friend` ,{
+        headers: {
+          Authorization: `Bearer ${tempObjectInfo.accessToken}`
+        }
+      });
+      console.log(response);
+      router.push('/');
+    } catch (error) {
+      console.error("코딩방을 나가는데 오류가 발생했습니다.", error);
+    }
+  }
 }
+
+// 협업 친구 초대
+const inviteCoop = async (userId) => {
+
+  // 이미 초대한 친구인지 확인
+  const isAlreadyInvited = coopMember.some(member => member.userId === userId);
+  if (isAlreadyInvited) {
+    alert("이미 초대한 친구입니다.")
+    console.log("이미 초대한 친구입니다.");
+    return;
+  }
+
+  // 초대 로직 작성 (예: API 호출)
+  try {
+    const response = await axios.post(`http://localhost:8080/api/v1/codingroom/${props.codingRoomId}/friend/${userId}`,{} ,{
+      headers: {
+        Authorization: `Bearer ${tempObjectInfo.accessToken}`
+      }
+    });
+    console.log(response);
+
+    // 초대 성공 시 협업 정보를 갱신
+    await updateInviteCoopInfo(props.codingRoomId);
+
+  } catch (error) {
+    console.error("친구를 초대하는 데 오류가 발생했습니다.", error);
+  }
+
+  alert("친구 초대가 완료되었습니다.");
+  console.log(`친구 ${userId} 초대`);
+};
+
+
 
 // 웹 소켓 연결 함수
 const connectWebSocket = (codingRoomId) => {
@@ -116,7 +236,7 @@ const connectWebSocket = (codingRoomId) => {
     if(receiveMessage.type === "statusCheck") {
       // console.log(receiveMessage);
       // console.log(Object.entries(receiveMessage.sessionList));
-      // for(let i = 0; i < coopMember.length; i++) {
+      // for(let i = 0; i < coopMember.length; i++) {ㄹ
       //   // 온라인 정보만 기록한다.
       //   if(receiveMessage.coopMember[i].status === "online")
       //   coopMember[i].status = receiveMessage.coopMember[i].status;
@@ -175,6 +295,7 @@ onUnmounted(async() => {
 </script>
 
 <template>
+
   <div class="chat-container">
     <div class="chat-header">
       <h3>채팅</h3>
@@ -196,10 +317,11 @@ onUnmounted(async() => {
         </div>
         <!-- 버튼들을 감싸는 컨테이너 추가 -->
         <div class="buttons-container">
-          <button @click="inviteCoop">협업초대</button>
+          <button @click="openInviteCoop">협업초대</button>
           <button @click="leaveCoop">협업탈퇴</button>
         </div>
       </div>
+
       <div class="messages-section">
         <div class="chat-messages" ref="chatMessages">
           <div v-for="message in messages"
@@ -233,9 +355,150 @@ onUnmounted(async() => {
       </div>
     </div>
   </div>
+
+  <!-- 모달 창 -->
+  <div v-if="isModalVisible" class="modal-overlay" @click.self="isModalVisible = false">
+    <div class="modal">
+      <h3>친구 목록</h3>
+      <table class="friend-table">
+        <thead>
+        <tr>
+          <th>번호</th>
+          <th>닉네임</th>
+          <th>초대</th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr v-for="(friend, index) in paginatedFriends" :key="friend.userId">
+          <td>{{ (currentPage - 1) * friendItemsPerPage + index + 1 }}</td>
+          <td>{{ friend.nickname }}</td>
+          <td><button @click="inviteCoop(friend.userId)" class="invite-btn">초대</button></td>
+        </tr>
+        </tbody>
+      </table>
+
+      <!-- 페이지 네비게이션 -->
+      <div class="pagination">
+        <button @click="currentPage--" :disabled="currentPage === 1">‹</button>
+        <span v-for="page in totalPages" :key="page">
+        <button @click="currentPage = page" :class="{ active: currentPage === page }">{{ page }}</button>
+      </span>
+        <button @click="currentPage++" :disabled="currentPage === totalPages">›</button>
+      </div>
+
+      <button class="close-button" @click="isModalVisible = false">닫기</button>
+    </div>
+  </div>
+
 </template>
 
 <style scoped>
+/* 모달 스타일 */
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: left;
+  overflow: auto; /* 화면을 넘는 경우 스크롤 추가 */
+}
+
+.modal {
+  background: #f5f5fa;
+  padding: 20px;
+  border-radius: 8px;
+  width: 400px;
+  margin-left: 150px;
+  position: relative;
+}
+
+.modal h3 {
+  text-align: center; /* 텍스트 가운데 정렬 */
+  margin-bottom: 20px; /* 아래 간격 추가 */
+  color: #3e497a; /* 제목의 색상 변경 (선택 사항) */
+}
+
+
+.friend-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.friend-table th,
+.friend-table td {
+  padding: 8px;
+  text-align: center;
+  border-bottom: 1px solid #ddd;
+}
+
+.friend-table th {
+  background: #3e497a;
+  color: white;
+}
+
+.invite-btn {
+  background-color: #4CAF50;
+  color: white;
+  border: none;
+  padding: 5px 10px;
+  cursor: pointer;
+  border-radius: 5px;
+}
+
+.invite-btn:hover {
+  background-color: #45a049;
+}
+
+.pagination {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin-top: 10px;
+}
+
+.pagination button {
+  background: none;
+  border: none;
+  padding: 5px;
+  margin: 0 5px;
+  cursor: pointer;
+  color: #3e497a;
+}
+
+.pagination button.active {
+  font-weight: bold;
+  color: #000;
+}
+
+.pagination button:disabled {
+  cursor: not-allowed;
+  color: #ccc;
+}
+/* 모달 스타일 끝*/
+
+/* 닫기 버튼 */
+.close-button {
+  position: absolute;
+  top: 10px; /* 위쪽 여백 */
+  right: 10px; /* 오른쪽 여백 */
+  background: transparent;
+  border: none;
+  font-size: 16px;
+  cursor: pointer;
+  color: #888;
+  font-weight: bold;
+}
+
+.close-button:hover {
+  color: #000;
+}
+
+
+
 .chat-layout {
   display: flex;
   flex-direction: row;

@@ -34,11 +34,11 @@ public class CoopService {
         }
 
         // 초대할려는 userId가 친구 관계에 있는지 확인해야 함
-        // 테스트하기 불편하면 이부분만 주석처리
-        boolean isFriendResult = friendDomainService.isExistFriend(loginUserId, userId);
-        if(!isFriendResult){ // 친구 관계가 아니라면
-            throw new CustomException(ErrorCode.NOT_INVITE_FRIEND);
-        }
+//        boolean isFriendResult = friendDomainService.isExistFriend(loginUserId, userId);
+//        if(!isFriendResult){ // 친구 관계가 아니라면
+//            throw new CustomException(ErrorCode.NOT_INVITE_FRIEND);
+//        }
+        // 프론트에서 확인 가능
 
         CoopDTO coopDTO = new CoopDTO();
         coopDTO.setCodingRoomId(codingRoomId);
@@ -60,6 +60,7 @@ public class CoopService {
 
         // 코딩방 호스트일 경우 코딩방 제거
         // 호스트가 아닌 유저가 코딩방에 마지막까지 존재할수는 없음.
+        System.out.println("User is host: " + findCoop.isHost());
         if(findCoop.isHost()){
             codingRoomDomainService.deleteCodingRoom(findCoop.getCodingRoomId());
         }
