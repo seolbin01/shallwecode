@@ -3,15 +3,16 @@ package com.shallwecode.backend.problem.application.service;
 import com.shallwecode.backend.common.exception.CustomException;
 import com.shallwecode.backend.common.exception.ErrorCode;
 import com.shallwecode.backend.common.util.CustomUserUtils;
-import com.shallwecode.backend.problem.application.dto.CoopDTO;
-import com.shallwecode.backend.problem.application.dto.CoopResDTO;
 import com.shallwecode.backend.problem.application.dto.FindMyCodingRoomResDTO;
+import com.shallwecode.backend.problem.application.dto.coop.CoopDTO;
+import com.shallwecode.backend.problem.application.dto.coop.CoopResDTO;
 import com.shallwecode.backend.problem.domain.aggregate.CodingRoom;
 import com.shallwecode.backend.problem.domain.service.CodingRoomDomainService;
 import com.shallwecode.backend.problem.domain.service.CoopDomainService;
 import com.shallwecode.backend.problem.domain.service.ProblemDomainService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
@@ -63,5 +64,11 @@ public class CodingRoomService {
 
         codingRoomDomainService.deleteCodingRoom(codingRoomId);
 
+    }
+
+    @Transactional
+    public void updateCode(Long codingroomId, String code) {
+
+        codingRoomDomainService.updateCode(codingroomId, code);
     }
 }

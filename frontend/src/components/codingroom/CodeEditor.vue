@@ -6,6 +6,18 @@ import {MonacoBinding} from "y-monaco";
 import * as monaco from 'monaco-editor';
 import axios from "axios";
 import {useAuthStore} from "@/stores/auth.js";
+import {postFetch} from "@/stores/apiClient.js";
+
+const props = defineProps({
+  problemId: {
+    type: String,
+    required: true
+  },
+  codingRoomId: {
+    type: String,
+    required: true
+  }
+});
 
 const MONACO_EDITOR_OPTIONS = {
   automaticLayout: true,
@@ -30,6 +42,7 @@ const editorInstance = shallowRef(null);
 const showDropdown = ref(false);
 const selectedLanguage = ref(languages[0]);
 const isRunning = ref(false);
+const isSubmitting = ref(false);
 const monacoEl = ref(null);
 
 // 실행 결과를 저장할 refs
@@ -37,6 +50,10 @@ const output = ref('');
 const compileError = ref('');
 const runtimeError = ref('');
 const systemError = ref('');
+
+const result = ref('');
+const score = ref(0);
+const isExist = ref(false);
 
 onMounted(() => {
   const ydocument = new Y.Doc();
@@ -116,6 +133,8 @@ const runCode = async () => {
           }
         });
 
+    isExist.value = false;
+
     // 각각의 응답 처리
     output.value = response.data.output || '';
     compileError.value = response.data.compileError || '';
@@ -123,10 +142,50 @@ const runCode = async () => {
     systemError.value = response.data.systemError || '';
 
   } catch (error) {
+    isExist.value = false;
     console.error('코드 실행 중 에러가 발생했습니다. ', error);
     systemError.value = '서버 연결 중 오류가 발생했습니다.';
   } finally {
     isRunning.value = false;
+  }
+};
+
+const submitCode = async () => {
+
+  isSubmitting.value = true;
+  clearOutputs();
+
+  try {
+    if (editorInstance.value) {
+      code.value = editorInstance.value.getValue();
+    }
+
+    const response = await axios.post(`http://localhost:8080/api/v1/compile/codingroom/${props.codingRoomId}/submission`,
+        {
+          code: code.value,
+          language: selectedLanguage.value.id.toLowerCase(),
+          problemId: props.problemId},
+        {
+          headers: {
+            Authorization: `Bearer ${authStore.accessToken}`,
+            'Authorization-refresh': `Bearer ${authStore.refreshToken}`
+          }
+        });
+
+    // 각각의 응답 처리
+    result.value = response.data.result;
+    score.value = response.data.score;
+
+    isExist.value = true;
+
+    console.log(result.value);
+    console.log(score.value);
+
+  } catch (error) {
+    console.error('코드 실행 중 에러가 발생했습니다. ', error);
+    systemError.value = '서버 연결 중 오류가 발생했습니다.';
+  } finally {
+    isSubmitting.value = false;
   }
 };
 </script>
@@ -172,12 +231,27 @@ const runCode = async () => {
         >
           Clear
         </button>
+        <button
+            class="run-button"
+            @click="submitCode"
+            :disabled="isSubmitting"
+        >
+          <span class="run-text">{{ isSubmitting ? '실행중...' : '제출' }}</span>
+          <span v-if="!isSubmitting" class="run-icon" :class="{ 'spinning': isSubmitting }">▶</span>
+          <span v-else class="loader"></span>
+        </button>
       </div>
       <div class="output-content">
         <!-- 정상 출력 -->
         <div v-if="output" class="output-section">
           <div class="section-header">실행 결과:</div>
           <pre class="section-content">{{ output }}</pre>
+        </div>
+
+        <div v-if="isExist" class="output-section">
+          <div class="section-header">실행 결과:</div>
+          <pre class="section-content">결과: {{ result }}</pre>
+          <pre class="section-content">점수: {{ score }}</pre>
         </div>
 
         <!-- 컴파일 에러 -->

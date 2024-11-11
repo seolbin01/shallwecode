@@ -37,7 +37,8 @@ public enum ErrorCode {
     NOT_GUEST_COOP_USER(HttpStatus.NOT_FOUND, "해당 게스트 유저가 존재하지 않습니다."),
     NOT_HOST_COOP_USER(HttpStatus.NOT_FOUND, "코딩방에 존재하지 않는 유저입니다. 해당 코딩방의 다른 유저를 강퇴할 수 없습니다. "),
     NOT_AUTH_HOST(HttpStatus.BAD_REQUEST, "코딩방 게스트 유저는 강퇴 기능을 사용할 수 없습니다."),
-    TOO_MANY_REQUESTS_ROOM(HttpStatus.TOO_MANY_REQUESTS, "해당 코딩방의 인원이 가득 찼습니다.");
+    TOO_MANY_REQUESTS_ROOM(HttpStatus.TOO_MANY_REQUESTS, "해당 코딩방의 인원이 가득 찼습니다."),
+    NOT_UPATED_CODE(HttpStatus.BAD_REQUEST, "코드가 코딩방에 저장 실패했습니다.");
 
     private final HttpStatus httpStatus;
     private final String message;

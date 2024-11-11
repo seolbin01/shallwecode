@@ -7,6 +7,7 @@ import com.shallwecode.backend.problem.application.dto.FindTryResDTO;
 import com.shallwecode.backend.problem.application.dto.SaveTryReqDTO;
 import com.shallwecode.backend.problem.domain.aggregate.QTry;
 import com.shallwecode.backend.problem.domain.aggregate.Try;
+import com.shallwecode.backend.problem.domain.aggregate.TryLanguage;
 import com.shallwecode.backend.problem.domain.repository.TryRepository;
 import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
@@ -27,6 +28,11 @@ public class TryDomainService {
         Try newTry = modelMapper.map(saveTryReqDTO, Try.class);
         newTry.updateUser(userId);
         newTry.updateProblem(problemId);
+        if (saveTryReqDTO.getTryLanguage().equalsIgnoreCase("JAVA")) {
+            newTry.updateLanguage(TryLanguage.JAVA);
+        } else if (saveTryReqDTO.getTryLanguage().equalsIgnoreCase("PYTHON")){
+            newTry.updateLanguage(TryLanguage.PYTHON);
+        }
 
         tryRepository.save(newTry);
     }

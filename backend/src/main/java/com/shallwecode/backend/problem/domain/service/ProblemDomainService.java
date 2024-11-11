@@ -4,11 +4,7 @@ import com.querydsl.core.BooleanBuilder;
 import com.querydsl.core.types.Projections;
 import com.querydsl.core.types.dsl.Expressions;
 import com.querydsl.jpa.impl.JPAQueryFactory;
-import com.shallwecode.backend.problem.application.dto.FindProblemResDTO;
-import com.shallwecode.backend.problem.application.dto.ProblemDTO;
-import com.shallwecode.backend.problem.application.dto.problem.ProblemOneResDTO;
-import com.shallwecode.backend.problem.application.dto.problem.ProblemReqDTO;
-import com.shallwecode.backend.problem.application.dto.problem.TestcaseDTO;
+import com.shallwecode.backend.problem.application.dto.problem.*;
 import com.shallwecode.backend.problem.domain.aggregate.*;
 import com.shallwecode.backend.problem.domain.repository.ProblemRepository;
 import com.shallwecode.backend.problem.domain.repository.TestcaseRepository;
@@ -213,7 +209,7 @@ public class ProblemDomainService {
     }
 
     @Transactional(readOnly = true)
-    public List<FindProblemResDTO> findAllProblem(com.shallwecode.backend.problem.application.dto.ProblemSearchFilter filter) {
+    public List<FindProblemResDTO> findAllProblem(ProblemSearchFilter filter) {
 
         QProblem qProblem = QProblem.problem;
         QTry qTry = QTry.try$;

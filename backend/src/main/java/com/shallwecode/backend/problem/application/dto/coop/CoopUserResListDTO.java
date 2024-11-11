@@ -1,4 +1,4 @@
-package com.shallwecode.backend.problem.application.dto;
+package com.shallwecode.backend.problem.application.dto.coop;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -13,5 +13,5 @@ import java.util.List;
 @AllArgsConstructor
 public class CoopUserResListDTO {
     private String message;
-    List<com.shallwecode.backend.problem.application.dto.CoopUserResDTO> coopList;
+    List<CoopUserResDTO> coopList;
 }
