@@ -1,6 +1,6 @@
 package com.shallwecode.backend.problem.domain.service;
 
-import com.shallwecode.backend.problem.application.dto.SendCodeDTO;
+import com.shallwecode.backend.problem.application.dto.compile.SendCodeDTO;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
