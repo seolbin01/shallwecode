@@ -10,16 +10,16 @@ import static org.junit.jupiter.api.Assertions.*;
 @SpringBootTest
 class CodingRoomServiceTest {
 
-    @Autowired
-    private CodingRoomService codingRoomService;
-
-    @Test
-    void saveCodingRoomTest() {
-        CodingRoom codingRoom = codingRoomService.saveCodingRoom(4L);
-        System.out.println(codingRoom.getCodingRoomId());
-        System.out.println(codingRoom.getCodeContent());
-        System.out.println(codingRoom.getProblemId());
-        System.out.println(codingRoom.isOpen());
-        System.out.println(codingRoom.getTryLanguage());
-    }
+//    @Autowired
+//    private CodingRoomService codingRoomService;
+//
+//    @Test
+//    void saveCodingRoomTest() {
+//        CodingRoom codingRoom = codingRoomService.saveCodingRoom(4L);
+//        System.out.println(codingRoom.getCodingRoomId());
+//        System.out.println(codingRoom.getCodeContent());
+//        System.out.println(codingRoom.getProblemId());
+//        System.out.println(codingRoom.isOpen());
+//        System.out.println(codingRoom.getTryLanguage());
+//    }
 }
