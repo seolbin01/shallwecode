@@ -12,6 +12,7 @@ import com.shallwecode.backend.problem.domain.service.CoopDomainService;
 import com.shallwecode.backend.problem.domain.service.ProblemDomainService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
@@ -63,5 +64,11 @@ public class CodingRoomService {
 
         codingRoomDomainService.deleteCodingRoom(codingRoomId);
 
+    }
+
+    @Transactional
+    public void updateCode(Long codingroomId, String code) {
+
+        codingRoomDomainService.updateCode(codingroomId, code);
     }
 }

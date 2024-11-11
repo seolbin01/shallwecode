@@ -20,7 +20,7 @@ const refreshAccessToken = async () => {
     } catch (error) {
         console.error('Failed to refresh access token:', error);
         store.logout();
-        // window.location.href = 'http://localhost';
+        window.location.href = 'http://localhost:5173';
     }
 };
 
