@@ -1,7 +1,7 @@
 package com.shallwecode.backend.problem.application.service;
 
-import com.shallwecode.backend.problem.application.dto.CompileReqDTO;
-import com.shallwecode.backend.problem.application.dto.CompileResDTO;
+import com.shallwecode.backend.problem.application.dto.compile.CompileReqDTO;
+import com.shallwecode.backend.problem.application.dto.compile.CompileResDTO;
 import com.shallwecode.backend.problem.application.dto.compile.SubmitResDTO;
 import com.shallwecode.backend.problem.application.dto.problem.ProblemOneResDTO;
 import com.shallwecode.backend.problem.application.dto.problem.TestcaseDTO;
