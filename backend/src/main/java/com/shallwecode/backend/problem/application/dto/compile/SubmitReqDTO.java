@@ -2,16 +2,16 @@ package com.shallwecode.backend.problem.application.dto.compile;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.Setter;
-import lombok.ToString;
 
 @Getter
 @Setter
-@ToString
+@NoArgsConstructor
 @AllArgsConstructor
-public class SendCodeDTO {
-    private Long codingRoomId;
+public class SubmitReqDTO {
+
+    private String language;
+    private String code;
     private Long problemId;
-    private String tryLanguage;
-    private String codeContent;
 }

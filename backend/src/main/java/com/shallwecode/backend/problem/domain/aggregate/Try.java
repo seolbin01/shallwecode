@@ -32,4 +32,8 @@ public class Try {
     public void updateProblem(Long problemId) {
         this.problemId = problemId;
     }
+
+    public void updateLanguage(TryLanguage tryLanguage) {
+        this.tryLanguage = tryLanguage;
+    }
 }

@@ -57,7 +57,8 @@ onMounted(async () => {
     </div>
     <div class="problem-container">
       <div class="content-wrapper">
-        <CodeEditor/>
+        <CodeEditor :problemId="problemInfo.problemId"
+        :codingRoomId="codingRoomId"/>
         <CodeResult/>
       </div>
     </div>

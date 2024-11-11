@@ -4,14 +4,15 @@ import com.querydsl.core.types.Projections;
 import com.querydsl.core.types.dsl.Expressions;
 import com.querydsl.jpa.JPAExpressions;
 import com.querydsl.jpa.impl.JPAQueryFactory;
+import com.shallwecode.backend.common.exception.CustomException;
+import com.shallwecode.backend.common.exception.ErrorCode;
 import com.shallwecode.backend.problem.application.dto.CodingRoomReqDTO;
 import com.shallwecode.backend.problem.application.dto.FindMyCodingRoomResDTO;
+import com.shallwecode.backend.problem.application.dto.compile.SendCodeDTO;
+import com.shallwecode.backend.problem.domain.aggregate.CodingRoom;
 import com.shallwecode.backend.problem.domain.aggregate.QCodingRoom;
 import com.shallwecode.backend.problem.domain.aggregate.QCoop;
 import com.shallwecode.backend.problem.domain.aggregate.QProblem;
-import com.shallwecode.backend.problem.application.dto.SendCodeDTO;
-import com.shallwecode.backend.problem.domain.aggregate.CodingRoom;
-import com.shallwecode.backend.problem.domain.aggregate.Problem;
 import com.shallwecode.backend.problem.domain.repository.CodingRoomRepository;
 import com.shallwecode.backend.problem.domain.repository.CoopRepository;
 import jakarta.transaction.Transactional;
@@ -94,5 +95,13 @@ public class CodingRoomDomainService {
                 .from(qProblem)
                 .where(qProblem.problemId.eq(problemId))
                 .fetchOne();
+    }
+
+    public void updateCode(Long codingroomId, String code) {
+
+        CodingRoom codingRoom = repository.findById(codingroomId)
+                .orElseThrow(() -> new CustomException(ErrorCode.NOT_UPATED_CODE));
+
+        codingRoom.updateCodeContent(code);
     }
 }
