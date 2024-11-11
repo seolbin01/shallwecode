@@ -30,7 +30,9 @@ public class CodingRoomController {
     )
     @PostMapping("/{problemId}")
     public ResponseEntity<CodingRoom> saveCodingRoom(@PathVariable Long problemId) {
-        CodingRoom codingRoom = codingRoomService.saveCodingRoom(problemId);
+
+        Long loginUserId = CustomUserUtils.getCurrentUserSeq();
+        CodingRoom codingRoom = codingRoomService.saveCodingRoom(problemId, loginUserId);
         return ResponseEntity.ok().body(codingRoom);
     }
 
@@ -42,7 +44,9 @@ public class CodingRoomController {
     @DeleteMapping("/{codingroomId}")
     public ResponseEntity<String> deleteCodingRoom(@PathVariable Long codingroomId) {
 
-        codingRoomService.deleteCodingRoom(codingroomId);
+
+        Long loginUserId = CustomUserUtils.getCurrentUserSeq();
+        codingRoomService.deleteCodingRoom(codingroomId, loginUserId);
         return ResponseEntity.noContent().build();
     }
 
