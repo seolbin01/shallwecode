@@ -94,7 +94,7 @@ const leaveCoop = () => {
 
 // 웹 소켓 연결 함수
 const connectWebSocket = (codingRoomId) => {
-  webSocket.value = new WebSocket(`ws://localhost:8080/ws/coding-room/${codingRoomId}`);
+  webSocket.value = new WebSocket(`ws://localhost/boot/ws/coding-room/${codingRoomId}`);
   // 연결시 온, 오프라인 구별을 위해 정보를 송신
   webSocket.value.onopen = () => {
     const statusCheck = {
