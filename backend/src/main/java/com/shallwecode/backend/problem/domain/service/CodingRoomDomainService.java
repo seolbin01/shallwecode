@@ -33,13 +33,15 @@ public class CodingRoomDomainService {
     private final JPAQueryFactory queryFactory;
 
     @Transactional
-    public Long saveCodingRoom(CodingRoomReqDTO newCodingRoom) {
+    public CodingRoom saveCodingRoom(Long problemId) {
+        // 문제 내용만 따로 조회
+        String content = selectProblemContent(problemId);
 
-        CodingRoom codingRoom = modelMapper.map(newCodingRoom, CodingRoom.class);
-        repository.save(codingRoom);
+        // 프론트에서 문제 목록을 통해서 문제에 들어갈 때 언어를 선택하지는 않아서 기본 JAVA 셋팅
+        CodingRoomReqDTO newCodingRoom = new CodingRoomReqDTO(problemId, "JAVA", content, true);
 
-        return codingRoom.getCodingRoomId();
-
+        // 엔티티 반환
+        return repository.save(modelMapper.map(newCodingRoom, CodingRoom.class));
     }
 
     // 코딩방 수정 기능은 제공하지 않음.
@@ -61,6 +63,7 @@ public class CodingRoomDomainService {
         return queryFactory
                 .select(Projections.constructor(FindMyCodingRoomResDTO.class,
                         codingRoom.codingRoomId,
+                        problem.problemId,
                         problem.title,
                         codingRoom.isOpen,
                         Expressions.asNumber(
@@ -81,5 +84,15 @@ public class CodingRoomDomainService {
         // 코드 수정
         CodingRoom foundCodingRoom = repository.findById(sendCodeDTO.getCodingRoomId()).orElseThrow(() -> new RuntimeException("해당 코딩방이 존재하지 않습니다."));
         foundCodingRoom.updateCodeContent(sendCodeDTO.getCodeContent());
+    }
+
+    /* 코딩방 생성시 문제 내용 조회 */
+    @Transactional
+    public String selectProblemContent(Long problemId) {
+        QProblem qProblem = QProblem.problem;
+        return queryFactory.select(qProblem.content)
+                .from(qProblem)
+                .where(qProblem.problemId.eq(problemId))
+                .fetchOne();
     }
 }

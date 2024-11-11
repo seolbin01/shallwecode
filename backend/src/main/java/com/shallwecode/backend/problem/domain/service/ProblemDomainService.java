@@ -136,7 +136,7 @@ public class ProblemDomainService {
             return null; // 문제 없음 처리
         }
 
-        // 해당 Problem에 대한 모든 Testcase를 조회하여 리스트로 추가
+        // 해당 Problem 에 대한 모든 Testcase 를 조회하여 리스트로 추가
         List<TestcaseDTO> testcases = queryFactory.select(
                         Projections.constructor(TestcaseDTO.class,
                                 qTestcase.input,
@@ -209,21 +209,6 @@ public class ProblemDomainService {
     }
 
     @Transactional(readOnly = true)
-    public List<FindProblemResDTO> findAllProblemByGuest() {
-
-        QProblem problem = QProblem.problem;
-
-        return queryFactory
-                .select(Projections.constructor(FindProblemResDTO.class,
-                        problem.problemId,
-                        problem.title,
-                        problem.problemLevel,
-                        Expressions.constant(0)))
-                .from(problem)
-                .fetch();
-    }
-
-    @Transactional(readOnly = true)
     public List<FindProblemResDTO> findAllProblem(ProblemSearchFilter filter) {
 
         QProblem qProblem = QProblem.problem;
@@ -233,6 +218,16 @@ public class ProblemDomainService {
 
         if (filter.getProblemLevel() != null) {
             whereConditions.and(qProblem.problemLevel.eq(filter.getProblemLevel()));
+        }
+
+        if (filter.getIsSolved() != null) {
+            if (filter.getIsSolved()) {
+                whereConditions.and(qTry.isSolved.isTrue());
+            } else {
+                whereConditions.and(
+                        qTry.isSolved.isFalse().or(qTry.isSolved.isNull())
+                );
+            }
         }
 
         if (filter.isGuestSearch()) {
@@ -247,11 +242,7 @@ public class ProblemDomainService {
                     .orderBy(qProblem.problemId.asc())
                     .fetch();
         }
-
-        if (filter.getIsSolved() != null) {
-            whereConditions.and(qTry.isSolved.eq(filter.getIsSolved()));
-        }
-
+        System.out.println("71434732894782190sdafj");
         return queryFactory
                 .select(Projections.constructor(FindProblemResDTO.class,
                         qProblem.problemId,

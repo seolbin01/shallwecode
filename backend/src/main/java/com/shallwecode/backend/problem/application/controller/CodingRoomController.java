@@ -4,6 +4,7 @@ import com.shallwecode.backend.common.util.CustomUserUtils;
 import com.shallwecode.backend.problem.application.dto.CodingRoomReqDTO;
 import com.shallwecode.backend.problem.application.dto.FindMyCodingRoomResDTO;
 import com.shallwecode.backend.problem.application.service.CodingRoomService;
+import com.shallwecode.backend.problem.domain.aggregate.CodingRoom;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
@@ -26,13 +27,12 @@ public class CodingRoomController {
     /* 코딩방 등록 */
     @Operation(
             summary = "코딩방 등록",
-            description = "새로운 코딩방을 생성합니다."
+            description = "새로운 코딩방을 생성합니다. 생성된 코딩방의 번호를 반환합니다."
     )
-    @PostMapping
-    public ResponseEntity<String> saveCodingRoom(@RequestBody CodingRoomReqDTO newCodingRoomInfo) {
-
-        codingRoomService.saveCodingRoom(newCodingRoomInfo);
-        return new ResponseEntity<>("코딩방 생성 완료", HttpStatus.CREATED);
+    @PostMapping("/{problemId}")
+    public ResponseEntity<CodingRoom> saveCodingRoom(@PathVariable Long problemId) {
+        CodingRoom codingRoom = codingRoomService.saveCodingRoom(problemId);
+        return ResponseEntity.ok().body(codingRoom);
     }
 
     /* 코딩방 삭제 */

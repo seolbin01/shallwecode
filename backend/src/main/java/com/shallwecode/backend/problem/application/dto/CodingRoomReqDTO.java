@@ -1,12 +1,13 @@
 package com.shallwecode.backend.problem.application.dto;
 
+import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.Setter;
 
 @Getter
 @Setter
-@RequiredArgsConstructor
+@AllArgsConstructor
 public class CodingRoomReqDTO {
 
     private Long problemId;  // 외래 키로 문제 ID를 참조
