@@ -1,4 +1,4 @@
-package com.shallwecode.backend.problem.application.dto.coop;
+package com.shallwecode.backend.problem.application.dto;
 
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
@@ -8,11 +8,7 @@ import lombok.Setter;
 @Setter
 @RequiredArgsConstructor
 public class CoopDTO {
-
     private Long codingRoomId;
     private Long userId;
     private boolean isHost;
-
-
-
 }

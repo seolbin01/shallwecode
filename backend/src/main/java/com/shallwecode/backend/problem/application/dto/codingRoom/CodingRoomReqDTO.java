@@ -1,7 +1,8 @@
-package com.shallwecode.backend.problem.application.dto.codingRoom;
+package com.shallwecode.backend.problem.application.dto;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
+import lombok.RequiredArgsConstructor;
 import lombok.Setter;
 
 @Getter

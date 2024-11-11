@@ -1,5 +1,6 @@
 package com.shallwecode.backend.problem.application.dto.problem;
 
+import com.shallwecode.backend.problem.application.dto.ProblemDTO;
 import lombok.*;
 
 import java.util.List;
