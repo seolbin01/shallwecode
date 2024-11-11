@@ -73,6 +73,10 @@ public class FriendDomainService {
         friendRepository.deleteById(findFriendDTO.getFriendId());
     }
 
+    public void deleteFriendByUserId(Long userId1, Long userId2) {
+        friendRepository.deleteByFromUser_UserIdOrToUser_UserId(userId1, userId2);
+    }
+
     public void updateFriendStatus(FindFriendDTO findFriendDTO) {
 
         Friend findFriend = friendRepository.findById(findFriendDTO.getFriendId())

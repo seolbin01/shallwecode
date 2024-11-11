@@ -41,6 +41,10 @@ public class TryDomainService {
         tryRepository.deleteById(tryId);
     }
 
+    public void deleteTryByUserId(Long userId) {
+        tryRepository.deleteByUserId(userId);
+    }
+
     public List<FindMyTryResDTO> findAllMyTry(Long userId, Long problemId) {
 
         QTry qTry = QTry.try$;
