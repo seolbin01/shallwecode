@@ -3,9 +3,9 @@ package com.shallwecode.backend.problem.application.service;
 import com.shallwecode.backend.common.exception.CustomException;
 import com.shallwecode.backend.common.exception.ErrorCode;
 import com.shallwecode.backend.common.util.CustomUserUtils;
-import com.shallwecode.backend.problem.application.dto.CoopDTO;
-import com.shallwecode.backend.problem.application.dto.CoopResDTO;
-import com.shallwecode.backend.problem.application.dto.CoopUserResDTO;
+import com.shallwecode.backend.problem.application.dto.coop.CoopDTO;
+import com.shallwecode.backend.problem.application.dto.coop.CoopResDTO;
+import com.shallwecode.backend.problem.application.dto.coop.CoopUserResDTO;
 import com.shallwecode.backend.problem.domain.service.CodingRoomDomainService;
 import com.shallwecode.backend.problem.domain.service.CoopDomainService;
 import com.shallwecode.backend.user.domain.service.FriendDomainService;
@@ -49,14 +49,14 @@ public class CoopService {
     }
 
     /* 코딩방에서 나가기 */
-    public void deleteCoop(Long codingRoomId) {
-
-        // 유저 id와 코딩방 id를 가지고 coopId 찾기
-        Long loginUserId = CustomUserUtils.getCurrentUserSeq();
+    public void deleteCoop(Long codingRoomId, Long loginUserId) {
 
         CoopResDTO findCoop = coopDomainService.findByCoop(codingRoomId, loginUserId);
-
         coopDomainService.delete(findCoop.getCoopId());
+        if (findCoop.isHost()) {
+            coopDomainService.deleteByCodingRoomId(codingRoomId);
+            codingRoomDomainService.deleteCodingRoom(codingRoomId);
+        }
 
         // 코딩방 호스트일 경우 코딩방 제거
         // 호스트가 아닌 유저가 코딩방에 마지막까지 존재할수는 없음.

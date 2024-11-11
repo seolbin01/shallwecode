@@ -1,7 +1,8 @@
 package com.shallwecode.backend.problem.application.controller;
 
-import com.shallwecode.backend.problem.application.dto.CoopUserResDTO;
-import com.shallwecode.backend.problem.application.dto.CoopUserResListDTO;
+import com.shallwecode.backend.common.util.CustomUserUtils;
+import com.shallwecode.backend.problem.application.dto.coop.CoopUserResDTO;
+import com.shallwecode.backend.problem.application.dto.coop.CoopUserResListDTO;
 import com.shallwecode.backend.problem.application.service.CoopService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -34,7 +35,9 @@ public class CoopController {
     @Operation(summary = "코딩방 나가기", description = "코딩방에서 나간다.")
     public ResponseEntity<Void> deleteCoop(@PathVariable Long codingroomId) {
 
-        coopService.deleteCoop(codingroomId);
+        Long loginUserId = CustomUserUtils.getCurrentUserSeq();
+
+        coopService.deleteCoop(codingroomId, loginUserId);
         return ResponseEntity.noContent().build();
     }
 

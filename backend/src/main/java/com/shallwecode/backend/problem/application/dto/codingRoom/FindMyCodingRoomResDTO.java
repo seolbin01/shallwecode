@@ -1,4 +1,4 @@
-package com.shallwecode.backend.problem.application.dto;
+package com.shallwecode.backend.problem.application.dto.codingRoom;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -10,6 +10,7 @@ import lombok.Setter;
 public class FindMyCodingRoomResDTO {
 
     private Long codingRoomId;
+    private Long problemId;
     private String problemTitle;
     private boolean isOpen;
     private int coopCount;
