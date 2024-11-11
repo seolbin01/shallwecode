@@ -29,21 +29,24 @@ public class FriendController {
     @Operation(summary = "친구 신청", description = "친구를 신청한다")
     @PostMapping("/request")
     public ResponseEntity<Void> saveFriend(@Valid @RequestBody SaveFriendReqDTO saveFriendReqDTO) {
-        friendService.saveFriend(saveFriendReqDTO);
+        Long loginUserId = CustomUserUtils.getCurrentUserSeq();
+        friendService.saveFriend(loginUserId, saveFriendReqDTO);
         return ResponseEntity.ok().build();
     }
 
     @Operation(summary = "친구 신청 수락", description = "친구 신청을 수락한다.")
     @PostMapping("/request/accept")
     public ResponseEntity<Void> acceptFriend(@Valid @RequestBody UpdateFriendReqDTO updateFriendReqDTO) {
-        friendService.updateFriend(updateFriendReqDTO, true);
+        Long loginUserId = CustomUserUtils.getCurrentUserSeq();
+        friendService.updateFriend(loginUserId, updateFriendReqDTO, true);
         return ResponseEntity.ok().build();
     }
 
     @Operation(summary = "친구 신청 거절", description = "친구 신청을 거절한다.")
     @PostMapping("/request/reject")
     public ResponseEntity<Void> rejectFriend(@Valid @RequestBody UpdateFriendReqDTO updateFriendReqDTO) {
-        friendService.updateFriend(updateFriendReqDTO, false);
+        Long loginUserId = CustomUserUtils.getCurrentUserSeq();
+        friendService.updateFriend(loginUserId, updateFriendReqDTO, false);
         return ResponseEntity.ok().build();
     }
 
@@ -81,7 +84,7 @@ public class FriendController {
 
         Long loginUserId = CustomUserUtils.getCurrentUserSeq();
 
-        friendService.deleteFriend(userId, loginUserId);
+        friendService.deleteFriend(loginUserId, userId);
         return ResponseEntity.ok().build();
     }
 }

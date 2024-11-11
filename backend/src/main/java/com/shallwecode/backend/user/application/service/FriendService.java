@@ -23,9 +23,7 @@ public class FriendService {
     private final NotiDomainService notiDomainService;
 
     @Transactional
-    public void saveFriend(SaveFriendReqDTO saveFriendReqDTO) {
-
-        Long loginUserId = CustomUserUtils.getCurrentUserSeq();
+    public void saveFriend(Long loginUserId, SaveFriendReqDTO saveFriendReqDTO) {
 
         boolean isExistFriendResult = friendDomainService.isExistFriend(loginUserId, saveFriendReqDTO.getToUserId());
 
@@ -38,7 +36,7 @@ public class FriendService {
         }
 
         try {
-            SaveFriendDTO SaveFriendDTO = friendDomainService.save(saveFriendReqDTO);
+            SaveFriendDTO SaveFriendDTO = friendDomainService.save(loginUserId, saveFriendReqDTO);
 
             String notiContent = SaveFriendDTO.getFromUser().getNickname()
                     + "님이 친구 신청하였습니다.";
@@ -55,9 +53,9 @@ public class FriendService {
     }
 
     @Transactional
-    public void updateFriend(UpdateFriendReqDTO updateFriendReqDTO, boolean result) {
+    public void updateFriend(Long loginUserId, UpdateFriendReqDTO updateFriendReqDTO, boolean result) {
 
-        FindFriendDTO findFriendDTO = friendDomainService.findMyFriend(updateFriendReqDTO);
+        FindFriendDTO findFriendDTO = friendDomainService.findMyFriend(loginUserId, updateFriendReqDTO);
 
         try {
             String notiContent = "";
@@ -92,7 +90,7 @@ public class FriendService {
     }
 
     @Transactional
-    public void deleteFriend(Long userId, Long loginUserId) {
+    public void deleteFriend(Long loginUserId, Long userId) {
 
         try {
             friendDomainService.deleteFriendByIds(userId, loginUserId);
