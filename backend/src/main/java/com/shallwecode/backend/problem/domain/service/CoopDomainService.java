@@ -5,7 +5,6 @@ import com.querydsl.jpa.impl.JPAQueryFactory;
 import com.shallwecode.backend.problem.application.dto.CoopDTO;
 import com.shallwecode.backend.problem.application.dto.CoopResDTO;
 import com.shallwecode.backend.problem.application.dto.CoopUserResDTO;
-import com.shallwecode.backend.problem.application.dto.ProblemOneResDTO;
 import com.shallwecode.backend.problem.domain.aggregate.Coop;
 import com.shallwecode.backend.problem.domain.aggregate.QCoop;
 import com.shallwecode.backend.problem.domain.repository.CoopRepository;
