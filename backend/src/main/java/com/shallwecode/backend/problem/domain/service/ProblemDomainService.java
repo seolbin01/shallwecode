@@ -136,7 +136,7 @@ public class ProblemDomainService {
             return null; // 문제 없음 처리
         }
 
-        // 해당 Problem에 대한 모든 Testcase를 조회하여 리스트로 추가
+        // 해당 Problem 에 대한 모든 Testcase 를 조회하여 리스트로 추가
         List<TestcaseDTO> testcases = queryFactory.select(
                         Projections.constructor(TestcaseDTO.class,
                                 qTestcase.input,

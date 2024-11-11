@@ -1,14 +1,10 @@
 <script setup>
-const problemText = '정수 배열 numbers가 주어집니다. 이 배열의 각 원소에 대해 다음과 같은 규칙으로 가공하여 새로운 배열을 만들어 반환하는 함수를 작성해주세요:\n' +
-    '짝수인 경우: 해당 숫자를 2로 나눕니다.\n' +
-    '홀수인 경우: 해당 숫자에 2를 곱하고 1을 더합니다.\n' +
-    '결과값이 10을 넘는 경우: 10을 뺍니다.';
-
-const constraints = [
-  '배열 numbers의 길이는 1 이상 100,000 이하입니다.',
-  '배열의 각 원소는 1 이상 100 이하의 자연수입니다.'
-];
-
+const props = defineProps({
+  content: {
+    type: String,
+    required: true
+  }
+});
 </script>
 
 <template>
@@ -19,16 +15,8 @@ const constraints = [
     <div class="description">
       <div class="problem-section">
         <div class="section-content">
-          {{ problemText }}
+          {{ props.content }}
         </div>
-      </div>
-      <div class="constraints-section">
-        <h3 class="constraints-title">제한사항</h3>
-        <ul class="constraints-list">
-          <li v-for="(constraint, index) in constraints" :key="index">
-            {{ constraint }}
-          </li>
-        </ul>
       </div>
     </div>
   </div>

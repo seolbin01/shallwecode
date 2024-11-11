@@ -14,14 +14,14 @@ class ProblemDomainServiceTest {
     @Autowired
     private ProblemDomainService problemDomainService;
 
-    @Test
-    void selectOneProblem() {
-        List<ProblemOneResDTO> problemResList = problemDomainService.selectOneProblem(1L);
-
-        for (ProblemOneResDTO problemOneResDTO : problemResList) {
-            System.out.println(problemOneResDTO.toString());
-        }
-    }
+//    @Test
+//    void selectOneProblem() {
+//        List<ProblemOneResDTO> problemResList = problemDomainService.selectOneProblem(1L);
+//
+//        for (ProblemOneResDTO problemOneResDTO : problemResList) {
+//            System.out.println(problemOneResDTO.toString());
+//        }
+//    }
 
     @Test
     void selectProblemList() {

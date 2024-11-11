@@ -5,6 +5,13 @@ import axios from "axios";
 
 const useAuth = useAuthStore();
 
+const props = defineProps({
+  codingRoomId : {
+    type : String,
+    required : true
+  }
+});
+
 const tempObjectInfo = {
   userId : useAuth.userId,
   accessToken : useAuth.accessToken,
@@ -98,8 +105,8 @@ const connectWebSocket = (codingRoomId) => {
 
     // 상태 체크 - 접속시 보내온 상태정보 업데이트
     if(receiveMessage.type === "statusCheck") {
-      console.log(receiveMessage);
-      console.log(Object.entries(receiveMessage.sessionList));
+      // console.log(receiveMessage);
+      // console.log(Object.entries(receiveMessage.sessionList));
       // for(let i = 0; i < coopMember.length; i++) {
       //   // 온라인 정보만 기록한다.
       //   if(receiveMessage.coopMember[i].status === "online")
@@ -149,8 +156,8 @@ const disConnectWebSocket = () => {
 
 // DOM 로딩 전
 onMounted(async () => {
-  await communicateCoopInfo(10);
-  connectWebSocket(10);
+  await communicateCoopInfo(props.codingRoomId);
+  connectWebSocket(props.codingRoomId);
 })
 
 onUnmounted(async() => {

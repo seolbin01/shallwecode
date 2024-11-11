@@ -1,6 +1,7 @@
 package com.shallwecode.backend.problem.domain.service;
 
 import com.shallwecode.backend.problem.application.dto.SendCodeDTO;
+import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
@@ -31,5 +32,11 @@ class CodingRoomDomainServiceTest {
     void updateCodeTest(Long codingRoomId, Long problemId, String tryLanguage, String codeContent) {
         SendCodeDTO sendCodeDTO = new SendCodeDTO(codingRoomId, problemId, tryLanguage, codeContent);
         codingRoomDomainService.updateCode(sendCodeDTO);
+    }
+
+    @Test
+    void selectProblemContentTest() {
+        String problemContent = codingRoomDomainService.selectProblemContent(4L);
+        System.out.println(problemContent);
     }
 }
