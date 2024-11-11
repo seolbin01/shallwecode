@@ -1,9 +1,18 @@
 package com.shallwecode.backend.user.application.service;
 
+import com.shallwecode.backend.common.exception.CustomException;
+import com.shallwecode.backend.common.exception.ErrorCode;
+import com.shallwecode.backend.problem.application.dto.CoopResDTO;
+import com.shallwecode.backend.problem.domain.service.CodingRoomDomainService;
+import com.shallwecode.backend.problem.domain.service.CoopDomainService;
+import com.shallwecode.backend.problem.domain.service.TryDomainService;
 import com.shallwecode.backend.user.application.dto.friend.FindFriendDetailDTO;
 import com.shallwecode.backend.user.application.dto.user.*;
+import com.shallwecode.backend.user.domain.aggregate.AuthType;
 import com.shallwecode.backend.user.domain.aggregate.UserInfo;
 import com.shallwecode.backend.user.domain.repository.UserRepository;
+import com.shallwecode.backend.user.domain.service.FriendDomainService;
+import com.shallwecode.backend.user.domain.service.NotiDomainService;
 import com.shallwecode.backend.user.domain.service.UserDomainService;
 import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
@@ -24,6 +33,12 @@ import java.util.List;
 public class UserService implements UserDetailsService {
     private final UserDomainService userDomainService;
     private final UserRepository userRepository;
+    private final CoopDomainService coopDomainService;
+    private final CodingRoomDomainService codingRoomDomainService;
+    private final NotiDomainService notiDomainService;
+    private final TryDomainService tryDomainService;
+    private final FriendDomainService friendDomainService;
+
     private final ModelMapper modelMapper;
 
     // 회원 가입
@@ -43,6 +58,26 @@ public class UserService implements UserDetailsService {
     // 회원 삭제
     @Transactional
     public void deleteUser(Long userId) {
+
+        // 회원 삭제 전
+        // 협업 친구 삭제시 삭제한 userId가 호스트라면 연관된 코딩방도 함께 삭제되어야 한다.
+
+        FindUserDTO findUserDTO = userDomainService.findById(userId);
+        if(findUserDTO.getAuth().equals(AuthType.ADMIN)) {
+            throw new CustomException(ErrorCode.NOT_ADMIN_DELETE_ADMIN);
+        }
+
+        CoopResDTO coopResDTO = coopDomainService.findCoopByUserId(userId);
+        if(coopResDTO.isHost()){
+            // 해당 호스트 유저의 코딩방을 삭제한다.
+            codingRoomDomainService.deleteCodingRoom(coopResDTO.getCodingRoomId());
+        }else{
+            coopDomainService.deleteByUserId(userId);
+        }
+
+        notiDomainService.deleteNotiByUserId(userId);
+        tryDomainService.deleteTryByUserId(userId);
+        friendDomainService.deleteFriendByUserId(userId, userId);
         userDomainService.deleteUser(userId);
     }
 
