@@ -4,7 +4,7 @@ import com.querydsl.core.BooleanBuilder;
 import com.querydsl.core.types.Projections;
 import com.querydsl.core.types.dsl.Expressions;
 import com.querydsl.jpa.impl.JPAQueryFactory;
-import com.shallwecode.backend.problem.application.dto.*;
+import com.shallwecode.backend.problem.application.dto.problem.*;
 import com.shallwecode.backend.problem.domain.aggregate.*;
 import com.shallwecode.backend.problem.domain.repository.ProblemRepository;
 import com.shallwecode.backend.problem.domain.repository.TestcaseRepository;
@@ -242,7 +242,6 @@ public class ProblemDomainService {
                     .orderBy(qProblem.problemId.asc())
                     .fetch();
         }
-        System.out.println("71434732894782190sdafj");
         return queryFactory
                 .select(Projections.constructor(FindProblemResDTO.class,
                         qProblem.problemId,

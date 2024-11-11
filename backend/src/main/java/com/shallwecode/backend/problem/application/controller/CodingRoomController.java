@@ -1,8 +1,7 @@
 package com.shallwecode.backend.problem.application.controller;
 
 import com.shallwecode.backend.common.util.CustomUserUtils;
-import com.shallwecode.backend.problem.application.dto.CodingRoomReqDTO;
-import com.shallwecode.backend.problem.application.dto.FindMyCodingRoomResDTO;
+import com.shallwecode.backend.problem.application.dto.codingRoom.FindMyCodingRoomResDTO;
 import com.shallwecode.backend.problem.application.service.CodingRoomService;
 import com.shallwecode.backend.problem.domain.aggregate.CodingRoom;
 import io.swagger.v3.oas.annotations.Operation;

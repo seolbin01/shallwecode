@@ -3,7 +3,7 @@ package com.shallwecode.backend.problem.application.controller;
 import com.shallwecode.backend.common.exception.CustomException;
 import com.shallwecode.backend.common.exception.ErrorCode;
 import com.shallwecode.backend.common.util.CustomUserUtils;
-import com.shallwecode.backend.problem.application.dto.*;
+import com.shallwecode.backend.problem.application.dto.problem.*;
 import com.shallwecode.backend.problem.application.service.ProblemService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
