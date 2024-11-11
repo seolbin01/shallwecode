@@ -10,6 +10,7 @@ import lombok.Setter;
 public class FindMyCodingRoomResDTO {
 
     private Long codingRoomId;
+    private Long problemId;
     private String problemTitle;
     private boolean isOpen;
     private int coopCount;
