@@ -5,6 +5,13 @@ import axios from "axios";
 
 const useAuth = useAuthStore();
 
+const props = defineProps({
+  codingRoomId : {
+    type : String,
+    required : true
+  }
+});
+
 const tempObjectInfo = {
   userId : useAuth.userId,
   accessToken : useAuth.accessToken,
@@ -73,8 +80,17 @@ const sendMessage = () => {
     webSocket.value.send(JSON.stringify(sendMess));
     newMessage.value = '';
   }
-
 };
+
+// 협업 친구 초대
+const inviteCoop = () => {
+  // 민철님 여기다가 하면 될 것 같습니다.
+}
+
+// 협업 탈퇴
+const leaveCoop = () => {
+  // 민철님 여기다가 하면 될 것 같습니다.
+}
 
 // 웹 소켓 연결 함수
 const connectWebSocket = (codingRoomId) => {
@@ -98,8 +114,8 @@ const connectWebSocket = (codingRoomId) => {
 
     // 상태 체크 - 접속시 보내온 상태정보 업데이트
     if(receiveMessage.type === "statusCheck") {
-      console.log(receiveMessage);
-      console.log(Object.entries(receiveMessage.sessionList));
+      // console.log(receiveMessage);
+      // console.log(Object.entries(receiveMessage.sessionList));
       // for(let i = 0; i < coopMember.length; i++) {
       //   // 온라인 정보만 기록한다.
       //   if(receiveMessage.coopMember[i].status === "online")
@@ -149,8 +165,8 @@ const disConnectWebSocket = () => {
 
 // DOM 로딩 전
 onMounted(async () => {
-  await communicateCoopInfo(10);
-  connectWebSocket(10);
+  await communicateCoopInfo(props.codingRoomId);
+  connectWebSocket(props.codingRoomId);
 })
 
 onUnmounted(async() => {
@@ -177,6 +193,11 @@ onUnmounted(async() => {
               {{ coopMember.userNickname }}
             </div>
           </div>
+        </div>
+        <!-- 버튼들을 감싸는 컨테이너 추가 -->
+        <div class="buttons-container">
+          <button @click="inviteCoop">협업초대</button>
+          <button @click="leaveCoop">협업탈퇴</button>
         </div>
       </div>
       <div class="messages-section">
@@ -461,5 +482,35 @@ onUnmounted(async() => {
 
 .chat-messages::-webkit-scrollbar-thumb:hover {
   background: rgba(255, 255, 255, 0.3);
+}
+
+.buttons-container {
+  display: flex;
+  flex-direction: row;
+  align-items: center; /* 가운데 정렬 */
+  gap: 8px; /* 버튼 간 간격 */
+  margin-top: auto; /* 상단 여백 자동으로 설정하여 아래쪽으로 이동 */
+}
+
+.buttons-container button {
+  padding: 6px 14px;
+  border: none;
+  border-radius: 4px;
+  background-color: #4CAF50;
+  color: white;
+  cursor: pointer;
+  transition: background-color 0.2s;
+  font-size: 14px;
+}
+
+.participants-section {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between; /* 공간을 위아래로 분배 */
+  width: 180px;
+  background-color: rgba(0, 0, 0, 0.2);
+  border-radius: 8px;
+  padding: 12px;
+  height: 200px;
 }
 </style>

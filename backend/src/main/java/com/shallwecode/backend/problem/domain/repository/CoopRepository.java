@@ -10,4 +10,6 @@ public interface CoopRepository extends JpaRepository<Coop, Long> {
     void deleteByCodingRoomId(Long id);
     Optional<Coop> findByCodingRoomIdAndUserId(Long codingRoomId, Long userId);
     Optional<Coop> findByCodingRoomIdAndCoopId(Long codingRoomId, Long coopId);
+    void deleteByUserId(Long userId);
+    Optional<Coop> findByUserId(Long userId);
 }

@@ -38,10 +38,16 @@ const deleteUser = async (userId) => {
 
   try {
     await delFetch(`http://localhost/boot/api/v1/user/${userId}`);
+    await delFetch(`http://localhost/boot/api/v1/user/${userId}`);
+    alert("해당 사용자의 회원 정보가 삭제되었습니다.")
     // 삭제 성공 후 사용자 목록을 다시 로드
     await fetchUserList();
   } catch (error) {
-    console.error('사용자 삭제 중 오류가 발생했습니다.', error.response ? error.response.data : error.message);
+    if (error.response.status === 403) {
+      alert("관리자는 삭제할 수 없습니다.");
+    } else {
+      console.error('사용자 삭제 중 오류가 발생했습니다.', error.response ? error.response.data : error.message);
+    }
   }
 };
 

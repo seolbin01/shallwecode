@@ -13,5 +13,5 @@ import java.util.List;
 @AllArgsConstructor
 public class CoopUserResListDTO {
     private String message;
-    List<CoopUserResDTO> coopList;
+    List<com.shallwecode.backend.problem.application.dto.CoopUserResDTO> coopList;
 }

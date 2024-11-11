@@ -5,7 +5,6 @@ import com.querydsl.jpa.impl.JPAQueryFactory;
 import com.shallwecode.backend.problem.application.dto.CoopDTO;
 import com.shallwecode.backend.problem.application.dto.CoopResDTO;
 import com.shallwecode.backend.problem.application.dto.CoopUserResDTO;
-import com.shallwecode.backend.problem.application.dto.ProblemOneResDTO;
 import com.shallwecode.backend.problem.domain.aggregate.Coop;
 import com.shallwecode.backend.problem.domain.aggregate.QCoop;
 import com.shallwecode.backend.problem.domain.repository.CoopRepository;
@@ -47,11 +46,21 @@ public class CoopDomainService {
     }
 
     @Transactional
-    public void delete(Long coopId){
-
-        coopRepository.deleteById(coopId);
-
+    public CoopResDTO findCoopByUserId(Long userId) {
+        return modelMapper.map(coopRepository.findByUserId(userId), CoopResDTO.class);
     }
+
+
+    @Transactional
+    public void delete(Long coopId){
+        coopRepository.deleteById(coopId);
+    }
+
+    @Transactional
+    public void deleteByUserId(Long userId) {
+        coopRepository.deleteByUserId(userId);
+    }
+
 
     public List<CoopUserResDTO> selectCoopFriend(Long codingRoomId) {
         /* UserInfo */

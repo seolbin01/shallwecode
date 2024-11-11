@@ -133,11 +133,27 @@ watch(selectedLevel, () => {
   fetchProblemList();
 });
 
+const goToCodingRoom = (codingRoomId, problemId) => {
+  router.push({path:`/codingroom/${String(codingRoomId)}/${String(problemId)}`});
+};
+
 const handleProblemClick = async (problem) => {
-  try {
-    console.log(problem.problemId);
-  } catch (error) {
-    console.error('코딩방 생성 중 에러가 발생했습니다.', error.response ? error.response.data : error.message);
+  const result = confirm("해당 문제를 도전 하시겠습니까? \n확인을 누르시면 새로운 코딩 협업창으로 들어갑니다.");
+  if(result){
+    try {
+      const response = await axios.post(`http://localhost:8080/api/v1/codingroom/${problem.problemId}`, {} , {
+        headers: {
+          Authorization: `Bearer ${store.accessToken}`
+        }
+      });
+
+      const problemId = response.data.problemId;
+      const codingRoomId = response.data.codingRoomId;
+
+      goToCodingRoom(codingRoomId, problemId);
+    } catch (error) {
+      console.error('코딩방 생성 중 에러가 발생했습니다.', error.response ? error.response.data : error.message);
+    }
   }
 };
 

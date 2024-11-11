@@ -1,6 +1,7 @@
 <script setup>
 import {computed, onMounted, ref} from "vue";
 import {getFetch} from "@/stores/apiClient.js";
+import router from "@/router/index.js";
 
 const ROWS_PER_PAGE = 7;
 const currentPage = ref(1);
@@ -15,9 +16,13 @@ const fetchMyCodingRoomList = async () => {
   }
 };
 
-const handleCodingRoomClick = () => {
-
+const handleCodingRoomClick = (codingRoom) => {
+  goToCodingRoom(codingRoom.codingRoomId, codingRoom.problemId);
 }
+
+const goToCodingRoom = (codingRoomId, problemId) => {
+  router.push({path:`/codingroom/${String(codingRoomId)}/${String(problemId)}`});
+};
 
 const displayedCodingRooms = computed(() => {
   const startIdx = (currentPage.value - 1) * ROWS_PER_PAGE;

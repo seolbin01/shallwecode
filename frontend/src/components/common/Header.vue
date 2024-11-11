@@ -10,7 +10,7 @@ const showNotis = ref(false);
 const notis = ref([]);
 const refreshNotiList = inject('refreshNotiList');
 const store = useAuthStore();
-const isLogin = ref(false);
+const isLogin = ref(0);
 
 const fetchMyNotReadNotiList = async () => {
   try {
@@ -100,7 +100,7 @@ function getCookie(name) {
 
 onMounted(() => {
 
-  if (!store.accessToken){
+  if (!store.accessToken) {
     const token = getCookie('accessToken');  // 쿠키에서 'token' 값 가져오기
     const token2 = getCookie('refreshToken');
     if (token) {
@@ -113,7 +113,11 @@ onMounted(() => {
   }
 
   if (store.accessToken != null) {
-    isLogin.value = true;
+    if (store.userRole === 'ADMIN') {
+      isLogin.value = 2;
+    } else {
+      isLogin.value = 1;
+    }
   }
 
   if (isLogin.value) {
@@ -130,7 +134,8 @@ onUnmounted(() => {
 <template>
   <header class="header">
     <router-link to="/" class="logo">ShallWeCode</router-link>
-    <div v-if=isLogin class="menu">
+    <div v-if='isLogin' class="menu">
+      <router-link v-if="isLogin === 2" to="/admin" class="menu-item">관리자 모드</router-link>
       <router-link to="/mypage" class="menu-item">마이페이지</router-link>
       <router-link to="/" class="menu-item">문제 목록</router-link>
       <router-link to="/user-list" class="menu-item">회원 목록</router-link>

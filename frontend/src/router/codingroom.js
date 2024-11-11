@@ -2,7 +2,7 @@ import CodingRoom from "@/views/codingroom/CodingRoom.vue";
 
 export default [
     {
-        path: '/codingroom',
+        path: '/codingroom/:codingRoomId/:problemId',
         component: CodingRoom
     }
 ];
