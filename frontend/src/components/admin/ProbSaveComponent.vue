@@ -99,8 +99,7 @@ export default {
       try {
         const response = await axios.post('http://localhost:8080/api/v1/problem', formData,{
           headers: {
-            Authorization: `Bearer ${authStore.accessToken}`,
-            'Authorization-refresh': `Bearer ${authStore.refreshToken}`
+            Authorization: `Bearer ${authStore.accessToken}`
           }
         });
         console.log('문제가 성공적으로 등록되었습니다:',response.data);
