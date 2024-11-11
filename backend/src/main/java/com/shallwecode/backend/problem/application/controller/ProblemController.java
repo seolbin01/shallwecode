@@ -33,7 +33,8 @@ public class ProblemController {
     @PostMapping
     public ResponseEntity<String> saveProblem(@RequestBody ProblemReqDTO newProblemInfo) {
 
-        problemService.saveProblem(newProblemInfo);
+        Long loginUserId = CustomUserUtils.getCurrentUserSeq();
+        problemService.saveProblem(newProblemInfo, loginUserId);
 
         return new ResponseEntity<>("문제 추가 완료", HttpStatus.CREATED);
     }
@@ -43,7 +44,8 @@ public class ProblemController {
     @PutMapping("/{problemId}")
     public ResponseEntity<String> updateProblem(@PathVariable Long problemId, @RequestBody ProblemReqDTO newProblemInfo) {
 
-        problemService.updateProblem(problemId, newProblemInfo);
+        Long loginUserId = CustomUserUtils.getCurrentUserSeq();
+        problemService.updateProblem(problemId, newProblemInfo, loginUserId);
 
         return ResponseEntity.ok().build();
 
@@ -57,10 +59,8 @@ public class ProblemController {
     @DeleteMapping("/{problemId}")
     public ResponseEntity<String> deleteProblem(@PathVariable Long problemId) {
 
-        // 해당 글이 존재하는지 확인해야 함
-
-        // 관리자 여부를 확인해야 함
-        problemService.deleteProblem(problemId);
+        Long loginUserId = CustomUserUtils.getCurrentUserSeq();
+        problemService.deleteProblem(problemId, loginUserId);
 
         return ResponseEntity.noContent().build();
     }
