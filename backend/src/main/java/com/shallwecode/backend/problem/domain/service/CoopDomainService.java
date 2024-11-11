@@ -66,4 +66,9 @@ public class CoopDomainService {
                 .where(qCoop.codingRoomId.eq(codingRoomId))
                 .fetch();
     }
+
+    public void deleteByCodingRoomId(Long codingRoomId) {
+
+        coopRepository.deleteByCodingRoomId(codingRoomId);
+    }
 }
