@@ -1,20 +1,20 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: boot-swc-dep
+  name: websocket-swc-dep
 spec:
   selector:
     matchLabels:
-      app: boot-swc-kube
+      app: websocket-swc-kube
   replicas: 1
   template:
     metadata:
       labels:
-        app: boot-swc-kube
+        app: websocket-swc-kube
     spec:
       containers:
-        - name: boot-container
-          image: seolbin/swc_boot_project:latest
+        - name: websocket-container
+          image: seolbin/swc_websocket_project:latest
           imagePullPolicy: Always
           ports:
-            - containerPort: 8080
+            - containerPort: 1234

@@ -13,12 +13,7 @@ spec:
     spec:
       containers:
         - name: vue-container
-          image: seolbin/swc_vue_ing:latest
+          image: seolbin/swc_vue_project:latest
           imagePullPolicy: Always
           ports:
-            - containerPort: 80      # 5173이 아니라 80으로 바꿔야 한다.
-  strategy:
-    type: RollingUpdate
-    rollingUpdate:
-      maxUnavailable: 1 # 배포 중 사용할 수 없는 최대 Pod 수
-      maxSurge: 1       # 배포 시 추가 생성 가능한 최대 Pod 수
+            - containerPort: 80
