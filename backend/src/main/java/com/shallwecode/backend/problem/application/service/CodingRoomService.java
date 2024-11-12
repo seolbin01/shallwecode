@@ -2,9 +2,7 @@ package com.shallwecode.backend.problem.application.service;
 
 import com.shallwecode.backend.common.exception.CustomException;
 import com.shallwecode.backend.common.exception.ErrorCode;
-import com.shallwecode.backend.problem.application.dto.coop.CoopDTO;
-import com.shallwecode.backend.problem.application.dto.CoopResDTO;
-import com.shallwecode.backend.problem.application.dto.FindMyCodingRoomResDTO;
+import com.shallwecode.backend.problem.application.dto.codingRoom.FindMyCodingRoomResDTO;
 import com.shallwecode.backend.problem.application.dto.coop.CoopDTO;
 import com.shallwecode.backend.problem.application.dto.coop.CoopResDTO;
 import com.shallwecode.backend.problem.domain.aggregate.CodingRoom;

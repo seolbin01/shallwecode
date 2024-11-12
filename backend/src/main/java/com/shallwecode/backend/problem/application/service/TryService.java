@@ -1,9 +1,8 @@
 package com.shallwecode.backend.problem.application.service;
 
-import com.shallwecode.backend.problem.application.dto.FindMyTryResDTO;
-import com.shallwecode.backend.problem.application.dto.FindTryResDTO;
-import com.shallwecode.backend.problem.application.dto.SaveTryReqDTO;
-import com.shallwecode.backend.problem.domain.aggregate.Try;
+import com.shallwecode.backend.problem.application.dto.try$.FindMyTryResDTO;
+import com.shallwecode.backend.problem.application.dto.try$.FindTryResDTO;
+import com.shallwecode.backend.problem.application.dto.try$.SaveTryReqDTO;
 import com.shallwecode.backend.problem.domain.service.TryDomainService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
