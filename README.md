@@ -485,7 +485,11 @@ pipeline {
 
 
 #### &emsp;3-9. Jenkins CI/CD 테스트 결과 화면
-<img src="images/jenkins테스트결과.png">
+<details>
+    <summary>Jenkins CI/CD 테스트 결과 화면 (gif)</summary>
+    <img src="gifs/jenkinstest.gif">
+
+</details>
 
 ---
 
