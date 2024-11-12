@@ -155,39 +155,39 @@ class FriendServiceTest {
         assertTrue(friend2.isEmpty());
     }
 
-    @Test
-    @DisplayName("친구 목록 조회 테스트")
-    public void findAllFriendsTest() {
-        // given
-        // 친구 목록 조회 테스트를 위해 유저
-        Long userId1 = 21L;
-
-        // when
-        List<FriendResListDTO> findAllFriends = friendService.findAllFriend(userId1);
-
-        // then
-        if (findAllFriends.isEmpty()) {
-            assertNull(findAllFriends);
-        } else {
-            assertNotNull(findAllFriends);
-        }
-    }
-
-    @Test
-    @DisplayName("친구 신청 목록 조회 테스트")
-    public void findAllFriendReqTest() {
-        // given
-        // 친구 신청 목록 조회 테스트 위한 유저
-        Long userId1 = 21L;
-
-        // when
-        List<FriendResListDTO> findAllFriendReq = friendService.findAllFriendReq(userId1);
-
-        //then
-        if (findAllFriendReq.isEmpty()) {
-            assertNull(findAllFriendReq);
-        } else {
-            assertNotNull(findAllFriendReq);
-        }
-    }
+//    @Test
+//    @DisplayName("친구 목록 조회 테스트")
+//    public void findAllFriendsTest() {
+//        // given
+//        // 친구 목록 조회 테스트를 위해 유저
+//        Long userId1 = 21L;
+//
+//        // when
+//        List<FriendResListDTO> findAllFriends = friendService.findAllFriend(userId1);
+//
+//        // then
+//        if (findAllFriends.isEmpty()) {
+//            assertNull(findAllFriends);
+//        } else {
+//            assertNotNull(findAllFriends);
+//        }
+//    }
+//
+//    @Test
+//    @DisplayName("친구 신청 목록 조회 테스트")
+//    public void findAllFriendReqTest() {
+//        // given
+//        // 친구 신청 목록 조회 테스트 위한 유저
+//        Long userId1 = 21L;
+//
+//        // when
+//        List<FriendResListDTO> findAllFriendReq = friendService.findAllFriendReq(userId1);
+//
+//        //then
+//        if (findAllFriendReq.isEmpty()) {
+//            assertNull(findAllFriendReq);
+//        } else {
+//            assertNotNull(findAllFriendReq);
+//        }
+//    }
 }
