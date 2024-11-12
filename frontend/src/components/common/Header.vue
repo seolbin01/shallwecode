@@ -113,7 +113,7 @@ onMounted(() => {
   }
 
   if (store.accessToken != null) {
-    if (store.userRole === 'ADMIN') {
+    if (store.userRole == 'ADMIN') {
       isLogin.value = 2;
     } else {
       isLogin.value = 1;
