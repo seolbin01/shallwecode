@@ -99,13 +99,393 @@
 
 ### 3-8. 빌드 및 배포 
 
-### &emsp;3-8-1. Docker File
+#### &emsp;3-8-1. Docker File
+<details>
+  <summary>backend Dockerfile</summary>
 
-### &emsp;3-8-2. Kubernetes manifest
+  ```dockerfile
+FROM openjdk:17-alpine
+WORKDIR /app
+COPY build/libs/*.jar ./
+COPY .env .env
+RUN mv $(ls *.jar | grep -v plain) app.jar
+ENTRYPOINT ["java", "-jar", "app.jar"]
+```
+</details>
 
-### &emsp;3-8-3. Jenkins Pipeline Script
+<details>
+  <summary>frontend Dockerfile</summary>
 
-### &emsp;3-9. Jenkins CI/CD 테스트 결과 화면
+  ```dockerfile
+FROM nginx:stable-alpine
+COPY dist /usr/share/nginx/html
+COPY nginx.conf /etc/nginx/conf.d/default.conf
+EXPOSE 80
+CMD ["nginx", "-g", "daemon off;"]
+```
+</details>
+
+<details>
+  <summary>websocket Dockerfile</summary>
+
+  ```dockerfile
+FROM node:lts-alpine
+WORKDIR /app
+COPY . .
+RUN npm install
+CMD ["node", "index.js"]
+```
+</details>
+
+#### &emsp;3-8-2. Kubernetes manifest
+<details>
+  <summary>ingress-swc</summary>
+
+  ```yml
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: ingress-swc
+  annotations:
+    nginx.ingress.kubernetes.io/ssl-redirect: "false"
+    nginx.ingress.kubernetes.io/rewrite-target: /$2
+spec:
+  ingressClassName: nginx
+  rules:
+    - http:
+        paths:
+          - path: /()(.*)
+            pathType: ImplementationSpecific
+            backend:
+              service:
+                name: vue-swc-ser
+                port:
+                  number: 8000
+          - path: /boot(/|$)(.*)
+            pathType: ImplementationSpecific
+            backend:
+              service:
+                name: boot-swc-ser
+                port:
+                  number: 8001
+          - path: /ws(/|$)(.*)
+            pathType: ImplementationSpecific
+            backend:
+              service:
+                name: websocket-swc-ser
+                port:
+                  number: 8002
+```
+</details>
+
+<details>
+  <summary>boot-swc-ser</summary>
+
+  ```yml
+apiVersion: v1
+kind: Service
+metadata:
+  name: boot-swc-ser
+spec:
+  type: ClusterIP
+  ports:
+    - port: 8001
+      targetPort: 8080
+  selector:
+    app: boot-swc-kube
+```
+</details>
+
+<details>
+  <summary>boot-swc-dep</summary>
+
+  ```yml
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: boot-swc-dep
+spec:
+  selector:
+    matchLabels:
+      app: boot-swc-kube
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: boot-swc-kube
+    spec:
+      containers:
+        - name: boot-container
+          image: seolbin/swc_boot_project:latest
+          imagePullPolicy: Always
+          ports:
+            - containerPort: 8080
+```
+</details>
+
+<details>
+  <summary>vue-swc-ser</summary>
+
+  ```yml
+apiVersion: v1
+kind: Service
+metadata:
+  name: vue-swc-ser
+spec:
+  type: ClusterIP
+  ports:
+    - port: 8000
+      targetPort: 80
+  selector:
+    app: vue-swc-kube
+```
+</details>
+
+<details>
+  <summary>vue-swc-dep</summary>
+
+  ```yml
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: vue-swc-dep
+spec:
+  selector:
+    matchLabels:
+      app: vue-swc-kube
+  template:
+    metadata:
+      labels:
+        app: vue-swc-kube
+    spec:
+      containers:
+        - name: vue-container
+          image: seolbin/swc_vue_project:latest
+          imagePullPolicy: Always
+          ports:
+            - containerPort: 80
+```
+</details>
+
+<details>
+  <summary>websocket-swc-ser</summary>
+
+  ```yml
+apiVersion: v1
+kind: Service
+metadata:
+  name: websocket-swc-ser
+spec:
+  type: ClusterIP
+  ports:
+    - port: 8002
+      targetPort: 1234
+  selector:
+    app: websocket-swc-kube
+```
+</details>
+
+<details>
+  <summary>websocket-swc-dep</summary>
+
+  ```yml
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: websocket-swc-dep
+spec:
+  selector:
+    matchLabels:
+      app: websocket-swc-kube
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: websocket-swc-kube
+    spec:
+      containers:
+        - name: websocket-container
+          image: seolbin/swc_websocket_project:latest
+          imagePullPolicy: Always
+          ports:
+            - containerPort: 1234
+```
+</details>
+
+#### &emsp;3-8-3. Jenkins Pipeline Script
+<details>
+  <summary>Jenkins Pipeline Script</summary>
+
+  ```pipeline script
+pipeline {
+    agent any
+
+    tools {
+        gradle 'gradle'
+        jdk 'openJDK17'
+    }
+
+    environment {
+        SOURCE_GITHUB_URL = 'https://github.com/code-4-u/shallwecode/'
+        MANIFESTS_GITHUB_URL = 'https://github.com/seolbin01/k8s-manifests'
+        GIT_USERNAME = 'seolbin01'
+        GIT_EMAIL = 'seolbinpark01@gmail.com'
+        DOCKERHUB_CREDENTIALS = credentials('DOCKERHUB_PASSWORD')
+        GITHUB_URL = 'https://github.com/code-4-u/shallwecode'
+        FRONTEND_IMAGE = 'swc_vue_project'
+        BACKEND_IMAGE = 'swc_boot_project'
+        WEBSOCKET_IMAGE = 'swc_websocket_project'
+    }
+
+    stages {
+        stage('Source Build') {
+            steps {
+                git branch: 'simple/chore', url: "${env.SOURCE_GITHUB_URL}"
+                script {
+                    dir('backend') { 
+                        configFileProvider([configFile(fileId: 'shallwecodeenv', targetLocation: '.env')]) {
+                            if (isUnix()) {
+                                sh "chmod +x ./gradlew"
+                                sh "./gradlew clean build"
+                            } else {
+                                bat "gradlew.bat clean build"
+                            }
+                        }
+                    }
+                    dir('frontend') {
+                        if (isUnix()) {
+                            sh 'rm -rf dist'
+                            sh 'npm install'
+                            sh 'npm run build'
+                        } else {
+                            bat 'if exist dist rd /s /q dist'
+                            bat 'npm install'
+                            bat 'npm run build'
+                        }
+                    }
+                    dir('websocket-server') {
+                        if (isUnix()) {
+                            sh 'npm install'
+                        } else {
+                            bat 'npm install'
+                        }
+                    }
+                }
+            }
+        }
+
+        stage('Run Tests') {
+            steps {
+                script {
+                    dir('backend') { 
+                        configFileProvider([configFile(fileId: 'shallwecodeenv', targetLocation: '.env')]) {
+                            if (isUnix()) {
+                                sh "./gradlew test"
+                            } else {
+                                bat "gradlew.bat test"
+                            }
+                        }
+                    }
+                }
+            }
+            post {
+                always {
+                    junit '**/build/test-results/test/*.xml'
+                }
+            }
+        }
+
+        stage('Docker Build and Push') {
+            steps {
+                script {
+                    withCredentials([usernamePassword(credentialsId: 'DOCKERHUB_PASSWORD', 
+                                                    usernameVariable: 'DOCKER_USER', 
+                                                    passwordVariable: 'DOCKER_PASS')]) {
+                        dir('backend') {
+                            if (isUnix()) {
+                                sh "docker build -t ${DOCKER_USER}/${BACKEND_IMAGE}:latest ."
+                                sh "docker login -u ${DOCKER_USER} -p ${DOCKER_PASS}"
+                                sh "docker push ${DOCKER_USER}/${BACKEND_IMAGE}:latest"
+                            } else {
+                                bat "docker build -t ${DOCKER_USER}/${BACKEND_IMAGE}:latest ."
+                                bat "docker login -u %DOCKER_USER% -p %DOCKER_PASS%"
+                                bat "docker push ${DOCKER_USER}/${BACKEND_IMAGE}:latest"
+                            }
+                        }
+                        dir('frontend') {
+                            if (isUnix()) {
+                                sh "docker build -t ${DOCKER_USER}/${FRONTEND_IMAGE}:latest ."
+                                sh "docker push ${DOCKER_USER}/${FRONTEND_IMAGE}:latest"
+                            } else {
+                                bat "docker build -t ${DOCKER_USER}/${FRONTEND_IMAGE}:latest ."
+                                bat "docker push ${DOCKER_USER}/${FRONTEND_IMAGE}:latest"
+                            }
+                        }
+                        dir('websocket-server') {
+                            if (isUnix()) {
+                                sh "docker build -t ${DOCKER_USER}/${WEBSOCKET_IMAGE}:latest ."
+                                sh "docker push ${DOCKER_USER}/${WEBSOCKET_IMAGE}:latest"
+                            } else {
+                                bat "docker build -t ${DOCKER_USER}/${WEBSOCKET_IMAGE}:latest ."
+                                bat "docker push ${DOCKER_USER}/${WEBSOCKET_IMAGE}:latest"
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    post {
+        always {
+            script {
+                if (isUnix()) {
+                    sh 'docker logout'
+                } else {
+                    bat 'docker logout'
+                }
+            }
+        }
+        success {
+            withCredentials([string(credentialsId: 'discord', variable: 'DISCORD')]) {
+                discordSend(
+                    description: """
+                    **빌드 성공!** :tada:
+                    
+                    **제목**: ${currentBuild.displayName}
+                    **결과**: :white_check_mark: ${currentBuild.currentResult}
+                    **실행 시간**: ${currentBuild.duration / 1000}s
+                    **링크**: [빌드 결과 보기](${env.BUILD_URL})
+                    """,
+                    title: "${env.JOB_NAME} 빌드 성공!", 
+                    webhookURL: "$DISCORD"
+                )
+            }
+        }
+        failure {
+            withCredentials([string(credentialsId: 'discord', variable: 'DISCORD')]) {
+                discordSend(
+                    description: """
+                    **빌드 실패!** :x:
+                    
+                    **제목**: ${currentBuild.displayName}
+                    **결과**: :x: ${currentBuild.currentResult}
+                    **실행 시간**: ${currentBuild.duration / 1000}s
+                    **링크**: [빌드 결과 보기](${env.BUILD_URL})
+                    """,
+                    title: "${env.JOB_NAME} 빌드 실패!", 
+                    webhookURL: "$DISCORD"
+                )
+            }
+        }
+    }
+}
+```
+</details>
+
+
+#### &emsp;3-9. Jenkins CI/CD 테스트 결과 화면
+<img src="images/jenkins테스트결과.png">
 
 ---
 
