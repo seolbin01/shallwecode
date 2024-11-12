@@ -35,7 +35,7 @@ public class CompileService {
         } else if (language.equals("python")){
 //            compileResDTO = compilePython(compileReqDTO.getCode());
         } else {
-            System.out.println("없는 언어입니다.");
+            System.out.println("지원하지 않는 언어입니다.");
         }
 
         return compileResDTO;
