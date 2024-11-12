@@ -69,7 +69,6 @@ public class JwtAuthenticationProcessingFilter extends OncePerRequestFilter {
             filterChain.doFilter(request, response);
         }
 
-
         Optional<String> accessToken = jwtService.extractToken(request, "access");
 
         if (accessToken.isPresent()) {
@@ -79,7 +78,6 @@ public class JwtAuthenticationProcessingFilter extends OncePerRequestFilter {
                 filterChain.doFilter(request, response); // 다음 필터로 요청 전달
                 return;
             }
-
         }
 
         // 모든 토큰이 유효하지 않은 경우 401 에러
@@ -87,14 +85,4 @@ public class JwtAuthenticationProcessingFilter extends OncePerRequestFilter {
             response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "Invalid tokens");
         }
     }
-
-//    @Override
-//    protected boolean shouldNotFilter(HttpServletRequest request) {
-//        for (String url : SWAGGER_URLS) {
-//            if (new AntPathRequestMatcher(url).matches(request)) {
-//                return true;
-//            }
-//        }
-//        return false;
-//    }
 }
