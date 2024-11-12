@@ -340,7 +340,7 @@ pipeline {
     stages {
         stage('Source Build') {
             steps {
-                git branch: 'simple/chore', url: "${env.SOURCE_GITHUB_URL}"
+                git branch: 'main', url: "${env.SOURCE_GITHUB_URL}"
                 script {
                     dir('backend') { 
                         configFileProvider([configFile(fileId: 'shallwecodeenv', targetLocation: '.env')]) {
