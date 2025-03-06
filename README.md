@@ -517,27 +517,19 @@ pipeline {
     <img src="gifs/deleteFriend.gif">
 </details>
 
-### 4-3. 알림 기능
-<details>
-    <summary></summary>
-
-</details>
-
-### 4-4. 관리자 기능
+### 4-3. 관리자 기능
 <details>
     <summary>관리자 기능</summary>
     <img src="gifs/adminFunctions.gif">
 </details>
 
-### 4-5. 문제 기능
+### 4-4. 문제 기능
 <details>
     <summary>문제 검색</summary>
     <img src="gifs/problemSearch.gif">
     <summary>코딩방 생성</summary>
     <img src="gifs/createCodingRoom.gif">
 </details>
-
-### 4-6. 채팅 기능
 
 ---
 
